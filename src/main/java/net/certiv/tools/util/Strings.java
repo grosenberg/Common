@@ -102,7 +102,7 @@ public class Strings {
 	private static char[] R = { '$', '@', '.', '#' };
 
 	/** Quoting character pairs */
-	private static char[][] Q = { //
+	private static final char[][] QuotePairs = { //
 			{ '\'', '\'' }, //
 			{ '\"', '\"' }, //
 			{ '[', ']' }, //
@@ -302,7 +302,7 @@ public class Strings {
 		if (endIdx < 2) return literal;
 		char beg = literal.charAt(0);
 		char end = literal.charAt(endIdx);
-		for (char[] element : Q) {
+		for (char[] element : QuotePairs) {
 			if (beg == element[0] && end == element[1]) {
 				return literal.substring(1, endIdx);
 			}
