@@ -8,7 +8,9 @@ package net.certiv.tools.util.stores;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * A table data-structure implemented as a LinkedHashMap with LinkedHashMap
@@ -56,8 +58,16 @@ public class Table<R, C, V> {
 		return r.containsKey(col);
 	}
 
+	public void forEach(BiConsumer<? super R, ? super LinkedHashMap<C, V>> action) {
+		table.forEach(action);
+	}
+
 	public Set<R> rowSet() {
 		return table.keySet();
+	}
+
+	public Set<Entry<R, LinkedHashMap<C, V>>> rowSetEntry() {
+		return table.entrySet();
 	}
 
 	public void remove(R row) {

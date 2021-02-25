@@ -109,28 +109,50 @@ public class Log {
 	private static Class<?> Cls = Log.class;
 	private static String Layout = LogConfig.LAYOUT;
 	private static String Logname = LogConfig.NAME;
-	private static String Offset = LogConfig.OFFSET;
+	private static String Location = LogConfig.OFFSET;
 
 	private static boolean TestMode;
 
 	private static AbstractAppender stdAppender;
 	private static ConsoleAppender testAppender;
 
+	/**
+	 * Sets a log pathname.
+	 *
+	 * @param logname the log base filename ('.log' will be appended)
+	 */
 	public static void setName(String logname) {
 		Logname = logname;
 		Initd = false;
 	}
 
-	public static void setName(String logname, String offset) {
+	/**
+	 * Sets a log pathname.
+	 *
+	 * @param logname the log base filename ('.log' will be appended)
+	 * @param location if relative, a path fragment specifiying the offset from the
+	 *            effective class location; if absolute, the absolute location of
+	 *            the directory that will contain the log file
+	 */
+	public static void setName(String logname, String location) {
 		Logname = logname;
-		Offset = offset;
+		Location = location;
 		Initd = false;
 	}
 
-	public static void setName(Class<?> cls, String logname, String offset) {
+	/**
+	 * Sets a log pathname.
+	 *
+	 * @param cls a class defining the effectie location of the log file
+	 * @param logname the log base filename ('.log' will be appended)
+	 * @param location if relative, a path fragment specifiying the offset from the
+	 *            effective class location; if absolute, the absolute location of
+	 *            the directory that will contain the log file
+	 */
+	public static void setName(Class<?> cls, String logname, String location) {
 		Cls = cls;
 		Logname = logname;
-		Offset = offset;
+		Location = location;
 		Initd = false;
 	}
 
@@ -175,7 +197,7 @@ public class Log {
 
 	private static boolean loggable(Object source, Level level) {
 		if (!Initd) {
-			Configurator.initialize(LogConfig.getConfiguration(Cls, Logname, Offset, Layout));
+			Configurator.initialize(LogConfig.getConfiguration(Cls, Logname, Location, Layout));
 			if (Levels.get(LogId) == null) setLevel(LogId, Level.WARN);
 			Initd = true;
 		}

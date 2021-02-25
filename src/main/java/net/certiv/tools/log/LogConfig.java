@@ -39,11 +39,22 @@ public class LogConfig {
 			final String layout) {
 
 		ConfigurationBuilder<BuiltConfiguration> builder = new DefaultConfigurationBuilder<>();
-		String loc = getLocation(cls, name, location);
-		return create(name, builder, loc, layout);
+		return create(name, builder, getLocation(cls, name, location), layout);
 	}
 
-	public static String getLocation(Class<?> cls, String name, String offset) {
+	public static String getLocation(Class<?> cls, String name, String location) {
+		Path loc = Path.of(location);
+		if (location.startsWith(Strings.SLASH) || location.startsWith("\\")) {
+			loc = loc.toAbsolutePath();
+		}
+
+		if (loc.isAbsolute()) {
+			Path path = loc.resolve(name + ".log");
+			System.err.println("Logpath: " + path.toString());
+			return new File(path.toUri()).getPath();
+		}
+
+		// location is an offset relative to the class file
 		URI uri = ClassUtil.getLocation(cls);
 		if (uri != null) {
 			Path path = Path.of(uri);
@@ -55,7 +66,7 @@ public class LogConfig {
 			uri = new File(Strings.DOT).toURI();
 		}
 
-		Path path = Path.of(uri).resolve(offset).resolve(name + ".log");
+		Path path = Path.of(uri).resolve(location).resolve(name + ".log");
 		System.err.println("Logpath: " + path.toString());
 		return new File(path.toUri()).getPath();
 	}

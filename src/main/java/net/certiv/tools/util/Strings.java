@@ -47,8 +47,12 @@ public class Strings {
 	public static final String TAB = "\t";
 	public static final String TILDE = "~";
 
+	public static final String LPAREN = "(";
+	public static final String RPAREN = ")";
 	public static final String LBRACE = "{";
 	public static final String RBRACE = "}";
+	public static final String LBRACK = "[";
+	public static final String RBRACK = "]";
 	public static final String RANGLE = ">";
 	public static final String LANGLE = "<";
 
@@ -670,7 +674,7 @@ public class Strings {
 		if (strs == null) return EMPTY;
 		StringBuilder sb = new StringBuilder();
 		for (String str : strs) {
-			sb.append(str + ", ");
+			sb.append(str + CsvDELIM);
 		}
 		int len = sb.length();
 		sb.delete(len - 2, len);
