@@ -35,7 +35,7 @@ public class ClassUtil {
 	 * <p>
 	 * If the given class is located within a jar, returns the jar file.
 	 */
-	public static URI getLocation(Class<?> cls) {
+	public static URI locate(Class<?> cls) {
 		if (cls != null) {
 			try {
 				URI uri = cls.getProtectionDomain().getCodeSource().getLocation().toURI();

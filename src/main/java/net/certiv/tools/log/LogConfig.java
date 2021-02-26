@@ -55,7 +55,7 @@ public class LogConfig {
 		}
 
 		// location is an offset relative to the class file
-		URI uri = ClassUtil.getLocation(cls);
+		URI uri = ClassUtil.locate(cls);
 		if (uri != null) {
 			Path path = Path.of(uri);
 			if (path.getFileName().toString().endsWith(ClassUtil.JAR)) {
