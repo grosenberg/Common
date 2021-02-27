@@ -3,6 +3,8 @@ package net.certiv.tools.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -14,29 +16,22 @@ public class Reflect {
 
 	private Reflect() {}
 
-	public static void set(Object target, String fieldName, Object value) {
+	public static boolean set(Object target, String fieldName, Object value) {
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
+			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			return false;
 		}
 	}
 
-	public static void setSuper(Object target, String fieldName, Object value) {
+	public static boolean setSuper(Object target, String fieldName, Object value) {
 		try {
 			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static boolean hasField(Object target, String fieldName) {
-		try {
-			target.getClass().getDeclaredField(fieldName);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -164,12 +159,32 @@ public class Reflect {
 		return ctor.newInstance(args);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <Type> List<Type> makeList(Class<Type> cls, Object... values) {
-		List<Type> list = new ArrayList<>();
-		for (Object value : values) {
-			list.add((Type) value);
+	@SafeVarargs
+	public static <T> List<T> makeList(T... values) {
+		List<T> list = new ArrayList<>();
+		for (T value : values) {
+			list.add(value);
 		}
 		return list;
+	}
+
+	public static Class<?> typeOfField(Object obj, String field, int argN) {
+		try {
+			Field decl = obj.getClass().getDeclaredField(field);
+			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
+			if (argN >= 0 && types.length > argN) {
+				return (Class<?>) types[argN];
+			}
+		} catch (Exception e) {}
+		return null;
+	}
+
+	public static boolean hasField(Object target, String name) {
+		try {
+			target.getClass().getDeclaredField(name);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }
