@@ -102,9 +102,8 @@ public class Reflect {
 			m.setAccessible(true);
 			return m.invoke(target, args);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e);
 		}
-		return null;
 	}
 
 	public static Object invokeSuperDeclared(Object target, String methodName, Class<?>[] params,
@@ -114,9 +113,8 @@ public class Reflect {
 			m.setAccessible(true);
 			return m.invoke(target, args);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e);
 		}
-		return null;
 	}
 
 	/**

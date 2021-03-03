@@ -41,6 +41,7 @@ public class Strings {
 	public static final String QUOTE = "\"";
 	public static final String SLASH = "/";
 	public static final String STAR = "*";
+	public static final String PERCENT = "%";
 	public static final String PIPE = "|";
 	public static final String SPACE = " ";
 	public static final String SEMI = ";";
