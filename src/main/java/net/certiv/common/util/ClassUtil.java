@@ -9,8 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.certiv.common.log.Log;
 
@@ -108,4 +111,42 @@ public class ClassUtil {
 		}
 		return sb.toString();
 	}
+
+	/** Dumps he packages defined in this class loader. */
+	public static String dump(ClassLoader loader) {
+
+		StringBuilder sb = new StringBuilder();
+
+		if (loader instanceof URLClassLoader) {
+			URLClassLoader urlLoader = (URLClassLoader) loader;
+			for (URL url : urlLoader.getURLs()) {
+				sb.append(url.toString() + ";");
+			}
+
+		} else {
+			Class<?> cls = loader.getClass();
+			while (cls != ClassLoader.class) {
+				cls = cls.getSuperclass();
+			}
+
+			LinkedHashMap<String, Package> packages = new LinkedHashMap<>();
+			try {
+				Map<?, ?> pkgmap = (Map<?, ?>) Reflect.get(cls, "packages");
+				for (Entry<?, ?> entry : pkgmap.entrySet()) {
+					String name = (String) entry.getKey();
+					Package pkg = (Package) entry.getValue();
+					packages.put(name, pkg);
+				}
+			} catch (Exception e) {
+				return "Error: " + e.getMessage();
+			}
+
+			for (String pkg : packages.keySet()) {
+				sb.append(pkg + ";");
+			}
+		}
+
+		return sb.toString();
+	}
+
 }

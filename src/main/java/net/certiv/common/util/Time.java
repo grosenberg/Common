@@ -1,6 +1,8 @@
 package net.certiv.common.util;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +67,23 @@ public class Time {
 
 	// ------------------------------
 
-	public static boolean wait(int seconds) {
+	public static final String DT_DEF = "MM/dd/yyyy hh:mm a";
+	public static final String DT_MDY = "MM/dd/yyyy";
+
+	public static final DateTimeFormatter UTC_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+			.withZone(ZoneId.of(Strings.UTC));
+
+	/**
+	 * The time given in the argument is scoped to a local (mgr default) time zone.
+	 * The result is adjusted to UTC time zone.
+	 */
+	public static String toUtcDateTimeString(long msSinceEpoch) {
+		if (msSinceEpoch == 0L) return null;
+		return UTC_FORMATTER.format(Instant.ofEpochMilli(msSinceEpoch)) + 'Z';
+	}
+
+	/** Sleep for the given number of seconds. */
+	public static boolean sleep(int seconds) {
 		try {
 			TimeUnit.SECONDS.sleep(seconds);
 			return true;
@@ -74,7 +92,21 @@ public class Time {
 		}
 	}
 
-	public static final String formatDate(LocalDateTime dt) {
-		return dt.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a"));
+	/** Sleep for the given number of time units. */
+	public static boolean sleep(int cnt, TimeUnit unit) {
+		try {
+			unit.sleep(cnt);
+			return true;
+		} catch (InterruptedException e) {
+			return false;
+		}
+	}
+
+	public static final String formatDate(LocalDateTime date) {
+		return formatDate(date, DT_DEF);
+	}
+
+	public static final String formatDate(LocalDateTime date, String pattern) {
+		return date.format(DateTimeFormatter.ofPattern(pattern));
 	}
 }

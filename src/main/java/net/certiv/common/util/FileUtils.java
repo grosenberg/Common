@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -307,18 +308,78 @@ public final class FileUtils {
 		return Math.abs(RANDOM.nextLong());
 	}
 
-	public static File createTmpFolder(String relpath) throws IOException {
-		Path path = Path.of(getSysTmp().getAbsolutePath(), relpath);
-		File Dir = path.toFile();
-		Dir.mkdirs();
-		return Dir;
+	public static int nextRandom(int bound) {
+		return Math.abs(RANDOM.nextInt(bound));
 	}
 
+	public static void deleteTmpFolderOnExit(File dir) {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					if (dir.isDirectory()) Files.walk(dir.toPath()) //
+							.map(Path::toFile) //
+							.sorted(Comparator.reverseOrder()) //
+							.forEach(File::delete);
+				} catch (Exception e) {}
+			}
+		});
+	}
+
+	public static File createTmpFolder(String path) throws IOException {
+		return createTmpFolder(getSysTmp(), path);
+	}
+
+	public static File createTmpFolder(File root, String path) throws IOException {
+		Assert.notNull(root, path);
+		Assert.isLegal(root.isDirectory());
+
+		File dir = new File(root, path);
+		dir.mkdirs();
+		return dir;
+	}
+
+	/**
+	 * Create a new empty file in the given directory, using the given prefix and
+	 * suffix strings to define the filename. If this method returns successfully
+	 * then it is guaranteed that:
+	 * <p>
+	 * If the {@code prefix} argument is {@code null}, the prefix {@code "Tmp"} is
+	 * used.
+	 * <p>
+	 * If the {@code suffix} argument is {@code null}, the suffix {@code ".tmp"} is
+	 * used.
+	 * <p>
+	 * If the {@code dir} argument is {@code null}, the system-dependent default
+	 * temporary-file directory is used.
+	 *
+	 * @param prefix a filename prefix
+	 * @param suffix a filename suffix
+	 * @param dir the directory that will contain the created file, or {@code null}
+	 *            select the default system temporary-file directory
+	 * @return the the newly-created file
+	 * @throws IOException if a file could not be created
+	 */
 	public static File createTmpFile(String prefix, String suffix, File dir) throws IOException {
-		try {
-			return File.createTempFile(prefix, suffix, dir);
-		} catch (IOException ex) {
-			throw new IOException(ex);
+		dir = dir != null ? dir : new File(TmpDir);
+		if (!dir.isDirectory()) {
+			throw new IOException(String.format("Directory '%s' does not exist", dir));
+		}
+
+		prefix = prefix != null ? prefix : "Tmp";
+		suffix = suffix != null ? suffix : ".tmp";
+
+		String name = String.format("%s-%08d%s", prefix, FileUtils.nextRandom(99999999), suffix);
+		return new File(dir, name);
+	}
+
+	public static void deleteFolder(File dir) throws IOException {
+		if (dir == null || !dir.exists()) return;
+
+		clearFolder(dir);
+		if (dir.list().length == 0) {
+			if (!dir.delete()) throw new IOException("Delete failed for " + dir);
 		}
 	}
 
@@ -331,18 +392,6 @@ public final class FileUtils {
 		for (File file : files) {
 			if (file.isDirectory()) clearFolder(file);
 			file.delete();
-		}
-	}
-
-	public static void deleteFolder(File dir) throws IOException {
-		if (dir == null || !dir.exists()) return;
-
-		clearFolder(dir);
-		if (dir.list().length == 0) {
-			if (!dir.delete()) {
-				String message = "Delete failed for " + dir;
-				throw new IOException(message);
-			}
 		}
 	}
 }

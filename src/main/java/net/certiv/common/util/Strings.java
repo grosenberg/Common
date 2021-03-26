@@ -27,6 +27,8 @@ public class Strings {
 
 	public static final String ISO_LATIN = "ISO-8859-1";
 	public static final String UTF_8 = "UTF-8";
+	public static final String UTC = "UTC";
+	public static final String MD5 = "MD5";
 
 	public static final String AT = "@";
 	public static final String BANG = "!";
@@ -61,6 +63,8 @@ public class Strings {
 
 	public static final String EOL = System.lineSeparator();
 	public static final char EOP = File.separatorChar;	// path
+	public static final String UDIR = System.getProperty("user.dir");
+	public static final String UHOME = System.getProperty("user.home");
 
 	public static final String EMPTY = ""; //$NON-NLS-1$
 	public static final String[] EMPTY_STRINGS = new String[0];
@@ -850,6 +854,15 @@ public class Strings {
 		for (int i = c.length; --i >= 0;)
 			if (s.charAt(i) != c[i]) return false;
 		return true;
+	}
+
+	public static String removeLeadingCharacters(String text, char toRemove) {
+		int idx = 0;
+		int len = text.length();
+		while (idx < len && text.charAt(idx) == toRemove) {
+			idx++;
+		}
+		return text.substring(idx);
 	}
 
 	public static String removeTrailingCharacters(String text, char toRemove) {

@@ -37,6 +37,13 @@ public class Version {
 		}
 	}
 
+	/**
+	 * Returns a pair of strings reporting the manifest "implementation" version and
+	 * the last modified date of the manifest file.
+	 *
+	 * @param cls any class file within the Jar containing a manifest file.
+	 * @return the Jar verision info
+	 */
 	public static Pair<String, String> manifestVersion(Class<?> cls) {
 		try {
 			File file = new File(cls.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -45,7 +52,7 @@ public class Version {
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 					String ver = attributes.getValue("Implementation-Version");
-					return Pair.of(ver, creationDate(file));
+					return Pair.of(ver, modificationDate(file));
 				}
 			}
 		} catch (Exception e) {
@@ -63,6 +70,19 @@ public class Version {
 
 		} catch (IOException e) {
 			Log.error(Version.class, "Failed reading file creation date: %s", e.getMessage());
+			return Strings.UNKNOWN;
+		}
+	}
+
+	public static String modificationDate(File file) {
+		try {
+			BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+			FileTime date = attr.lastModifiedTime();
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			return df.format(date.toMillis());
+
+		} catch (IOException e) {
+			Log.error(Version.class, "Failed reading file last modification date: %s", e.getMessage());
 			return Strings.UNKNOWN;
 		}
 	}

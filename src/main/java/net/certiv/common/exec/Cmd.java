@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +22,7 @@ import net.certiv.common.util.Strings;
 public class Cmd {
 
 	/**
-	 * Execute a command in a subprocess. The encoding of the data produced by
-	 * execution of the command is preserved.
+	 * Execute a command in a subprocess. Sanitizes the I/O to UTF-8.
 	 *
 	 * @param cmd command line argument array defining the command and options. The
 	 *            command must execute as a standard filter: stdIn to stdOut.
@@ -40,26 +40,33 @@ public class Cmd {
 			Process process = pb.start();
 
 			// prep for output from the process
-			InputStreamReader in = new InputStreamReader(process.getInputStream());
-			BufferedReader br = new BufferedReader(in);
+			try (InputStreamReader in = new InputStreamReader(process.getInputStream(), Strings.UTF_8);
+					BufferedReader br = new BufferedReader(in)) {
 
-			// prep and feed input to the process
-			OutputStreamWriter out = new OutputStreamWriter(process.getOutputStream(), in.getEncoding());
-			BufferedWriter bw = new BufferedWriter(out);
-			bw.write(data);
-			bw.close();
+				// prep and feed input to the process
+				OutputStreamWriter out = new OutputStreamWriter(process.getOutputStream(), in.getEncoding());
+				BufferedWriter bw = new BufferedWriter(out);
 
-			// read output from the process
-			String line;
-			while ((line = br.readLine()) != null) {
-				sb.append(line + Strings.EOL);
+				bw.write(toUTF8(data));
+				bw.close();
+
+				// read output from the process
+				String line;
+				while ((line = br.readLine()) != null) {
+					sb.append(line + Strings.EOL);
+				}
+				return sb.toString();
 			}
-			return sb.toString();
 
 		} catch (IOException e) {
-			Log.error(Cmd.class, "Cmd execution error: " + e.getMessage());
-			return "";
+			Log.error(Cmd.class, "Cmd execution error: %s", e.getMessage());
+			return Strings.EMPTY;
 		}
+	}
+
+	/** Returns a UTF-8 encoded copy of the given string. */
+	public static String toUTF8(String data) throws UnsupportedEncodingException {
+		return new String(data.getBytes(Strings.UTF_8), Strings.UTF_8);
 	}
 
 	/** Parse a string into an array of command line arguments. */
