@@ -16,6 +16,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+@Deprecated
 public class Utils {
 
 	public static final int RIGHT = 0;
@@ -23,6 +24,7 @@ public class Utils {
 
 	private Utils() {}
 
+	@Deprecated
 	public static JFrame getFrame(Container obj) {
 		Container o = obj;
 		while (o != null && !(o instanceof JFrame)) {
@@ -31,14 +33,17 @@ public class Utils {
 		return (JFrame) o;
 	}
 
+	@Deprecated
 	public static String[] appendArray(String[] one, String two) {
 		return appendArray(one, new String[] { two });
 	}
 
+	@Deprecated
 	public static String[] appendArray(String one, String[] two) {
 		return appendArray(new String[] { one }, two);
 	}
 
+	@Deprecated
 	public static String[] appendArray(String[] one, String[] two) {
 		String[] result = new String[one.length + two.length];
 		System.arraycopy(one, 0, result, 0, one.length - 1);
@@ -46,10 +51,12 @@ public class Utils {
 		return result;
 	}
 
+	@Deprecated
 	public static final boolean isANumber(String val) {
 		return !isNaN(val);
 	}
 
+	@Deprecated
 	public static final boolean isNaN(String val) {
 		boolean result = false;
 		try {
@@ -67,6 +74,7 @@ public class Utils {
 	 * @param word String to be checked for capitalization.
 	 * @returns true if first character is upper case.
 	 */
+	@Deprecated
 	public static final boolean isCapitalLetter(String word) {
 		return !Character.isDigit(word.charAt(0)) && Character.isUpperCase(word.charAt(0));
 	}
@@ -77,6 +85,7 @@ public class Utils {
 	 * @param word String to be checked for capitalization.
 	 * @returns true if all characters are is upper case.
 	 */
+	@Deprecated
 	public static final boolean isCapitalWord(String word) {
 		for (int i = 0; i < word.length(); i++) {
 			if (Character.isDigit(word.charAt(i)) || Character.isLowerCase(word.charAt(i))) {
@@ -92,6 +101,7 @@ public class Utils {
 	 * @param line the line to be checked for upper case
 	 * @return true if the line is all upper case words
 	 */
+	@Deprecated
 	public static final boolean isCapitalLine(String line) {
 		if (line == null || line.length() == 0) {
 			return false;
@@ -113,6 +123,7 @@ public class Utils {
 	 * @param input the string to filter
 	 * @return the filtered string
 	 */
+	@Deprecated
 	public static String tokenFilterAll(String input) {
 		String s1 = input.replaceAll("<Indent/>", "      ");
 		String s2 = s1.replaceAll("<.*?>", " ");
@@ -128,6 +139,7 @@ public class Utils {
 	 * @param input the string to filter
 	 * @return the filtered string
 	 */
+	@Deprecated
 	public static String tokenFilterXml(String input) {
 		String s1 = input.replaceAll("<Indent/>", "      ");
 		String s2 = s1.replaceAll("<.*?>", " ");
@@ -140,6 +152,7 @@ public class Utils {
 	 * @param input the string to filter
 	 * @return the filtered string
 	 */
+	@Deprecated
 	public static String tokenFilterXmlSimple(String input) {
 		String s1 = input.replaceAll("<Indent/>", "      ");
 		String s2 = s1.replaceAll("<.*?\\w/>", "");
@@ -147,14 +160,17 @@ public class Utils {
 	}
 
 	// //////////////////////////////////////////////////////////////////////
+	@Deprecated
 	public static String numberAlign(String s, int len) {
 		return pad(s, len, '0', RIGHT);
 	}
 
+	@Deprecated
 	public static String rightAlign(String s, int len) {
 		return pad(s, len, ' ', RIGHT);
 	}
 
+	@Deprecated
 	public static String rightAlign(String s, int len, char c) {
 		return pad(s, len, c, RIGHT);
 	}
@@ -163,10 +179,12 @@ public class Utils {
 	 * Pads the string to the given length with spaces. Reasonable corner conditions
 	 * are applied.
 	 */
+	@Deprecated
 	public static String leftAlign(String s, int len) {
 		return pad(s, len, ' ', LEFT);
 	}
 
+	@Deprecated
 	public static String leftAlign(String s, int len, char c) {
 		return pad(s, len, c, LEFT);
 	}
@@ -175,6 +193,7 @@ public class Utils {
 	 * Pads the string to the given length with the given character. Reasonable
 	 * corner conditions are applied.
 	 */
+	@Deprecated
 	public static String pad(String s, int len, char c, int align) {
 		if (s == null) {
 			s = "";
@@ -200,6 +219,7 @@ public class Utils {
 	 * @param len The target string length.
 	 * @return The padding string.
 	 */
+	@Deprecated
 	public static String filler(char c, int len) {
 		if (len == 0) {
 			return "";
@@ -223,6 +243,7 @@ public class Utils {
 	 * @return the index of the first occurrence of the elem in this list; returns
 	 *             <tt>-1</tt> if the object is not found within the given variance.
 	 */
+	@Deprecated
 	public static int closeTo(ArrayList<? extends Number> list, float elem, float variance) {
 		for (int i = 0; i < list.size(); i++) {
 			if (within(((Integer) list.get(i)).floatValue(), elem, variance)) return i;
@@ -238,6 +259,7 @@ public class Utils {
 	 * @param center The second number to compare to.
 	 * @param percent The allowed percent variance.
 	 */
+	@Deprecated
 	public static boolean bounded(float value, float center, float percent) {
 		float ubound = value * (1f + percent);
 		float lbound = value * (1f - percent);
@@ -254,6 +276,7 @@ public class Utils {
 	 * @param second The second number to compare to.
 	 * @param variance The allowed variance.
 	 */
+	@Deprecated
 	public static boolean within(Integer first, Integer second, float variance) {
 		return within(first.floatValue(), second.floatValue(), variance);
 	}
@@ -266,6 +289,7 @@ public class Utils {
 	 * @param second The second number to compare to.
 	 * @param variance The allowed variance.
 	 */
+	@Deprecated
 	public static boolean within(float first, float second, float variance) {
 		float firstMin = first - variance;
 		float firstMax = first + variance;
@@ -281,8 +305,9 @@ public class Utils {
 	// window.setLocation(x, y);
 	// }
 
-	public static boolean calcColumnWidthsCalled = false;
+	@Deprecated public static boolean calcColumnWidthsCalled = false;
 
+	@Deprecated
 	public static void calcColumnWidths(JTable table, int columnsToProcess, int padding) {
 		calcColumnWidthsCalled = true;
 
@@ -332,6 +357,7 @@ public class Utils {
 		table.setPreferredScrollableViewportSize(size);
 	}
 
+	@Deprecated
 	public static String encode(String str) {
 		if (str == null) return null;
 		if (str.isBlank()) return str;

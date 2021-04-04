@@ -554,6 +554,14 @@ public class ArrayUtil {
 		return result;
 	}
 
+	public static double[] convert(final List<Double> values) {
+		double[] result = new double[values.size()];
+		for (int idx = 0; idx < result.length; idx++) {
+			result[idx] = values.get(idx);
+		}
+		return result;
+	}
+
 	/**
 	 * Reverses order of elements in an array.
 	 *

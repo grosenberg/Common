@@ -26,15 +26,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-/** @Deprecated use FsUtil */
-@Deprecated
-public final class FileUtils {
+public final class FsUtil {
 
 	private static final int DEFAULT_READING_SIZE = 8192;
 	private static final Random RANDOM = new Random(System.currentTimeMillis());
@@ -42,7 +43,25 @@ public final class FileUtils {
 
 	private static File sysTmp;
 
-	private FileUtils() {}
+	private FsUtil() {}
+
+	/** Returns the current filesystem time. */
+	public static long now() {
+		return Date.from(Instant.now()).getTime();
+	}
+
+	/**
+	 * Returns a {@code long} represeting the last modified date/time of the file at
+	 * the given path location.
+	 */
+	public static long getLastModified(Path path) {
+		try {
+			FileTime mod = Files.getLastModifiedTime(path);
+			return Date.from(mod.toInstant()).getTime();
+		} catch (IOException e) {
+			return 0;
+		}
+	}
 
 	/**
 	 * Returns the file exension of the given pathname or {@code EMPTY} if there is
@@ -51,7 +70,6 @@ public final class FileUtils {
 	 * @param pathname a pathname string
 	 * @return the pathname extension
 	 */
-	@Deprecated
 	public static String getExt(String pathname) {
 		if (pathname == null || pathname.isEmpty()) return Strings.EMPTY;
 		Path path = Path.of(pathname);
@@ -61,7 +79,6 @@ public final class FileUtils {
 		return Strings.EMPTY;
 	}
 
-	@Deprecated
 	public static BufferedReader getReader(File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			return getReader(fis);
@@ -70,12 +87,10 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static BufferedReader getReader(InputStream in) {
 		return getReader(in, Strings.UTF_8);
 	}
 
-	@Deprecated
 	public static BufferedReader getReader(InputStream in, String encoding) {
 		InputStreamReader reader;
 		try {
@@ -86,14 +101,12 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static String readToString(File file) throws IOException {
 		try (FileInputStream is = new FileInputStream(file)) {
 			return readFromStream(is);
 		}
 	}
 
-	@Deprecated
 	public static String[] readToLines(File file) throws IOException {
 		List<String> lines = new ArrayList<>();
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
@@ -108,7 +121,6 @@ public final class FileUtils {
 	 * Returns a String from an InputStream using the platform's default encoding
 	 * ({@code ResourcesPlugin.getEncoding()}).
 	 */
-	@Deprecated
 	public static String readFromStream(InputStream stream) throws IOException {
 		return readFromStream(stream, null);
 	}
@@ -118,7 +130,6 @@ public final class FileUtils {
 	 * encoding is {@code null} it sets the platform's default encoding
 	 * ({@code ResourcesPlugin.getEncoding()}).
 	 */
-	@Deprecated
 	public static String readFromStream(InputStream stream, String encoding) throws IOException {
 		if (encoding == null) encoding = Strings.UTF_8;
 		StringBuilder sb = new StringBuilder(2048);
@@ -134,7 +145,6 @@ public final class FileUtils {
 		return sb.toString();
 	}
 
-	@Deprecated
 	public static BufferedWriter getWriter(File file) {
 		try {
 			return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Strings.UTF_8));
@@ -143,7 +153,6 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static BufferedWriter getWriter(OutputStream out) {
 		OutputStreamWriter writer;
 		try {
@@ -154,7 +163,6 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static void write(File out, CharSequence page) {
 		try (FileOutputStream fos = new FileOutputStream(out); BufferedWriter writer = getWriter(fos)) {
 			writer.append(page);
@@ -163,7 +171,6 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static void close(Closeable io) {
 		if (io == null) return;
 		try {
@@ -176,7 +183,6 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static void delete(File file) {
 		if (!file.exists()) return;
 		if (file.delete()) return;
@@ -193,7 +199,6 @@ public final class FileUtils {
 		throw new RuntimeException(new IOException(msg));
 	}
 
-	@Deprecated
 	public static StringBuilder getContent(File file) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		Path path = Paths.get(file.getAbsolutePath());
@@ -203,7 +208,6 @@ public final class FileUtils {
 		return sb;
 	}
 
-	@Deprecated
 	public static Path save(StringBuilder sb, File file) throws IOException {
 		Assert.notNull(sb, file);
 		return Files.writeString(file.toPath(), sb, StandardCharsets.UTF_8);
@@ -216,7 +220,6 @@ public final class FileUtils {
 	 *
 	 * @throws IOException if a problem occured reading the stream.
 	 */
-	@Deprecated
 	public static byte[] getInputStreamAsByteArray(InputStream stream, int length) throws IOException {
 		byte[] contents;
 		if (length == -1) {
@@ -265,7 +268,6 @@ public final class FileUtils {
 	 *
 	 * @throws IOException if a problem occured reading the stream.
 	 */
-	@Deprecated
 	public static char[] getInputStreamAsCharArray(InputStream stream, int length, String encoding)
 			throws IOException {
 		InputStreamReader reader = encoding == null ? new InputStreamReader(stream)
@@ -315,7 +317,6 @@ public final class FileUtils {
 		return contents;
 	}
 
-	@Deprecated
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {
 			sysTmp = new File(TmpDir);
@@ -324,17 +325,14 @@ public final class FileUtils {
 		return sysTmp;
 	}
 
-	@Deprecated
 	public static long nextRandom() {
 		return Math.abs(RANDOM.nextLong());
 	}
 
-	@Deprecated
 	public static int nextRandom(int bound) {
 		return Math.abs(RANDOM.nextInt(bound));
 	}
 
-	@Deprecated
 	public static void deleteTmpFolderOnExit(File dir) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
@@ -350,12 +348,10 @@ public final class FileUtils {
 		});
 	}
 
-	@Deprecated
 	public static File createTmpFolder(String path) throws IOException {
 		return createTmpFolder(getSysTmp(), path);
 	}
 
-	@Deprecated
 	public static File createTmpFolder(File root, String path) throws IOException {
 		Assert.notNull(root, path);
 		Assert.isLegal(root.isDirectory());
@@ -386,7 +382,6 @@ public final class FileUtils {
 	 * @return the the newly-created file
 	 * @throws IOException if a file could not be created
 	 */
-	@Deprecated
 	public static File createTmpFile(String prefix, String suffix, File dir) throws IOException {
 		dir = dir != null ? dir : new File(TmpDir);
 		if (!dir.isDirectory()) {
@@ -396,11 +391,10 @@ public final class FileUtils {
 		prefix = prefix != null ? prefix : "Tmp";
 		suffix = suffix != null ? suffix : ".tmp";
 
-		String name = String.format("%s-%08d%s", prefix, FileUtils.nextRandom(99999999), suffix);
+		String name = String.format("%s-%08d%s", prefix, FsUtil.nextRandom(99999999), suffix);
 		return new File(dir, name);
 	}
 
-	@Deprecated
 	public static void deleteFolder(File dir) throws IOException {
 		if (dir == null || !dir.exists()) return;
 
@@ -410,7 +404,6 @@ public final class FileUtils {
 		}
 	}
 
-	@Deprecated
 	public static void clearFolder(File folder) {
 		assert folder != null;
 		assert folder.exists();

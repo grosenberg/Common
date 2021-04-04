@@ -43,7 +43,7 @@ public class LogConfig {
 	}
 
 	public static String getLocation(Class<?> cls, String name, String location) {
-		Path loc = Path.of(location);
+		Path loc = Path.of(location != null ? location : Strings.DOT);
 		if (location.startsWith(Strings.SLASH) || location.startsWith("\\")) {
 			loc = loc.toAbsolutePath();
 		}

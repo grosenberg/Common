@@ -117,6 +117,21 @@ public class Log {
 	private static ConsoleAppender testAppender;
 
 	/**
+	 * Returns {@code true} if the logger has been initialized.
+	 * <p>
+	 * The first call to use the logger will force initialization. The
+	 * initialization will use the currently set log name and location to create a
+	 * log file. If no log name or location is set, defaults are used. If the name
+	 * or location is set, or reset, after any initialization, the logger is forced
+	 * to reinitialize.
+	 *
+	 * @return the current initialization state
+	 */
+	public static boolean isInitalized() {
+		return Initd;
+	}
+
+	/**
 	 * Sets a log pathname.
 	 *
 	 * @param logname the log base filename ('.log' will be appended)
@@ -143,7 +158,19 @@ public class Log {
 	/**
 	 * Sets a log pathname.
 	 *
-	 * @param cls a class defining the effectie location of the log file
+	 * @param cls a class defining the effective location of the log file
+	 * @param logname the log base filename ('.log' will be appended)
+	 */
+	public static void setName(Class<?> cls, String logname) {
+		Cls = cls;
+		Logname = logname;
+		Initd = false;
+	}
+
+	/**
+	 * Sets a log pathname.
+	 *
+	 * @param cls a class defining the effective location of the log file
 	 * @param logname the log base filename ('.log' will be appended)
 	 * @param location if relative, a path fragment specifiying the offset from the
 	 *            effective class location; if absolute, the absolute location of

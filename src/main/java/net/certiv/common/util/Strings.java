@@ -123,6 +123,16 @@ public class Strings {
 	private Strings() {}
 
 	/** Encodes WS as discrete visible characters. */
+	public static List<String> encode(List<String> in) {
+		if (in != null) {
+			for (int idx = 0; idx < in.size(); idx++) {
+				in.set(idx, encode(in.get(idx)));
+			}
+		}
+		return in;
+	}
+
+	/** Encodes WS as discrete visible characters. */
 	public static String encode(String in) {
 		if (in == null) return EMPTY;
 		StringBuilder sb = new StringBuilder();
@@ -195,6 +205,18 @@ public class Strings {
 		phrase = phrase.trim();
 		if (phrase.isEmpty()) return phrase;
 		return phrase.substring(0, 1).toUpperCase() + phrase.substring(1).toLowerCase();
+	}
+
+	/**
+	 * Returns <code>true</code> if the given character is a line delimiter
+	 * character.
+	 *
+	 * @param ch the given character
+	 * @return Returns <code>true</code> if this the character is a line delimiter
+	 *             character, <code>false</code> otherwise
+	 */
+	public static boolean isLineDelimiterChar(char ch) {
+		return ch == Chars.NL || ch == Chars.RET;
 	}
 
 	public static String titleCase(String title) {
@@ -392,6 +414,7 @@ public class Strings {
 	 * Wraps the given text to lines of length less than the given limit. Preserves
 	 * existing hard line returns.
 	 */
+	@Deprecated
 	public static String wrap(String text, int limit) {
 		StringBuilder block = new StringBuilder();
 		String[] lines = text.split("\\R");
@@ -402,6 +425,7 @@ public class Strings {
 		return block.toString().trim();
 	}
 
+	@Deprecated
 	private static String _wrap(String text, int limit) {
 		StringBuilder block = new StringBuilder();
 		StringBuilder line = new StringBuilder();
@@ -441,6 +465,16 @@ public class Strings {
 		return PAT_NL.split(txt, -1).length;
 	}
 
+	/** Split all lines, preserving blank last line, if any. */
+	public static String[] splitLines(String text) {
+		return PAT_NL.split(text, -1);
+	}
+
+	public static int count(String text, String mark) {
+		if (text == null || text.isEmpty()) return 0;
+		return text.split(Pattern.quote(mark), -1).length - 1;
+	}
+
 	public static int lastLineLen(String txt) {
 		if (txt == null || txt.isEmpty()) return 0;
 
@@ -457,6 +491,7 @@ public class Strings {
 	 * @return the visual width of {@code text}
 	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
 	 */
+	@Deprecated
 	public static int measureVisualWidth(CharSequence text, int tabWidth) {
 		return measureVisualWidth(text, tabWidth, 0);
 	}
@@ -472,6 +507,7 @@ public class Strings {
 	 * @return the visual width of {@code text}
 	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
 	 */
+	@Deprecated
 	public static int measureVisualWidth(CharSequence text, int tabWidth, int from) {
 		if (text == null || tabWidth < 0 || from < 0) throw new IllegalArgumentException();
 
@@ -493,6 +529,7 @@ public class Strings {
 		return width - from;
 	}
 
+	@Deprecated
 	public static String expandTabs(String text, int tabWidth) {
 		if (text == null || tabWidth < 1) throw new IllegalArgumentException();
 
@@ -528,6 +565,7 @@ public class Strings {
 	 * @param tabWidth the defined visual unit with in spaces
 	 * @return
 	 */
+	@Deprecated
 	public static String[] allocateVisualWidth(String text, int tabWidth) {
 		if (text == null || tabWidth < 0) throw new IllegalArgumentException();
 
@@ -574,6 +612,11 @@ public class Strings {
 		}
 
 		return res.toArray(new String[res.size()]);
+	}
+
+	/** Returns a string containing {@code count} spaces. */
+	public static String spaces(int count) {
+		return dup(count, SPACE);
 	}
 
 	public static String dup(int cnt, char... c) {
