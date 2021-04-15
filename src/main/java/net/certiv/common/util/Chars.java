@@ -18,6 +18,7 @@ public final class Chars {
 	public static final char LOWDASH = '_';
 	public static final char MARK = '\'';
 	public static final char PLUS = '+';
+	public static final char QMARK = '?';
 	public static final char QUOTE = '"';
 	public static final char SEMI = ';';
 	public static final char SLASH = '/';
