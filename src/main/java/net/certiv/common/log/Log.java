@@ -91,7 +91,7 @@ public class Log {
 	private static void log(Object source, Level level, String msg, Throwable e) {
 		Class<?> origin = source != null ? source.getClass() : Log.class;
 		if (loggable(source, level)) {
-			ExtendedLogger log = LogManager.getLogger(origin);
+			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
 			log.logIfEnabled(FQCN, level, null, msg, e);
 		}
 	}
@@ -105,16 +105,19 @@ public class Log {
 	private static final int LogId = Log.class.hashCode();
 	private static final HashMap<Integer, Level> Levels = new HashMap<>();
 
-	private static boolean Initd;
-	private static Class<?> Cls = Log.class;
-	private static String Layout = LogConfig.LAYOUT;
-	private static String Logname = LogConfig.NAME;
-	private static String Location = LogConfig.OFFSET;
+	private static Class<?> refCls_ = Log.class;
 
-	private static boolean TestMode;
+	private static boolean initd_;
+	private static boolean testMode_;
 
-	private static AbstractAppender stdAppender;
-	private static ConsoleAppender testAppender;
+	private static LoggerContext ctx_;
+
+	private static String layout_ = LogConfig.LAYOUT;
+	private static String logname_ = LogConfig.NAME;
+	private static String location_ = LogConfig.OFFSET;
+
+	private static AbstractAppender stdAppender_;
+	private static ConsoleAppender testAppender_;
 
 	/**
 	 * Returns {@code true} if the logger has been initialized.
@@ -128,7 +131,7 @@ public class Log {
 	 * @return the current initialization state
 	 */
 	public static boolean isInitalized() {
-		return Initd;
+		return initd_;
 	}
 
 	/**
@@ -137,8 +140,8 @@ public class Log {
 	 * @param logname the log base filename ('.log' will be appended)
 	 */
 	public static void setName(String logname) {
-		Logname = logname;
-		Initd = false;
+		logname_ = logname;
+		initd_ = false;
 	}
 
 	/**
@@ -150,9 +153,9 @@ public class Log {
 	 *            the directory that will contain the log file
 	 */
 	public static void setName(String logname, String location) {
-		Logname = logname;
-		Location = location;
-		Initd = false;
+		logname_ = logname;
+		location_ = location;
+		initd_ = false;
 	}
 
 	/**
@@ -162,9 +165,9 @@ public class Log {
 	 * @param logname the log base filename ('.log' will be appended)
 	 */
 	public static void setName(Class<?> cls, String logname) {
-		Cls = cls;
-		Logname = logname;
-		Initd = false;
+		refCls_ = cls;
+		logname_ = logname;
+		initd_ = false;
 	}
 
 	/**
@@ -177,15 +180,15 @@ public class Log {
 	 *            the directory that will contain the log file
 	 */
 	public static void setName(Class<?> cls, String logname, String location) {
-		Cls = cls;
-		Logname = logname;
-		Location = location;
-		Initd = false;
+		refCls_ = cls;
+		logname_ = logname;
+		location_ = location;
+		initd_ = false;
 	}
 
 	public static void setLayout(String layout) {
-		Layout = layout;
-		Initd = false;
+		layout_ = layout;
+		initd_ = false;
 	}
 
 	/**
@@ -223,10 +226,10 @@ public class Log {
 	}
 
 	private static boolean loggable(Object source, Level level) {
-		if (!Initd) {
-			Configurator.initialize(LogConfig.getConfiguration(Cls, Logname, Location, Layout));
+		if (!initd_) {
+			ctx_ = Configurator.initialize(LogConfig.getConfiguration(refCls_, logname_, location_, layout_));
 			if (Levels.get(LogId) == null) setLevel(LogId, Level.WARN);
-			Initd = true;
+			initd_ = true;
 		}
 		Level srcLevel = levelOf(source);
 		return level.isMoreSpecificThan(srcLevel);
@@ -250,25 +253,25 @@ public class Log {
 	}
 
 	public static void setTestMode(boolean testMode) {
-		TestMode = testMode;
+		testMode_ = testMode;
 
 		try (LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext()) {
 			AbstractConfiguration cfg = (AbstractConfiguration) ctx.getConfiguration();
-			if (stdAppender == null) {
-				stdAppender = (AbstractAppender) cfg.getAppender(CONSOLE);
+			if (stdAppender_ == null) {
+				stdAppender_ = (AbstractAppender) cfg.getAppender(CONSOLE);
 			}
-			if (testAppender == null) {
+			if (testAppender_ == null) {
 				PatternLayout testLayout = PatternLayout.createDefaultLayout();
-				testAppender = ConsoleAppender.newBuilder().setLayout(testLayout).setTarget(OUTPUT)
+				testAppender_ = ConsoleAppender.newBuilder().setLayout(testLayout).setTarget(OUTPUT)
 						.setName(CONSOLE).setIgnoreExceptions(true).build();
 			}
 
-			if (TestMode) {
+			if (testMode_) {
 				cfg.removeAppender(CONSOLE);
-				cfg.addAppender(testAppender);
+				cfg.addAppender(testAppender_);
 			} else {
 				cfg.removeAppender(CONSOLE);
-				cfg.addAppender(stdAppender);
+				cfg.addAppender(stdAppender_);
 			}
 			ctx.updateLoggers();
 		}
