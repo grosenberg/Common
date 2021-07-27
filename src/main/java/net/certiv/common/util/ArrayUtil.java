@@ -11,6 +11,59 @@ public class ArrayUtil {
 
 	private static final int DEFAULT_LENGTH = 2;
 
+	@SafeVarargs
+	public static <E> E[] alloc(E... array) {
+		return array;
+	}
+
+	@SafeVarargs
+	public static <E> E[] alloc(int length, E... array) {
+		return Arrays.copyOf(array, length);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] alloc(T[] array, int newLen) {
+		return (T[]) alloc(array.getClass().getComponentType(), newLen);
+	}
+
+	/** Allocate an array of generic type T (initialized to null) */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] alloc(Class<T> cls, int newLen) {
+		return (T[]) Array.newInstance(cls, newLen);
+	}
+
+	/**
+	 * Clones an array returning a typecast result and handling {@code null}.
+	 * <p>
+	 * This method returns {@code null} for a {@code null} input array.
+	 *
+	 * @param array the array to clone, may be {@code null}
+	 * @return the cloned array, {@code null} if {@code null} input
+	 */
+	public static double[] copy(final double[] array) {
+		if (array == null) return null;
+		return array.clone();
+	}
+
+	/** Allocation space and copy */
+	public static <T> T[] copy(T[] array) {
+		return copy(array, 0, array.length);
+	}
+
+	/** Allocation space and copy */
+	public static <T> T[] copy(T[] array, int start, int finish) {
+		return Arrays.copyOfRange(array, start, finish);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] dup(T type, int length) {
+		T[] array = (T[]) alloc(type.getClass(), length);
+		for (int idx = 0; idx < length; idx++) {
+			array[idx] = type;
+		}
+		return array;
+	}
+
 	/** Clones an array returning a typecast result and handling {@code null}. */
 	public static <T> T[] clone(final T[] array) {
 		if (array == null) return null;
@@ -72,6 +125,63 @@ public class ArrayUtil {
 	}
 
 	/**
+	 * Inserts the {@code obj} at the beginning of the array, shifting the whole
+	 * thing one index Assumes that array contains {@code null}s at the end, only.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] prepend(Class<T> c, T[] array, T obj) {
+		if (obj == null) return array;
+		if (array == null || array.length == 0) {
+			array = (T[]) Array.newInstance(c, DEFAULT_LENGTH);
+			array[0] = obj;
+			return array;
+		}
+
+		int i = findFirstNull(array);
+		if (i >= 0) {
+			System.arraycopy(array, 0, array, 1, i);
+			array[0] = obj;
+		} else {
+			T[] temp = (T[]) Array.newInstance(c, array.length * 2);
+			System.arraycopy(array, 0, temp, 1, array.length);
+			temp[0] = obj;
+			array = temp;
+		}
+		return array;
+	}
+
+	/**
+	 * Inserts the {@code obj} at the beginning of the array, shifting the whole
+	 * thing one index Assumes that array contains {@code null}s at the end, only.
+	 * array must not be {@code null}.
+	 *
+	 * @since 5.2
+	 */
+	public static <T> T[] prepend(T[] array, T obj) {
+		Assert.notNull(array);
+
+		if (obj == null) return array;
+		if (array.length == 0) {
+			array = alloc(array, DEFAULT_LENGTH);
+			array[0] = obj;
+			return array;
+		}
+
+		int i = findFirstNull(array);
+		if (i >= 0) {
+			System.arraycopy(array, 0, array, 1, i);
+			array[0] = obj;
+		} else {
+			T[] temp = alloc(array, array.length * 2);
+			System.arraycopy(array, 0, temp, 1, array.length);
+			temp[0] = obj;
+			array = temp;
+		}
+
+		return array;
+	}
+
+	/**
 	 * Assumes that array contains {@code null}s at the end, only. Appends element
 	 * after the last non-{@code null} element. If the array is {@code null} or not
 	 * large enough, a larger one is allocated, using the given class object.
@@ -95,6 +205,43 @@ public class ArrayUtil {
 		System.arraycopy(array, 0, temp, 0, array.length);
 		temp[array.length] = obj;
 		return temp;
+	}
+
+	/**
+	 * Adds all the elements of the given arrays into a new array.
+	 * <p>
+	 * The new array contains all of the element of {@code array1} followed by all
+	 * of the elements {@code array2}. When an array is returned, it is always a new
+	 * array.
+	 *
+	 * <pre>
+	 * ArrayUtils.addAll(array1, null)   = cloned copy of array1
+	 * ArrayUtils.addAll(null, array2)   = cloned copy of array2
+	 * ArrayUtils.addAll([], [])         = []
+	 * </pre>
+	 *
+	 * @param array1 the first array whose elements are added to the new array.
+	 * @param array2 the second array whose elements are added to the new array.
+	 * @return The new double[] array.
+	 */
+	public static double[] append(final double[] array1, final double... array2) {
+		if (array1 == null) return copy(array2);
+		if (array2 == null) return copy(array1);
+	
+		final double[] joinedArray = new double[array1.length + array2.length];
+		System.arraycopy(array1, 0, joinedArray, 0, array1.length);
+		System.arraycopy(array2, 0, joinedArray, array1.length, array2.length);
+		return joinedArray;
+	}
+
+	/**
+	 * Concatenates two arrays and returns the result
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] append(final T[] first, final T... second) {
+		final T[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
 	}
 
 	/**
@@ -124,25 +271,6 @@ public class ArrayUtil {
 		System.arraycopy(array, 0, temp, 0, array.length);
 		temp[array.length] = obj;
 		return temp;
-	}
-
-	/**
-	 * Assumes that array contains {@code null}s at the end, only.
-	 *
-	 * @return index of first {@code null}, or -1
-	 */
-	private static int findFirstNull(Object[] array) {
-		int low = 0;
-		int high = array.length;
-		while (low < high) {
-			int mid = (low + high) >>> 1;
-			if (array[mid] == null) {
-				high = mid;
-			} else {
-				low = mid + 1;
-			}
-		}
-		return high < array.length ? high : -1;
 	}
 
 	/**
@@ -193,6 +321,25 @@ public class ArrayUtil {
 		Assert.isTrue(currentLength == 0 || array[currentLength - 1] != null);
 		array[currentLength] = obj;
 		return array;
+	}
+
+	/**
+	 * Assumes that array contains {@code null}s at the end, only.
+	 *
+	 * @return index of first {@code null}, or -1
+	 */
+	private static int findFirstNull(Object[] array) {
+		int low = 0;
+		int high = array.length;
+		while (low < high) {
+			int mid = (low + high) >>> 1;
+			if (array[mid] == null) {
+				high = mid;
+			} else {
+				low = mid + 1;
+			}
+		}
+		return high < array.length ? high : -1;
 	}
 
 	/**
@@ -299,6 +446,20 @@ public class ArrayUtil {
 	}
 
 	/**
+	 * Assumes that array contains {@code null}s at the end, only. Returns whether
+	 * the specified array contains the specified object. Comparison is by object
+	 * identity.
+	 *
+	 * @param array the array to search
+	 * @param obj the object to search for
+	 * @return true if the specified array contains the specified object, or the
+	 *             specified array is {@code null}
+	 */
+	public static <T> boolean containsEqual(T[] array, T obj) {
+		return indexOfEqual(array, obj) != -1;
+	}
+
+	/**
 	 * Returns the index into the specified array of the specified object, or -1 if
 	 * the array does not contain the object, or if the array is {@code null}.
 	 * Comparison is by object identity.
@@ -317,20 +478,6 @@ public class ArrayUtil {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Assumes that array contains {@code null}s at the end, only. Returns whether
-	 * the specified array contains the specified object. Comparison is by object
-	 * identity.
-	 *
-	 * @param array the array to search
-	 * @param obj the object to search for
-	 * @return true if the specified array contains the specified object, or the
-	 *             specified array is {@code null}
-	 */
-	public static <T> boolean containsEqual(T[] array, T obj) {
-		return indexOfEqual(array, obj) != -1;
 	}
 
 	/**
@@ -372,6 +519,77 @@ public class ArrayUtil {
 				j++;
 			}
 		}
+	}
+
+	/**
+	 * Removes first occurrence of element in array and moves objects behind up
+	 * front.
+	 *
+	 * @since 4.0
+	 */
+	public static <T> void remove(T[] array, T element) {
+		if (array != null) {
+			for (int i = 0; i < array.length; i++) {
+				if (element == array[i]) {
+					System.arraycopy(array, i + 1, array, i, array.length - i - 1);
+					array[array.length - 1] = null;
+					return;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns a new array that contains all of the elements of the given array
+	 * except the first one.
+	 *
+	 * @throws NullPointerException if {@code array} is {@code null}
+	 * @throws IllegalArgumentException if {@code array} is empty
+	 * @since 5.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] removeFirst(T[] array) {
+		int n = array.length;
+		if (n <= 0) throw new IllegalArgumentException();
+
+		T[] newArgs = (T[]) Array.newInstance(array.getClass().getComponentType(), n - 1);
+		for (int i = 1; i < n; i++) {
+			newArgs[i - 1] = array[i];
+		}
+		return newArgs;
+	}
+
+	/**
+	 * Returns a new array that contains elements of the given array except
+	 * duplicates and {@code null}s. Duplicates are determined by
+	 * {@link Object#equals(Object)} method.
+	 *
+	 * @throws NullPointerException if {@code array} is {@code null}
+	 * @since 5.5
+	 */
+	public static <T> T[] removeDuplicates(T[] array) {
+		int k = 0;
+		if (array.length >= 16) {
+			HashSet<T> set = new HashSet<>(array.length);
+			for (int i = 0; i < array.length; i++) {
+				T obj = array[i];
+				if (obj != null && set.add(obj)) {
+					array[k++] = obj;
+				}
+			}
+		} else {
+			for (int i = 0; i < array.length; i++) {
+				T obj = array[i];
+				if (obj != null) {
+					array[k++] = obj;
+					for (int j = i + 1; j < array.length; j++) {
+						if (obj.equals(array[j])) array[j] = null;
+					}
+				}
+			}
+		}
+		if (k == array.length) return array;
+		return Arrays.copyOf(array, k);
 	}
 
 	/**
@@ -455,86 +673,6 @@ public class ArrayUtil {
 	}
 
 	/**
-	 * Inserts the {@code obj} at the beginning of the array, shifting the whole
-	 * thing one index Assumes that array contains {@code null}s at the end, only.
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T[] prepend(Class<T> c, T[] array, T obj) {
-		if (obj == null) return array;
-		if (array == null || array.length == 0) {
-			array = (T[]) Array.newInstance(c, DEFAULT_LENGTH);
-			array[0] = obj;
-			return array;
-		}
-
-		int i = findFirstNull(array);
-		if (i >= 0) {
-			System.arraycopy(array, 0, array, 1, i);
-			array[0] = obj;
-		} else {
-			T[] temp = (T[]) Array.newInstance(c, array.length * 2);
-			System.arraycopy(array, 0, temp, 1, array.length);
-			temp[0] = obj;
-			array = temp;
-		}
-		return array;
-	}
-
-	/**
-	 * Inserts the {@code obj} at the beginning of the array, shifting the whole
-	 * thing one index Assumes that array contains {@code null}s at the end, only.
-	 * array must not be {@code null}.
-	 *
-	 * @since 5.2
-	 */
-	public static <T> T[] prepend(T[] array, T obj) {
-		Assert.notNull(array);
-
-		if (obj == null) return array;
-		if (array.length == 0) {
-			array = newArray(array, DEFAULT_LENGTH);
-			array[0] = obj;
-			return array;
-		}
-
-		int i = findFirstNull(array);
-		if (i >= 0) {
-			System.arraycopy(array, 0, array, 1, i);
-			array[0] = obj;
-		} else {
-			T[] temp = newArray(array, array.length * 2);
-			System.arraycopy(array, 0, temp, 1, array.length);
-			temp[0] = obj;
-			array = temp;
-		}
-
-		return array;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T[] newArray(T[] array, int newLen) {
-		return (T[]) Array.newInstance(array.getClass().getComponentType(), newLen);
-	}
-
-	/**
-	 * Removes first occurrence of element in array and moves objects behind up
-	 * front.
-	 *
-	 * @since 4.0
-	 */
-	public static <T> void remove(T[] array, T element) {
-		if (array != null) {
-			for (int i = 0; i < array.length; i++) {
-				if (element == array[i]) {
-					System.arraycopy(array, i + 1, array, i, array.length - i - 1);
-					array[array.length - 1] = null;
-					return;
-				}
-			}
-		}
-	}
-
-	/**
 	 * Stores the specified array contents in a new array of specified runtime type.
 	 *
 	 * @param target the runtime type of the new array
@@ -586,59 +724,6 @@ public class ArrayUtil {
 			array[i] = array[j];
 			array[j] = tmp;
 		}
-	}
-
-	/**
-	 * Returns a new array that contains all of the elements of the given array
-	 * except the first one.
-	 *
-	 * @throws NullPointerException if {@code array} is {@code null}
-	 * @throws IllegalArgumentException if {@code array} is empty
-	 * @since 5.1
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T[] removeFirst(T[] array) {
-		int n = array.length;
-		if (n <= 0) throw new IllegalArgumentException();
-
-		T[] newArgs = (T[]) Array.newInstance(array.getClass().getComponentType(), n - 1);
-		for (int i = 1; i < n; i++) {
-			newArgs[i - 1] = array[i];
-		}
-		return newArgs;
-	}
-
-	/**
-	 * Returns a new array that contains elements of the given array except
-	 * duplicates and {@code null}s. Duplicates are determined by
-	 * {@link Object#equals(Object)} method.
-	 *
-	 * @throws NullPointerException if {@code array} is {@code null}
-	 * @since 5.5
-	 */
-	public static <T> T[] removeDuplicates(T[] array) {
-		int k = 0;
-		if (array.length >= 16) {
-			HashSet<T> set = new HashSet<>(array.length);
-			for (int i = 0; i < array.length; i++) {
-				T obj = array[i];
-				if (obj != null && set.add(obj)) {
-					array[k++] = obj;
-				}
-			}
-		} else {
-			for (int i = 0; i < array.length; i++) {
-				T obj = array[i];
-				if (obj != null) {
-					array[k++] = obj;
-					for (int j = i + 1; j < array.length; j++) {
-						if (obj.equals(array[j])) array[j] = null;
-					}
-				}
-			}
-		}
-		if (k == array.length) return array;
-		return Arrays.copyOf(array, k);
 	}
 
 	public static int[] setInt(int[] array, int idx, int val) {

@@ -8,6 +8,7 @@ public final class Chars {
 
 	public static final char[] EMPTY_CHARS = {};
 
+	public static final char ACCENT = '\'';
 	public static final char AT = '@';
 	public static final char BANG = '!';
 	public static final char DOT = '.';

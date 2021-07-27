@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,6 +42,7 @@ public class Strings {
 	public static final String HASH = "#";
 	public static final String PLUS = "+";
 	public static final String QUOTE = "\"";
+	public static final String ACCENT = "'";
 	public static final String SLASH = "/";
 	public static final String STAR = "*";
 	public static final String PERCENT = "%";
@@ -67,26 +69,24 @@ public class Strings {
 	public static final String UHOME = System.getProperty("user.home");
 
 	public static final String EMPTY = ""; //$NON-NLS-1$
-	public static final String[] EMPTY_STRINGS = new String[0];
-	public static final Object[] EMPTY_ARRAY = new Object[0];
+	public static final String[] EMPTY_STRINGS = {};
+	public static final Object[] EMPTY_ARRAY = {};
 
-	public static final String UNKNOWN = "<unknown>";
+	public static final String UNKNOWN = "Unknown";
 
 	public static final String TAB_UBAR_MARK = "\u1E6F"; 	// t underbar ṯ
 	public static final String DIAMOND_MARK = "\u2666";		// diamond ♦
 	public static final String DOWN_TRIANGLE = "\u25BC";	// down triangle ▼
 	public static final String RIGHT_TRIANGLE = "\u25B6";	// down triangle ▶
 	public static final String PARA_MARK = "\u00B6";		// pillcrow ¶
-	public static final String NULL_MARK = "\u2400";		// null �?�
-	public static final String ACK_MARK = "\u2406";			// acknowledge �?�
-	public static final String BS_MARK = "\u2408";			// backspace �?�
-	public static final String TAB_MARK = "\u2409";			// horizontal tabulation �?�
-	// public static final String TAB_MARK = "\u00BB";
-	public static final String LF_MARK = "\u240A";			// line feed �?�
-	public static final String CR_MARK = "\u240D";			// carriage return �??
-	public static final String RETURN_MARK = "\u23CE";		// return symbol �?�
-	public static final String SPACE_MARK = "\u2423";		// space symbol �?�
-	// public static final String SPACE_MARK = "\u00B7";
+	public static final String NULL_MARK = "\u2400";		// null ␀
+	public static final String ACK_MARK = "\u2406";			// acknowledge ␆
+	public static final String BS_MARK = "\u2408";			// backspace ␈
+	public static final String TAB_MARK = "\u2409";			// horizontal tabulation ␉
+	public static final String LF_MARK = "\u240A";			// line feed ␊
+	public static final String CR_MARK = "\u240D";			// carriage return ␍
+	public static final String RETURN_MARK = "\u23CE";		// return symbol ⏎
+	public static final String SPACE_MARK = "\u2423";		// space symbol ␣
 	public static final String MIDDLE_DOT = "\u00B7";		// middle dot ·
 	public static final String HOLLOW_DOT = "\u25E6";		// hollow dot ◦
 	public static final String RING_POINT = "\u2E30";		// ring point ⸰
@@ -196,7 +196,7 @@ public class Strings {
 		if (len == 0) return EMPTY;
 		if (input == null || input.length() < Math.abs(len)) return input;
 		if (len > 0) return input.substring(0, len) + ELLIPSIS_MARK;
-		return ELLIPSIS_MARK + input.substring(input.length() + len, input.length());
+		return ELLIPSIS_MARK + input.substring(input.length() + len);
 	}
 
 	/** Capitalize the first letter of the given phrase & lowercase remainder. */
@@ -308,14 +308,20 @@ public class Strings {
 		return content.replaceAll("\\R", EOL);
 	}
 
-	public static boolean blank(String line) {
-		return line == null || line.trim().isEmpty();
+	/**
+	 * Return {@code true} if the given text is {@code null}, empty, or only
+	 * contains whitespace.
+	 */
+	public static boolean blank(String text) {
+		return text == null || text.trim().isEmpty();
 	}
 
+	/** Returns result of !null and !isEmpty test. */
 	public static boolean notEmpty(String arg) {
 		return arg != null && !arg.isEmpty();
 	}
 
+	/** Returns result of null or isEmpty test. */
 	public static boolean empty(String arg) {
 		return arg == null || arg.isEmpty();
 	}
@@ -341,15 +347,16 @@ public class Strings {
 		return literal;
 	}
 
-	public static String trimQuotes(String string) {
-		if (string.charAt(0) != '\'' && string.charAt(0) != '"') {
-			return string;
+	public static String trimQuotes(String arg) {
+		if (arg == null) return null;
+		if (arg.charAt(0) != Chars.ACCENT && arg.charAt(0) != Chars.QUOTE) {
+			return arg;
 		}
-		char c = string.charAt(string.length() - 1);
-		if (c != '\'' && c != '"') {
-			return string;
+		char c = arg.charAt(arg.length() - 1);
+		if (c != Chars.ACCENT && c != Chars.QUOTE) {
+			return arg;
 		} else {
-			return string.substring(1, string.length() - 1);
+			return arg.substring(1, arg.length() - 1);
 		}
 	}
 
@@ -624,6 +631,7 @@ public class Strings {
 	}
 
 	public static String dup(int cnt, String value) {
+		cnt = Math.max(0, cnt);
 		StringBuilder sb = new StringBuilder();
 		for (int idx = 0; idx < cnt; idx++) {
 			sb.append(value);
@@ -730,6 +738,45 @@ public class Strings {
 	}
 
 	/**
+	 * Returns the string representation of the given objects joined using the CSV
+	 * delimiter.
+	 */
+	public static String join(Collection<?> objs) {
+		return join(CsvDELIM, objs);
+	}
+
+	/**
+	 * Returns the string representation of the given objects joined using the given
+	 * delimiter.
+	 */
+	public static String join(CharSequence delimiter, Collection<?> objs) {
+		List<String> list = new ArrayList<>();
+		for (Object obj : objs) {
+			list.add(obj.toString());
+		}
+		return String.join(delimiter, list);
+	}
+
+	public static String join(CharSequence delim, int wrap, Collection<?> objs) {
+		if (wrap < 1) return join(delim, objs);
+
+		StringBuilder sb = new StringBuilder();
+		int cnt = 0;
+		for (Object obj : objs) {
+			sb.append(obj.toString());
+
+			sb.append(delim);
+			cnt++;
+			if (cnt >= wrap) {
+				sb.append(EOL);
+				cnt = 0;
+			}
+		}
+		if (sb.length() > 0) sb.setLength(sb.length() - delim.length());
+		return sb.toString();
+	}
+
+	/**
 	 * Remove leading reference identifier. No error if the identifier is not
 	 * present.
 	 */
@@ -741,15 +788,6 @@ public class Strings {
 		}
 		return varRef;
 	}
-
-	// /** Generalized concatenation of filename path strings */
-	// public static String concat(String... args) {
-	// String result = EMPTY;
-	// for (String arg : args) {
-	// result = FilenameUtils.concat(result, arg);
-	// }
-	// return result;
-	// }
 
 	/**
 	 * Concatenate the given strings into one string using the passed line delimiter

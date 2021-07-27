@@ -71,8 +71,19 @@ public final class FsUtil {
 	 * @return the pathname extension
 	 */
 	public static String getExt(String pathname) {
-		if (pathname == null || pathname.isEmpty()) return Strings.EMPTY;
-		Path path = Path.of(pathname);
+		if (pathname == null) return Strings.EMPTY;
+		return getExt(Path.of(pathname));
+	}
+
+	/**
+	 * Returns the file exension of the given path or {@code EMPTY} if there is no
+	 * extension.
+	 *
+	 * @param path a pathname
+	 * @return the pathname extension
+	 */
+	public static String getExt(Path path) {
+		if (path == null) return Strings.EMPTY;
 		String name = path.getFileName().toString();
 		int dot = name.lastIndexOf(Chars.DOT);
 		if (dot > -1) return name.substring(dot + 1);

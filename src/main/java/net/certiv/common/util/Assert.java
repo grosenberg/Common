@@ -87,6 +87,14 @@ public final class Assert {
 	 */
 	public static void notNull(Object object, String msg) {
 		if (object == null) throw exception(NULL_ARG, msg);
+		if (object instanceof Collection<?>) {
+			Collection<?> objs = (Collection<?>) object;
+			if (!objs.isEmpty()) {
+				for (Object obj : objs) {
+					notNull(obj, null);
+				}
+			}
+		}
 	}
 
 	/**
@@ -154,21 +162,22 @@ public final class Assert {
 	}
 
 	/**
-	 * Asserts that the given object is not {@code null} and, if applicable, not
-	 * {@code empty}. If this is not the case, some kind of unchecked exception is
-	 * thrown. The given message is included in that exception, to aid debugging.
+	 * Asserts that the given object is not {@code null} and, if determinable, is
+	 * not {@code empty}. On failure, some kind of unchecked exception is thrown.
+	 * The given message is included in that exception, to aid debugging.
 	 *
 	 * @param object the value to test
 	 * @param msg the message to include in the exception
 	 */
 	public static void notEmpty(Object value, String msg) {
 		if (value == null) throw exception(EMPTY_ARG, msg);
-		if (value instanceof CharSequence) {
-			if (((CharSequence) value).length() == 0) throw exception(EMPTY_ARG, msg);
+		if (value.getClass().isArray()) {
+			if (((Object[]) value).length == 0) throw exception(EMPTY_ARG, msg);
 		}
 		if (value instanceof Collection<?>) {
 			if (((Collection<?>) value).isEmpty()) throw exception(EMPTY_ARG, msg);
 		}
+		if (value.toString().isEmpty()) throw exception(EMPTY_ARG, msg);
 	}
 
 	private static AssertionFailedException exception(String lead, String text) {

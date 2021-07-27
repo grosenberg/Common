@@ -5,184 +5,217 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Stream;
 
+import net.certiv.common.stores.Result;
+
 public class Reflect {
+
+	private static final String ERR_NULL = "Cannot determine type of 'null'";
+	private static final String ADD = "add";
 
 	public static final Class<?>[] NoParams = null;
 	public static final Object[] NoArgs = null;
 
 	private Reflect() {}
 
-	public static boolean set(Object target, String fieldName, Object value) {
+	@SuppressWarnings("unchecked")
+	public static <T> Result<T> get(Object target, String fieldName) {
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
 			f.setAccessible(true);
-			f.set(target, value);
-			return true;
+			T value = (T) f.get(target);
+			return Result.of(value);
 		} catch (Exception e) {
-			return false;
+			return Result.of(e);
 		}
 	}
-
-	public static boolean setSuper(Object target, String fieldName, Object value) {
-		try {
-			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
-			f.setAccessible(true);
-			f.set(target, value);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	public static Object get(Object target, String fieldName) {
-		return get(target, fieldName, false);
-	}
-
-	public static Object get(Object target, String fieldName, boolean quiet) {
-		try {
-			Field f = target.getClass().getDeclaredField(fieldName);
-			f.setAccessible(true);
-			return f.get(target);
-		} catch (Exception e) {
-			if (!quiet) e.printStackTrace();
-		}
-		return null;
-	}
-
-	// public static Object getSuper(Object target, String fieldName) {
-	// try {
-	// Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
-	// f.setAccessible(true);
-	// return f.get(target);
-	// } catch (Exception e) {}
-	// return null;
-	// }
 
 	@SuppressWarnings("unchecked")
-	public static <T> T getSuper(Object target, String fieldName) {
+	public static <T> Result<T> getSuper(Object target, String fieldName) {
 		try {
 			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
-			return (T) f.get(target);
-		} catch (Exception e) {}
-		return null;
+			T value = (T) f.get(target);
+			return Result.of(value);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
 	}
 
-	public static Object getSuper2(Object target, String fieldName) {
+	@SuppressWarnings("unchecked")
+	public static <T> Result<T> getSuper2(Object target, String fieldName) {
 		try {
 			Field f = target.getClass().getSuperclass().getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
-			return f.get(target);
+			T value = (T) f.get(target);
+			return Result.of(value);
 		} catch (Exception e) {
-			e.printStackTrace();
+			return Result.of(e);
 		}
-		return null;
 	}
 
-	public static boolean hasMethod(Object target, String methodName, Class<?>[] params) {
+	public static Result<Boolean> set(Object target, String fieldName, Object value) {
+		try {
+			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
+			f.set(target, value);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	public static Result<Boolean> setSuper(Object target, String fieldName, Object value) {
+		try {
+			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
+			f.setAccessible(true);
+			f.set(target, value);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Returns the class type of the generic field parameter at the given index
+	 *
+	 * @param target the target object
+	 * @param field the name of the contained field
+	 * @param idx the generic position index of the type being queried
+	 * @return the class type of the generic field at the given index
+	 */
+	public static Result<Class<?>> fieldTypeN(Object target, String field, int idx) {
+		try {
+			Field decl = target.getClass().getDeclaredField(field);
+			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
+			if (idx < 0 || types.length > idx) return Result.of(new IndexOutOfBoundsException(idx));
+			return Result.of((Class<?>) types[idx]);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	public static Result<Boolean> hasField(Object target, String name) {
+		try {
+			target.getClass().getDeclaredField(name);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	public static Result<Boolean> hasMethod(Object target, String methodName, Class<?>[] params) {
 		if (params == null) params = NoParams;
 		try {
-			Method m = target.getClass().getMethod(methodName, params);
-			if (m != null) return true;
-		} catch (Exception e) {}
-		return false;
+			target.getClass().getMethod(methodName, params);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
 	}
 
 	public static Object invoke(Object target, String methodName) {
 		return invoke(target, methodName, NoParams, NoArgs);
 	}
 
-	public static Object invoke(Object target, String methodName, Class<?>[] params, Object[] args) {
+	@SuppressWarnings("unchecked")
+	public static <T> Result<T> invoke(Object target, String methodName, Class<?>[] params, Object[] args) {
 		try {
 			Method m = target.getClass().getMethod(methodName, params);
 			m.setAccessible(true);
-			return m.invoke(target, args);
+			T value = (T) m.invoke(target, args);
+			return Result.of(value);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
+			return Result.of(e);
 		}
 	}
 
-	public static Object invokeSuperDeclared(Object target, String methodName, Class<?>[] params,
+	@SuppressWarnings("unchecked")
+	public static <T> Result<T> invokeSuperDeclared(Object target, String methodName, Class<?>[] params,
 			Object[] args) {
 		try {
 			Method m = target.getClass().getSuperclass().getDeclaredMethod(methodName, params);
 			m.setAccessible(true);
-			return m.invoke(target, args);
+			T value = (T) m.invoke(target, args);
+			return Result.of(value);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
+			return Result.of(e);
 		}
 	}
 
-	/**
-	 * Returns an initialized class instance corresponding to the given
-	 * {@code classname}, using the bootstrap class loader.
-	 *
-	 * @param loader class loader from which the class must be loaded
-	 * @param classname fully qualified name of the desired class
-	 * @return class object representing the desired class
-	 * @throws ClassNotFoundException if the class is not found by the loader
-	 */
-	public static Class<?> classOf(String classname) throws ClassNotFoundException {
-		return Class.forName(classname, true, null);
-	}
+	public static Result<Class<?>> typeOf(Object obj) {
+		if (obj == null) return Result.of(new IllegalArgumentException(ERR_NULL));
 
-	/**
-	 * Returns an initialized class instance corresponding to the given
-	 * {@code classname}, using the given class loader.
-	 *
-	 * @param loader class loader from which the class must be loaded
-	 * @param classname fully qualified name of the desired class
-	 * @return class object representing the desired class
-	 * @throws ClassNotFoundException if the class is not found by the loader
-	 */
-	public static Class<?> classOf(ClassLoader loader, String classname) throws ClassNotFoundException {
-		return Class.forName(classname, true, loader);
-	}
-
-	public static <C> C make(ClassLoader loader, String className, Object... args)
-			throws ReflectiveOperationException {
-		Class<?> cls = Class.forName(className, true, loader);
-		return make(cls, args);
-	}
-
-	public static <C> C make(Class<?> cls, Object... args) throws ReflectiveOperationException {
-		Class<?>[] types = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
-		@SuppressWarnings("unchecked")
-		Constructor<C> ctor = (Constructor<C>) cls.getConstructor(types);
-		ctor.setAccessible(true);
-		return ctor.newInstance(args);
-	}
-
-	@SafeVarargs
-	public static <T> List<T> makeList(T... values) {
-		List<T> list = new ArrayList<>();
-		for (T value : values) {
-			list.add(value);
-		}
-		return list;
-	}
-
-	public static Class<?> typeOfField(Object obj, String field, int argN) {
-		try {
-			Field decl = obj.getClass().getDeclaredField(field);
-			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
-			if (argN >= 0 && types.length > argN) {
-				return (Class<?>) types[argN];
+		Class<?> cls = obj.getClass();
+		if (cls.isArray()) return Result.of(cls.getComponentType());
+		if (obj instanceof Collection<?>) {
+			try {
+				Type ret = cls.getMethod(ADD).getGenericReturnType();
+				return Result.of((Class<?>) ret);
+			} catch (Exception e) {
+				return Result.of(e);
 			}
-		} catch (Exception e) {}
-		return null;
+		}
+		return Result.of(cls);
 	}
 
-	public static boolean hasField(Object target, String name) {
+	/**
+	 * Returns an initialized class instance corresponding to the given class name
+	 * using the bootstrap class loader.
+	 *
+	 * @param name fully qualified name of the desired class
+	 * @return {@code Result} object representing the desired class
+	 */
+	public static Result<Class<?>> forName(String name) {
+		return forName(name, null);
+	}
+
+	/**
+	 * Returns an initialized class instance corresponding to the given class name
+	 * using the given class loader.
+	 *
+	 * @param loader the class loader to use to load the class
+	 * @param name fully qualified name of the desired class
+	 * @return {@code Result} object representing the desired class
+	 */
+	public static Result<Class<?>> forName(String name, ClassLoader loader) {
 		try {
-			target.getClass().getDeclaredField(name);
-			return true;
+			return Result.of(Class.forName(name, true, loader));
 		} catch (Exception e) {
-			return false;
+			return Result.of(e);
+		}
+	}
+
+	public static <C> Result<C> make(String className, Object... args) {
+		try {
+			Class<?> cls = Class.forName(className, true, null);
+			return make(cls, args);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	public static <C> Result<C> make(ClassLoader loader, String className, Object... args) {
+		try {
+			Class<?> cls = Class.forName(className, true, loader);
+			return make(cls, args);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <C> Result<C> make(Class<?> cls, Object... args) {
+		try {
+			Class<?>[] types = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
+			Constructor<?> ctor = cls.getConstructor(types);
+			ctor.setAccessible(true);
+			C inst = (C) ctor.newInstance(args);
+			return Result.of(inst);
+		} catch (Exception e) {
+			return Result.of(e);
 		}
 	}
 }

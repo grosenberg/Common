@@ -1,5 +1,6 @@
 package net.certiv.common.log;
 
+import java.time.Instant;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.Level;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
 import org.apache.logging.log4j.core.config.AbstractConfiguration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.spi.AbstractLogger;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
 import net.certiv.common.util.Chars;
@@ -86,6 +88,15 @@ public class Log {
 
 	public static void fatal(Object source, String message, Throwable e) {
 		log(source, Level.FATAL, message, e);
+	}
+
+	public static void printf(Object source, Level level, String format, Instant time, String logger,
+			String message) {
+		Class<?> origin = source != null ? source.getClass() : Log.class;
+		if (loggable(source, level)) {
+			AbstractLogger log = (AbstractLogger) LogManager.getLogger(origin);
+			log.printf(level, format, time, logger, message);
+		}
 	}
 
 	private static void log(Object source, Level level, String msg, Throwable e) {

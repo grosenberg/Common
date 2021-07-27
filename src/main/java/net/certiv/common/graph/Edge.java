@@ -31,6 +31,10 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> {
 		this.end = end;
 	}
 
+	public String name() {
+		return String.valueOf(_eid);
+	}
+
 	public N beg() {
 		return beg;
 	}

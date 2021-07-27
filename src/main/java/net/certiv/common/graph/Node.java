@@ -3,6 +3,7 @@ package net.certiv.common.graph;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -28,6 +29,10 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public Node() {
 		_nid = Factor.getAndIncrement();
+	}
+
+	public String name() {
+		return String.valueOf(_nid);
 	}
 
 	/**
@@ -246,5 +251,20 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		inNodes.clear();
 		outEdges.clear();
 		outNodes.clear();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(_nid, inEdges, inNodes, outEdges, outNodes);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof Node)) return false;
+		Node<?, ?> other = (Node<?, ?>) obj;
+		return _nid == other._nid && Objects.equals(inEdges, other.inEdges)
+				&& Objects.equals(inNodes, other.inNodes) && Objects.equals(outEdges, other.outEdges)
+				&& Objects.equals(outNodes, other.outNodes);
 	}
 }

@@ -6,7 +6,7 @@
 
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.6.2</version>
+	<version>0.6.3</version>
 
 	<name>net.certiv :: certiv-util</name>
 	<description>General utilities including logging</description>

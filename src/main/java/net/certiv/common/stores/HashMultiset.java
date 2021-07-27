@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -110,5 +111,18 @@ public class HashMultiset<K, V> {
 
 	public int size() {
 		return map.size();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(map);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof HashMultiset)) return false;
+		HashMultiset<?, ?> other = (HashMultiset<?, ?>) obj;
+		return Objects.equals(map, other.map);
 	}
 }

@@ -1,6 +1,7 @@
 package net.certiv.common.graph;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import net.certiv.common.graph.Edge.Sense;
@@ -12,6 +13,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	protected final Set<N> roots = new LinkedHashSet<>();
 	/** All nodes. */
 	protected final Set<N> nodes = new LinkedHashSet<>();
+
+	/**
+	 * Representational name of this {@code Graph}. Defaults to the simple class
+	 * name.
+	 */
+	public String name() {
+		return getClass().getSimpleName();
+	}
 
 	/**
 	 * Add the given node; returns {@code true} if not already present. Handles root
@@ -73,9 +82,26 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		return src.to(dst);
 	}
 
+	public Set<Node<?, ?>> getNodes() {
+		return new LinkedHashSet<>(nodes);
+	}
+
 	protected void clear() {
 		nodes.forEach(n -> n.edges().forEach(e -> e.remove()));
 		roots.clear();
 		nodes.clear();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nodes, roots);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof Graph)) return false;
+		Graph<?, ?> other = (Graph<?, ?>) obj;
+		return Objects.equals(nodes, other.nodes) && Objects.equals(roots, other.roots);
 	}
 }
