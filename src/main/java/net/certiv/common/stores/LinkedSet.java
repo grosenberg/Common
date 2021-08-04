@@ -37,17 +37,14 @@ public class LinkedSet<E> extends AbstractList<E> implements SortedSet<E>, Compa
 
 	/** Create a new LinkedSet. */
 	public LinkedSet() {
-		super();
 	}
 
 	/** Create a new LinkedSet with the mappings from the given Set. */
 	public LinkedSet(Collection<? extends E> values) {
-		super();
 		elements.addAll(values);
 	}
 
 	public LinkedSet(Comparator<? super E> comp) {
-		super();
 		this.comp = comp;
 	}
 
@@ -203,7 +200,7 @@ public class LinkedSet<E> extends AbstractList<E> implements SortedSet<E>, Compa
 
 	@Override
 	public int compareTo(E o) {
-
+		// TODO: implement
 		return 0;
 	}
 

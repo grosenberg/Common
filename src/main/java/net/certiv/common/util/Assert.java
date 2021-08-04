@@ -1,5 +1,6 @@
 package net.certiv.common.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import net.certiv.common.ex.AssertionFailedException;
@@ -87,13 +88,35 @@ public final class Assert {
 	 */
 	public static void notNull(Object object, String msg) {
 		if (object == null) throw exception(NULL_ARG, msg);
+	}
+
+	/**
+	 * Asserts that the given objects, including the contents of any collection
+	 * objects, are not {@code null}. If this is not the case, some kind of
+	 * unchecked exception is thrown.
+	 *
+	 * @param objects the values to test
+	 */
+	public static void notNulls(Object... objects) {
+		for (Object object : objects) {
+			notNulls(object, null);
+		}
+	}
+
+	/**
+	 * Asserts that the given object, including the contents of a collection object,
+	 * is not {@code null}. If this is not the case, some kind of unchecked
+	 * exception is thrown. The given message is included in that exception, to aid
+	 * debugging.
+	 *
+	 * @param object the value to test
+	 * @param msg the message to include in the exception
+	 */
+	public static void notNulls(Object object, String msg) {
+		if (object == null) throw exception(NULL_ARG, msg);
 		if (object instanceof Collection<?>) {
 			Collection<?> objs = (Collection<?>) object;
-			if (!objs.isEmpty()) {
-				for (Object obj : objs) {
-					notNull(obj, null);
-				}
-			}
+			if (!objs.isEmpty()) objs.forEach(obj -> notNulls(obj, msg));
 		}
 	}
 
@@ -130,7 +153,7 @@ public final class Assert {
 	 * @param object the value to test
 	 * @param data the message to include in the exception
 	 */
-	public static void notEmpty(Object[] values) {
+	public static void notEmpty(Object... values) {
 		notEmpty(values, null);
 	}
 
@@ -172,10 +195,14 @@ public final class Assert {
 	public static void notEmpty(Object value, String msg) {
 		if (value == null) throw exception(EMPTY_ARG, msg);
 		if (value.getClass().isArray()) {
-			if (((Object[]) value).length == 0) throw exception(EMPTY_ARG, msg);
+			Object[] arr = (Object[]) value;
+			if (arr.length == 0) throw exception(EMPTY_ARG, msg);
+			Arrays.asList(arr).forEach(obj -> notEmpty(obj, msg));
 		}
 		if (value instanceof Collection<?>) {
-			if (((Collection<?>) value).isEmpty()) throw exception(EMPTY_ARG, msg);
+			Collection<?> coll = (Collection<?>) value;
+			if (coll.isEmpty()) throw exception(EMPTY_ARG, msg);
+			coll.forEach(obj -> notEmpty(obj, msg));
 		}
 		if (value.toString().isEmpty()) throw exception(EMPTY_ARG, msg);
 	}

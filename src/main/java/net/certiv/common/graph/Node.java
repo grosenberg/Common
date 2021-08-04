@@ -82,12 +82,15 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		return inNodes.containsKey(node) || outNodes.containsKey(node);
 	}
 
-	/** Returns the set of all adjacent nodes. */
+	/** Returns the set of all immediately adjacent nodes. */
 	public Set<N> adjacent() {
 		return adjacent(null, null);
 	}
 
-	/** Returns the set of all adjacent nodes connected with the given sense. */
+	/**
+	 * Returns the set of all immediately adjacent nodes connected with the given
+	 * sense.
+	 */
 	public Set<N> adjacent(Sense dir) {
 		return adjacent(null, dir);
 	}
@@ -104,12 +107,12 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		Set<N> results = new LinkedHashSet<>();
 		if (dir == null || dir == Sense.IN) {
 			for (N parent : inEdges.values()) {
-				if (parent.equals(node)) results.add(parent);
+				if (node == null || parent.equals(node)) results.add(parent);
 			}
 		}
 		if (dir == null || dir == Sense.OUT) {
 			for (N child : outEdges.values()) {
-				if (child.equals(null)) results.add(child);
+				if (node == null || child.equals(node)) results.add(child);
 			}
 		}
 		return results;

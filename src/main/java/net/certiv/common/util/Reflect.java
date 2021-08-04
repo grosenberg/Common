@@ -5,15 +5,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import net.certiv.common.stores.Result;
 
 public class Reflect {
-
-	private static final String ERR_NULL = "Cannot determine type of 'null'";
-	private static final String ADD = "add";
 
 	public static final Class<?>[] NoParams = null;
 	public static final Object[] NoArgs = null;
@@ -78,44 +74,6 @@ public class Reflect {
 		}
 	}
 
-	/**
-	 * Returns the class type of the generic field parameter at the given index
-	 *
-	 * @param target the target object
-	 * @param field the name of the contained field
-	 * @param idx the generic position index of the type being queried
-	 * @return the class type of the generic field at the given index
-	 */
-	public static Result<Class<?>> fieldTypeN(Object target, String field, int idx) {
-		try {
-			Field decl = target.getClass().getDeclaredField(field);
-			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
-			if (idx < 0 || types.length > idx) return Result.of(new IndexOutOfBoundsException(idx));
-			return Result.of((Class<?>) types[idx]);
-		} catch (Exception e) {
-			return Result.of(e);
-		}
-	}
-
-	public static Result<Boolean> hasField(Object target, String name) {
-		try {
-			target.getClass().getDeclaredField(name);
-			return Result.of(true);
-		} catch (Exception e) {
-			return Result.of(e);
-		}
-	}
-
-	public static Result<Boolean> hasMethod(Object target, String methodName, Class<?>[] params) {
-		if (params == null) params = NoParams;
-		try {
-			target.getClass().getMethod(methodName, params);
-			return Result.of(true);
-		} catch (Exception e) {
-			return Result.of(e);
-		}
-	}
-
 	public static Object invoke(Object target, String methodName) {
 		return invoke(target, methodName, NoParams, NoArgs);
 	}
@@ -145,20 +103,53 @@ public class Reflect {
 		}
 	}
 
-	public static Result<Class<?>> typeOf(Object obj) {
-		if (obj == null) return Result.of(new IllegalArgumentException(ERR_NULL));
-
-		Class<?> cls = obj.getClass();
-		if (cls.isArray()) return Result.of(cls.getComponentType());
-		if (obj instanceof Collection<?>) {
-			try {
-				Type ret = cls.getMethod(ADD).getGenericReturnType();
-				return Result.of((Class<?>) ret);
-			} catch (Exception e) {
-				return Result.of(e);
-			}
+	public static Result<Boolean> hasField(Object target, String name) {
+		try {
+			target.getClass().getDeclaredField(name);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
 		}
-		return Result.of(cls);
+	}
+
+	public static Result<Boolean> hasMethod(Object target, String methodName, Class<?>[] params) {
+		if (params == null) params = NoParams;
+		try {
+			target.getClass().getMethod(methodName, params);
+			return Result.of(true);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Returns the class type of the first generic field parameter
+	 *
+	 * @param target the target object
+	 * @param fieldname the name of the target contained field
+	 * @return the class type of the first generic parameter
+	 */
+	public static Result<Class<?>> typeOf(Object obj, String fieldname) {
+		return typeOf(obj, fieldname, 0);
+	}
+
+	/**
+	 * Returns the class type of the generic field parameter at the given index
+	 *
+	 * @param target the target object
+	 * @param fieldname the name of the target contained field
+	 * @param idx the position index of the generic parameter being queried
+	 * @return the class type of the generic parameter at the given index
+	 */
+	public static Result<Class<?>> typeOf(Object target, String fieldname, int idx) {
+		try {
+			Field decl = target.getClass().getDeclaredField(fieldname);
+			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
+			if (idx < 0 || idx >= types.length) return Result.of(new IndexOutOfBoundsException(idx));
+			return Result.of((Class<?>) types[idx]);
+		} catch (Exception e) {
+			return Result.of(e);
+		}
 	}
 
 	/**
