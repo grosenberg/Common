@@ -239,6 +239,12 @@ public class TreeList<K, V> {
 		return map.remove(key);
 	}
 
+	public boolean remove(K key, V value) {
+		LinkedList<V> values = map.get(key);
+		if (values == null) return false;
+		return values.remove(value);
+	}
+
 	public void clear() {
 		map.clear();
 	}

@@ -24,9 +24,14 @@ public class Table<R, C, V> {
 		table = new LinkedHashMap<>();
 	}
 
+	public Table(Table<R, C, V> table) {
+		this();
+		this.table.putAll(table.keyMap());
+	}
+
 	public Table(Map<R, LinkedHashMap<C, V>> keyMap) {
 		this();
-		this.table.putAll(keyMap);
+		table.putAll(keyMap);
 	}
 
 	public LinkedHashMap<C, V> get(R row) {
@@ -37,6 +42,38 @@ public class Table<R, C, V> {
 		LinkedHashMap<C, V> r = table.get(row);
 		if (r == null) return null;
 		return r.get(col);
+	}
+
+	/**
+	 * Copies all of the mappings from the given map to this map to the col/value
+	 * mappings identified by the given row key. The copied mappings will be added
+	 * to or replace, as appropriate, any prior existing col/value mappings.
+	 *
+	 * @throws NullPointerException if the row or map is {@code null}
+	 */
+	public void putRow(R key, Map<C, V> map) {
+		LinkedHashMap<C, V> values = table.get(key);
+		if (values == null) {
+			values = new LinkedHashMap<>();
+			table.put(key, values);
+		}
+		values.putAll(map);
+	}
+
+	/**
+	 * Replaces the col/value mappings identified by the given row key with the
+	 * given map, or adds the mappings at the given row key.
+	 *
+	 * @throws NullPointerException if the row or map is {@code null}
+	 */
+	public void replaceRow(R row, Map<C, V> map) {
+		LinkedHashMap<C, V> values = table.get(row);
+		if (values == null) {
+			values = new LinkedHashMap<>();
+			table.put(row, values);
+		}
+		values.clear();
+		values.putAll(map);
 	}
 
 	public V put(R key, C sel, V value) {
@@ -60,6 +97,10 @@ public class Table<R, C, V> {
 
 	public void forEach(BiConsumer<? super R, ? super LinkedHashMap<C, V>> action) {
 		table.forEach(action);
+	}
+
+	public LinkedHashMap<R, LinkedHashMap<C, V>> keyMap() {
+		return table;
 	}
 
 	public Set<R> rowSet() {

@@ -328,6 +328,26 @@ public final class FsUtil {
 		return contents;
 	}
 
+	public static String loadResourceString(Class<?> cls, String name) throws IOException {
+		return new String(loadResource(cls, name));
+	}
+
+	public static byte[] loadResource(Class<?> cls, String name) throws IOException {
+		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
+			return rs.readAllBytes();
+
+		} catch (NullPointerException e) {
+			String pkg = cls.getPackageName().replace(Strings.DOT, Strings.SLASH);
+			Path fqname = Path.of(pkg, name);
+			try (InputStream rs = cls.getClassLoader().getResourceAsStream(fqname.toString())) {
+				return rs.readAllBytes();
+
+			} catch (NullPointerException ex) {
+				throw new IOException(ex);
+			}
+		}
+	}
+
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {
 			sysTmp = new File(TmpDir);

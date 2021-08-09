@@ -146,7 +146,9 @@ public class HashList<K, V> {
 	}
 
 	public boolean remove(K key, V value) {
-		return map.remove(key, value);
+		List<V> values = get(key);
+		if (values == null) return false;
+		return values.remove(value);
 	}
 
 	public void enforceUniqueValues(boolean unique) {

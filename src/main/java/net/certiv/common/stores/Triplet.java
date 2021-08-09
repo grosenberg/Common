@@ -2,6 +2,7 @@ package net.certiv.common.stores;
 
 import java.util.Objects;
 
+@Deprecated
 public class Triplet<A, B, C> {
 
 	public final A a;
@@ -12,7 +13,7 @@ public class Triplet<A, B, C> {
 		return new Triplet<>(a, b, c);
 	}
 
-	public Triplet(A a, B b, C c) {
+	protected Triplet(A a, B b, C c) {
 		this.a = a;
 		this.b = b;
 		this.c = c;
