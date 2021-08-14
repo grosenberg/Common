@@ -74,7 +74,7 @@ public class Reflect {
 		}
 	}
 
-	public static Object invoke(Object target, String methodName) {
+	public static <T> Result<T> invoke(Object target, String methodName) {
 		return invoke(target, methodName, NoParams, NoArgs);
 	}
 

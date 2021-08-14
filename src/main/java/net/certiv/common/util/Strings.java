@@ -37,20 +37,24 @@ public class Strings {
 	public static final String COLON2 = "::";
 	public static final String COMMA = ",";
 	public static final String DASH = "-";
-	public static final String LOWDASH = "_";
 	public static final String DOT = ".";
+	public static final String LOWDASH = "_";
 	public static final String HASH = "#";
-	public static final String PLUS = "+";
-	public static final String QUOTE = "\"";
-	public static final String ACCENT = "'";
-	public static final String SLASH = "/";
-	public static final String STAR = "*";
 	public static final String PERCENT = "%";
 	public static final String PIPE = "|";
-	public static final String SPACE = " ";
+	public static final String PLUS = "+";
+	public static final String QMARK = "?";
 	public static final String SEMI = ";";
-	public static final String TAB = "\t";
+	public static final String SLASH = "/";
+	public static final String STAR = "*";
 	public static final String TILDE = "~";
+
+	public static final String ACCENT = "'";
+	public static final String TIC = "`";
+	public static final String QUOTE = "\"";
+
+	public static final String SPACE = " ";
+	public static final String TAB = "\t";
 
 	public static final String LPAREN = "(";
 	public static final String RPAREN = ")";
@@ -282,11 +286,11 @@ public class Strings {
 	}
 
 	public static boolean isUpperCase(CharSequence text) {
-		return text.codePoints().allMatch(cpt -> Character.isUpperCase(cpt));
+		return text.codePoints().allMatch(Character::isUpperCase);
 	}
 
 	public static boolean isLowerCase(CharSequence text) {
-		return text.codePoints().allMatch(cpt -> Character.isLowerCase(cpt));
+		return text.codePoints().allMatch(Character::isLowerCase);
 	}
 
 	public static boolean matchesNoCase(char c, char d) {
@@ -425,9 +429,8 @@ public class Strings {
 	public static String wrap(String text, int limit) {
 		StringBuilder block = new StringBuilder();
 		String[] lines = text.split("\\R");
-		for (int idx = 0; idx < lines.length; idx++) {
-			String line = _wrap(lines[idx], limit);
-			block.append(line + EOL);
+		for (String line : lines) {
+			block.append(_wrap(line, limit) + EOL);
 		}
 		return block.toString().trim();
 	}

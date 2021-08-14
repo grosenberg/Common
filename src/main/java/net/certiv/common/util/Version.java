@@ -9,6 +9,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -119,6 +121,17 @@ public class Version {
 			Log.error(Version.class, "Failed reading manifest version: %s", e.getMessage());
 		}
 		return Pair.of(Strings.UNKNOWN, Instant.now());
+	}
+
+	/**
+	 * Returns the given instant as a {@code LocalDateTime} in the system default
+	 * time zone.
+	 *
+	 * @param instant the intant to convert
+	 * @return a local date/time
+	 */
+	public static LocalDateTime toDateTime(Instant instant) {
+		return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 	}
 
 	public static Instant created(File file) throws IOException {
