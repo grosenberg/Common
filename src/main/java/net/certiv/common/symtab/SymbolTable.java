@@ -1,4 +1,4 @@
-package net.certiv.common.graph.symtab;
+package net.certiv.common.symtab;
 
 import java.util.ArrayList;
 import java.util.List;

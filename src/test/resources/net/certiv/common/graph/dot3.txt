@@ -1,0 +1,18 @@
+digraph Cycle_Test_0 {
+  label="Cycle Test.0"
+
+  A_1
+  B_2
+  C_3
+  D_4
+  E_5
+  F_6
+
+  A_1 -> B_2
+  B_2 -> C_3
+  C_3 -> D_4
+  D_4 -> E_5
+  D_4 -> F_6
+  F_6 -> B_2
+
+}

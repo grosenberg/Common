@@ -328,6 +328,30 @@ public final class FsUtil {
 		return contents;
 	}
 
+	/**
+	 * Returns the content of the given named resource as a {@code String}.
+	 *
+	 * @param cls a resource classloader relative class
+	 * @param name the resource name
+	 * @return the resource content as a {@code String} or {@code null} on any IO
+	 *             exception
+	 */
+	public static String loadResourceStringChecked(Class<?> cls, String name) {
+		try {
+			return loadResourceString(cls, name);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the content of the given named resource as a {@code String}.
+	 *
+	 * @param cls a resource classloader relative class
+	 * @param name the resource name
+	 * @return the resource content as a {@code String}
+	 * @throws IOException on load IO exception
+	 */
 	public static String loadResourceString(Class<?> cls, String name) throws IOException {
 		return new String(loadResource(cls, name));
 	}

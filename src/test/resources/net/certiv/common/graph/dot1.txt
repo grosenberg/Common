@@ -1,0 +1,15 @@
+digraph Test_0 {
+  label="Test.0"
+
+  A_1
+  B_2
+  C_3
+  D_4
+  E_5
+
+  A_1 -> B_2
+  B_2 -> C_3
+  B_2 -> D_4
+  D_4 -> E_5
+
+}

@@ -3,7 +3,6 @@ package net.certiv.common.graph;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -26,6 +25,8 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 	protected final HashMultiset<N, E> inNodes = new HashMultiset<>();
 	/** Node:Edges index: key=distal node; value={@code out} connecting edge set. */
 	protected final HashMultiset<N, E> outNodes = new HashMultiset<>();
+
+	private LinkedHashMap<Object, Object> props;
 
 	public Node() {
 		_nid = Factor.getAndIncrement();
@@ -121,14 +122,14 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 	public Set<E> to(N end) {
 		Set<E> results = new LinkedHashSet<>();
 		Set<E> edges = outNodes.get(end);
-		if (edges != null) results.addAll(results);
+		if (edges != null) results.addAll(edges);
 		return results;
 	}
 
 	public Set<E> from(N beg) {
 		Set<E> results = new LinkedHashSet<>();
 		Set<E> edges = inNodes.get(beg);
-		if (edges != null) results.addAll(results);
+		if (edges != null) results.addAll(edges);
 		return results;
 	}
 
@@ -256,9 +257,50 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		outNodes.clear();
 	}
 
+	/**
+	 * Adds an arbitrary key/value "property" to this edge. If value is
+	 * {@code null}, the property will be removed.
+	 *
+	 * @param key the property key
+	 * @param value the new property value
+	 * @return the previous property value associated with key, or {@code null} if
+	 *             there was no mapping for the key
+	 */
+	public final Object putProperty(Object key, Object value) {
+		if (props == null) {
+			props = new LinkedHashMap<>();
+		}
+		if (value == null) return props.remove(key);
+		return props.put(key, value);
+	}
+
+	/**
+	 * Returns the value of the property with the specified key. Only properties
+	 * added with putProperty will return a non-null value.
+	 *
+	 * @param key the property key
+	 * @return the property value associated with key, or {@code null} if there was
+	 *             no mapping for the key
+	 */
+	public final Object getProperty(Object key) {
+		if (props == null) return null;
+		return props.get(key);
+	}
+
+	/**
+	 * Returns {@code true} if a property value is associated with the given key.
+	 *
+	 * @param key the property key
+	 * @return {@code true} if a property value is associated with key
+	 */
+	public final boolean hasProperty(Object key) {
+		if (props == null) return false;
+		return props.containsKey(key);
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(_nid, inEdges, inNodes, outEdges, outNodes);
+		return Long.hashCode(_nid);
 	}
 
 	@Override
@@ -266,8 +308,11 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		if (this == obj) return true;
 		if (!(obj instanceof Node)) return false;
 		Node<?, ?> other = (Node<?, ?>) obj;
-		return _nid == other._nid && Objects.equals(inEdges, other.inEdges)
-				&& Objects.equals(inNodes, other.inNodes) && Objects.equals(outEdges, other.outEdges)
-				&& Objects.equals(outNodes, other.outNodes);
+		return _nid == other._nid;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s[%s]", name(), isRoot() ? "root" : "child");
 	}
 }

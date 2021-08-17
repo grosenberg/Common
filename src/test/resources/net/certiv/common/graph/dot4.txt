@@ -1,0 +1,14 @@
+digraph Test_Styles_0 {
+  label="Test Styles.0" 
+  fontcolor=teal 
+  fontsize=18 
+
+
+  A_1 [label="Styled A.1" color=blue fillcolor=lightgrey]
+  B_2 [label="Styled B.2" color=red fillcolor=white shape=circle]
+  C_3
+
+  A_1 -> B_2 [label="Styled Edge 6" color=blue penwidth=2]
+  B_2 -> C_3 [label="Styled Edge 7" arrowhead=vee arrowtail=inv arrowsize=0.7 color=maroon fontsize=11 fontcolor=navy style=dotted]
+
+}

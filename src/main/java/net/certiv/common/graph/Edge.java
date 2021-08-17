@@ -1,5 +1,6 @@
 package net.certiv.common.graph;
 
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -23,6 +24,8 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	protected final N beg;
 	protected final N end;
+
+	private LinkedHashMap<Object, Object> props;
 
 	protected Edge(N beg, N end) {
 		Assert.notNull(beg, end);
@@ -73,9 +76,50 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> {
 		remove();
 	}
 
+	/**
+	 * Adds an arbitrary key/value "property" to this edge. If value is
+	 * {@code null}, the property will be removed.
+	 *
+	 * @param key the property key
+	 * @param value the new property value
+	 * @return the previous property value associated with key, or {@code null} if
+	 *             there was no mapping for the key
+	 */
+	public final Object putProperty(Object key, Object value) {
+		if (props == null) {
+			props = new LinkedHashMap<>();
+		}
+		if (value == null) return props.remove(key);
+		return props.put(key, value);
+	}
+
+	/**
+	 * Returns the value of the property with the specified key. Only properties
+	 * added with putProperty will return a non-null value.
+	 *
+	 * @param key the property key
+	 * @return the property value associated with key, or {@code null} if there was
+	 *             no mapping for the key
+	 */
+	public final Object getProperty(Object key) {
+		if (props == null) return null;
+		return props.get(key);
+	}
+
+	/**
+	 * Returns {@code true} if a property value is associated with the given key.
+	 *
+	 * @param key the property key
+	 * @return {@code true} if a property value is associated with key
+	 */
+	public final boolean hasProperty(Object key) {
+		if (props == null) return false;
+		return props.containsKey(key);
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(_eid);
+		return Long.hashCode(_eid);
 	}
 
 	@Override

@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
+import net.certiv.common.stores.Table;
+
 public class Strings {
 
 	public static final Pattern PAT_NL = Pattern.compile("\\R");
@@ -633,13 +635,19 @@ public class Strings {
 		return dup(cnt, String.valueOf(c));
 	}
 
+	// row=dup cnt; col=dup value; value=dup'd result
+	private static final Table<Integer, String, String> DUPS = new Table<>();
+
 	public static String dup(int cnt, String value) {
 		cnt = Math.max(0, cnt);
-		StringBuilder sb = new StringBuilder();
-		for (int idx = 0; idx < cnt; idx++) {
-			sb.append(value);
+		if (!DUPS.contains(cnt, value)) {
+			StringBuilder sb = new StringBuilder();
+			for (int idx = 0; idx < cnt; idx++) {
+				sb.append(value);
+			}
+			DUPS.put(cnt, value, sb.toString());
 		}
-		return sb.toString();
+		return DUPS.get(cnt, value);
 	}
 
 	public static List<String> dupList(int cnt, String value) {

@@ -1,5 +1,6 @@
 package net.certiv.common.graph;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +14,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	protected final Set<N> roots = new LinkedHashSet<>();
 	/** All nodes. */
 	protected final Set<N> nodes = new LinkedHashSet<>();
+
+	private LinkedHashMap<Object, Object> props;
 
 	/**
 	 * Representational name of this {@code Graph}. Defaults to the simple class
@@ -78,6 +81,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		return ok;
 	}
 
+	/** Returns the set of source to destination edges. */
 	public Set<E> findEdges(N src, N dst) {
 		return src.to(dst);
 	}
@@ -92,9 +96,50 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		nodes.clear();
 	}
 
+	/**
+	 * Adds an arbitrary key/value "property" to this graph. If value is
+	 * {@code null}, the property will be removed.
+	 *
+	 * @param key the property key
+	 * @param value the new property value
+	 * @return the previous property value associated with key, or {@code null} if
+	 *             there was no mapping for the key
+	 */
+	public final Object putProperty(Object key, Object value) {
+		if (props == null) {
+			props = new LinkedHashMap<>();
+		}
+		if (value == null) return props.remove(key);
+		return props.put(key, value);
+	}
+
+	/**
+	 * Returns the value of the property with the specified key. Only properties
+	 * added with putProperty will return a non-null value.
+	 *
+	 * @param key the property key
+	 * @return the property value associated with key, or {@code null} if there was
+	 *             no mapping for the key
+	 */
+	public final Object getProperty(Object key) {
+		if (props == null) return null;
+		return props.get(key);
+	}
+
+	/**
+	 * Returns {@code true} if a property value is associated with the given key.
+	 *
+	 * @param key the property key
+	 * @return {@code true} if a property value is associated with key
+	 */
+	public final boolean hasProperty(Object key) {
+		if (props == null) return false;
+		return props.containsKey(key);
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(nodes, roots);
+		return getClass().getName().hashCode();
 	}
 
 	@Override
@@ -102,6 +147,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		if (this == obj) return true;
 		if (!(obj instanceof Graph)) return false;
 		Graph<?, ?> other = (Graph<?, ?>) obj;
-		return Objects.equals(nodes, other.nodes) && Objects.equals(roots, other.roots);
+		return Objects.equals(getClass().getName(), other.getClass().getName());
+	}
+
+	@Override
+	public String toString() {
+		return name();
 	}
 }
