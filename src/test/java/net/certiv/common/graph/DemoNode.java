@@ -3,7 +3,7 @@ package net.certiv.common.graph;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.Walker.NodeListener;
+import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.HashList;
 
 public class DemoNode extends Node<DemoNode, DemoEdge> {
@@ -28,13 +28,13 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 	}
 
 	@Override
-	public boolean enter(Sense dir, HashList<DemoNode, DemoNode> visited, NodeListener<DemoNode> listener,
+	public boolean enter(Sense dir, HashList<DemoNode, DemoNode> visited, NodeVisitor<DemoNode> listener,
 			DemoNode parent) {
 		return listener.enter(dir, visited, parent, this);
 	}
 
 	@Override
-	public boolean exit(Sense dir, HashList<DemoNode, DemoNode> visited, NodeListener<DemoNode> listener,
+	public boolean exit(Sense dir, HashList<DemoNode, DemoNode> visited, NodeVisitor<DemoNode> listener,
 			DemoNode parent) {
 		return listener.exit(dir, visited, parent, this);
 	}

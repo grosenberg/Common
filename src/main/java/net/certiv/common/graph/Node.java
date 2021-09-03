@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.Walker.NodeListener;
+import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.HashList;
 import net.certiv.common.stores.HashMultiset;
 
@@ -217,12 +217,12 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/** Walker callback. */
-	public boolean enter(Sense dir, HashList<N, N> visited, NodeListener<N> listener, N node) {
+	public boolean enter(Sense dir, HashList<N, N> visited, NodeVisitor<N> listener, N node) {
 		return true;
 	}
 
 	/** Walker callback. */
-	public boolean exit(Sense dir, HashList<N, N> visited, NodeListener<N> listener, N node) {
+	public boolean exit(Sense dir, HashList<N, N> visited, NodeVisitor<N> listener, N node) {
 		return true;
 	}
 

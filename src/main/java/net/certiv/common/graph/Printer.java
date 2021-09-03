@@ -10,7 +10,7 @@ import org.apache.commons.text.TextStringBuilder;
 
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.Walker.NodeListener;
+import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.HashList;
 import net.certiv.common.stores.Pair;
 import net.certiv.common.util.Strings;
@@ -50,7 +50,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	private class Dumper extends NodeListener<N> {
+	private class Dumper extends NodeVisitor<N> {
 
 		private TextStringBuilder sb;
 		// key=node; value=node name beg/end column
@@ -153,7 +153,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return dot.toString();
 	}
 
-	private class Dotter extends NodeListener<N> {
+	private class Dotter extends NodeVisitor<N> {
 
 		private Graph<N, E> graph;
 		private Map<N, String> nodes;

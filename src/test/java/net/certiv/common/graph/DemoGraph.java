@@ -19,13 +19,13 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 	public final String name;
 	public final Long id;
 
-	public Long nextId() {
-		return IdFactory.getAndIncrement();
-	}
-
 	public DemoGraph(String name) {
 		this.name = name;
 		id = nextId();
+	}
+
+	public Long nextId() {
+		return IdFactory.getAndIncrement();
 	}
 
 	public Set<DemoNode> getRoots() {

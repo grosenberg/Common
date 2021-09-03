@@ -63,6 +63,11 @@ public final class FsUtil {
 		}
 	}
 
+	/** Replaces each dot with a forward slash. */
+	public static String slashify(String name) {
+		return name.replace(Strings.DOT, Strings.SLASH);
+	}
+
 	/**
 	 * Returns the file exension of the given pathname or {@code EMPTY} if there is
 	 * no extension.
@@ -88,6 +93,43 @@ public final class FsUtil {
 		int dot = name.lastIndexOf(Chars.DOT);
 		if (dot > -1) return name.substring(dot + 1);
 		return Strings.EMPTY;
+	}
+
+	/**
+	 * Returns the given pathname with the filename modified to have the given
+	 * extension.
+	 *
+	 * @param pathname a pathname
+	 * @param ext the new extension
+	 * @return the modified pathname
+	 */
+	public static String replaceExt(String pathname, String ext) {
+		Path path = replaceExt(Path.of(pathname), ext);
+		return path.toString().replace("\\", "/");
+	}
+
+	/**
+	 * Returns the given pathname with the filename modified to have the given
+	 * extension.
+	 *
+	 * @param pathname a pathname
+	 * @param ext the new extension
+	 * @return the modified pathname
+	 */
+	public static Path replaceExt(Path pathname, String ext) {
+		if (pathname == null) return pathname;
+
+		String name = pathname.getFileName().toString();
+		if (name.matches("[.|..]")) return pathname;
+
+		Path base = pathname.getParent();
+		ext = ext.startsWith(Strings.DOT) ? ext : Strings.DOT + ext;
+
+		int dot = name.lastIndexOf(Chars.DOT);
+		if (dot > -1) {
+			name = name.substring(0, dot);
+		}
+		return base != null ? base.resolve(name + ext) : Path.of(name + ext);
 	}
 
 	public static BufferedReader getReader(File file) {
@@ -361,7 +403,7 @@ public final class FsUtil {
 			return rs.readAllBytes();
 
 		} catch (NullPointerException e) {
-			String pkg = cls.getPackageName().replace(Strings.DOT, Strings.SLASH);
+			String pkg = slashify(cls.getPackageName());
 			Path fqname = Path.of(pkg, name);
 			try (InputStream rs = cls.getClassLoader().getResourceAsStream(fqname.toString())) {
 				return rs.readAllBytes();
