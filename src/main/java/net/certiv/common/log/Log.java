@@ -99,7 +99,7 @@ public class Log {
 		}
 	}
 
-	private static void log(Object source, Level level, String msg, Throwable e) {
+	public static void log(Object source, Level level, String msg, Throwable e) {
 		Class<?> origin = source != null ? source.getClass() : Log.class;
 		if (loggable(source, level)) {
 			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
@@ -142,6 +142,7 @@ public class Log {
 	 * @return the current initialization state
 	 */
 	public static boolean isInitalized() {
+		chkInit();
 		return initd_;
 	}
 
@@ -237,11 +238,7 @@ public class Log {
 	}
 
 	private static boolean loggable(Object source, Level level) {
-		if (!initd_) {
-			ctx_ = Configurator.initialize(LogConfig.getConfiguration(refCls_, logname_, location_, layout_));
-			if (Levels.get(LogId) == null) setLevel(LogId, Level.WARN);
-			initd_ = true;
-		}
+		chkInit();
 		Level srcLevel = levelOf(source);
 		return level.isMoreSpecificThan(srcLevel);
 	}
@@ -254,7 +251,23 @@ public class Log {
 	}
 
 	private static Level defaultLevel() {
+		chkInit();
 		return Levels.get(LogId);
+	}
+
+	private static void chkInit() {
+		if (!initd_) {
+			initd_ = true;
+			ctx_ = Configurator.initialize(LogConfig.getConfiguration(refCls_, logname_, location_, layout_));
+			if (ctx_ != null) {
+				Level level = ctx_.getConfiguration().getRootLogger().getLevel();
+				setLevel(LogId, level);
+
+			} else {
+				setLevel(LogId, Level.TRACE);
+				error(LogId, "Configuration failed @%s[%s:%s]", logname_, location_, layout_);
+			}
+		}
 	}
 
 	private static String objNameOf(Object source) {
