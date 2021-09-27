@@ -179,32 +179,78 @@ public class Reflect {
 		}
 	}
 
-	public static <C> Result<C> make(String className, Object... args) {
+	/**
+	 * Returns an instantiated instance of the {@code Class} object identified by
+	 * the given fully-qualified class name (in the same format returned by
+	 * {@code getName}), using the bootstrap class loader and given constuctor
+	 * parameter arguments.
+	 * <p>
+	 * Fails if the instantiated class cannot be cast to the intended class type.
+	 *
+	 * @param <C> the intended class type
+	 * @param classname fully-qualified class name
+	 * @param args constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation
+	 *             error
+	 */
+	public static <C> Result<C> make(String classname, Object... args) {
 		try {
-			Class<?> cls = Class.forName(className, true, null);
+			@SuppressWarnings("unchecked")
+			Class<C> cls = (Class<C>) Class.forName(classname, true, null);
 			return make(cls, args);
+
 		} catch (Exception e) {
 			return Result.of(e);
 		}
 	}
 
-	public static <C> Result<C> make(ClassLoader loader, String className, Object... args) {
+	/**
+	 * Returns an instantiated instance of the {@code Class} object identified by
+	 * the given fully-qualified class name (in the same format returned by
+	 * {@code getName}), using the given class loader and constuctor parameter
+	 * arguments.
+	 * <p>
+	 * Fails if the instantiated class cannot be cast to the intended class type.
+	 *
+	 * @param <C> the intended class type
+	 * @param loader the class loader to use
+	 * @param classname fully-qualified class name
+	 * @param args constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation
+	 *             error
+	 */
+	public static <C> Result<C> make(ClassLoader loader, String classname, Object... args) {
 		try {
-			Class<?> cls = Class.forName(className, true, loader);
+			@SuppressWarnings("unchecked")
+			Class<C> cls = (Class<C>) Class.forName(classname, true, loader);
 			return make(cls, args);
+
 		} catch (Exception e) {
 			return Result.of(e);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <C> Result<C> make(Class<?> cls, Object... args) {
+	/**
+	 * Returns an instantiated instance of the given {@code Class} object using the
+	 * given constuctor parameter arguments.
+	 * <p>
+	 * Fails if the instantiated class cannot be cast to the intended class type.
+	 *
+	 * @param <C> the intended class type
+	 * @param cls the class to instantiate
+	 * @param args constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation
+	 *             error
+	 */
+	public static <C> Result<C> make(Class<C> cls, Object... args) {
 		try {
 			Class<?>[] types = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
 			Constructor<?> ctor = cls.getConstructor(types);
 			ctor.setAccessible(true);
+			@SuppressWarnings("unchecked")
 			C inst = (C) ctor.newInstance(args);
 			return Result.of(inst);
+
 		} catch (Exception e) {
 			return Result.of(e);
 		}
