@@ -14,9 +14,11 @@ import net.certiv.common.util.Assert;
  */
 public class AssertionFailedException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+	public AssertionFailedException(String msg) {
+		super(msg);
+	}
 
-	public AssertionFailedException(String detail) {
-		super(detail);
+	public AssertionFailedException(String fmg, Object... args) {
+		super(String.format(fmg, args));
 	}
 }

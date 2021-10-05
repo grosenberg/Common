@@ -1,8 +1,8 @@
 package net.certiv.common.util;
 
-public class ObjUtil {
+public class Objs {
 
-	private ObjUtil() {}
+	private Objs() {}
 
 	public static boolean empty(Object arg) {
 		return arg == null || arg.toString().isEmpty();
@@ -10,5 +10,13 @@ public class ObjUtil {
 
 	public static boolean empty(Object[] args) {
 		return args == null || args.length == 0;
+	}
+
+	/**
+	 * Returns the given {@code arg} value if not {@code null}, or the given default
+	 * value.
+	 */
+	public static <V> V nonNull(V arg, V def) {
+		return arg != null ? arg : def;
 	}
 }

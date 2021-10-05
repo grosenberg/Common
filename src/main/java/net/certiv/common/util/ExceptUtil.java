@@ -1,5 +1,8 @@
 package net.certiv.common.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class ExceptUtil {
 
 	/**
@@ -40,5 +43,11 @@ public class ExceptUtil {
 			}
 		}
 		return Strings.EMPTY;
+	}
+
+	public static String stacktrace(Throwable t) {
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
 	}
 }

@@ -32,13 +32,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 public final class FsUtil {
 
 	private static final int DEFAULT_READING_SIZE = 8192;
-	private static final Random RANDOM = new Random(System.currentTimeMillis());
 	private static final String TmpDir = System.getProperty("java.io.tmpdir");
 
 	private static File sysTmp;
@@ -422,14 +420,6 @@ public final class FsUtil {
 		return sysTmp;
 	}
 
-	public static long nextRandom() {
-		return Math.abs(RANDOM.nextLong());
-	}
-
-	public static int nextRandom(int bound) {
-		return Math.abs(RANDOM.nextInt(bound));
-	}
-
 	public static void deleteTmpFolderOnExit(File dir) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
@@ -488,7 +478,7 @@ public final class FsUtil {
 		prefix = prefix != null ? prefix : "Tmp";
 		suffix = suffix != null ? suffix : ".tmp";
 
-		String name = String.format("%s-%08d%s", prefix, FsUtil.nextRandom(99999999), suffix);
+		String name = String.format("%s-%08d%s", prefix, Maths.nextRandom(99999999), suffix);
 		return new File(dir, name);
 	}
 

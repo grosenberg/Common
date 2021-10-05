@@ -18,8 +18,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	private LinkedHashMap<Object, Object> props;
 
 	/**
-	 * Representational name of this {@code Graph}. Defaults to the simple class
-	 * name.
+	 * Descriptive name of this {@code Graph}. Defaults to the simple class name of
+	 * the implementing class.
 	 */
 	public String name() {
 		return getClass().getSimpleName();

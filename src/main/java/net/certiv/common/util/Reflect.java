@@ -7,12 +7,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
+import net.certiv.common.ex.AssertionFailedException;
 import net.certiv.common.stores.Result;
 
 public class Reflect {
 
 	public static final Class<?>[] NoParams = null;
 	public static final Object[] NoArgs = null;
+
+	private static final String ERR_CHK = "Arguments check mismatch";
 
 	private Reflect() {}
 
@@ -23,7 +26,8 @@ public class Reflect {
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -35,7 +39,8 @@ public class Reflect {
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -47,7 +52,8 @@ public class Reflect {
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -58,7 +64,8 @@ public class Reflect {
 			f.setAccessible(true);
 			f.set(target, value);
 			return Result.of(true);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -69,7 +76,8 @@ public class Reflect {
 			f.setAccessible(true);
 			f.set(target, value);
 			return Result.of(true);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -85,7 +93,8 @@ public class Reflect {
 			m.setAccessible(true);
 			T value = (T) m.invoke(target, args);
 			return Result.of(value);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -98,7 +107,8 @@ public class Reflect {
 			m.setAccessible(true);
 			T value = (T) m.invoke(target, args);
 			return Result.of(value);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -107,7 +117,8 @@ public class Reflect {
 		try {
 			target.getClass().getDeclaredField(name);
 			return Result.of(true);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -117,7 +128,8 @@ public class Reflect {
 		try {
 			target.getClass().getMethod(methodName, params);
 			return Result.of(true);
-		} catch (Exception e) {
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -129,7 +141,7 @@ public class Reflect {
 	 * @param fieldname the name of the target contained field
 	 * @return the class type of the first generic parameter
 	 */
-	public static Result<Class<?>> typeOf(Object obj, String fieldname) {
+	public static <C> Result<Class<C>> typeOf(Object obj, String fieldname) {
 		return typeOf(obj, fieldname, 0);
 	}
 
@@ -141,13 +153,14 @@ public class Reflect {
 	 * @param idx the position index of the generic parameter being queried
 	 * @return the class type of the generic parameter at the given index
 	 */
-	public static Result<Class<?>> typeOf(Object target, String fieldname, int idx) {
+	public static <C> Result<Class<C>> typeOf(Object target, String fieldname, int idx) {
 		try {
 			Field decl = target.getClass().getDeclaredField(fieldname);
 			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
 			if (idx < 0 || idx >= types.length) return Result.of(new IndexOutOfBoundsException(idx));
-			return Result.of((Class<?>) types[idx]);
-		} catch (Exception e) {
+			return Result.of(cast((Class<?>) types[idx]));
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -159,7 +172,7 @@ public class Reflect {
 	 * @param name fully qualified name of the desired class
 	 * @return {@code Result} object representing the desired class
 	 */
-	public static Result<Class<?>> forName(String name) {
+	public static <C> Result<Class<C>> forName(String name) {
 		return forName(name, null);
 	}
 
@@ -171,10 +184,11 @@ public class Reflect {
 	 * @param name fully qualified name of the desired class
 	 * @return {@code Result} object representing the desired class
 	 */
-	public static Result<Class<?>> forName(String name, ClassLoader loader) {
+	public static <C> Result<Class<C>> forName(String name, ClassLoader loader) {
 		try {
-			return Result.of(Class.forName(name, true, loader));
-		} catch (Exception e) {
+			return Result.of(cast(Class.forName(name, true, loader)));
+
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -195,11 +209,11 @@ public class Reflect {
 	 */
 	public static <C> Result<C> make(String classname, Object... args) {
 		try {
-			@SuppressWarnings("unchecked")
-			Class<C> cls = (Class<C>) Class.forName(classname, true, null);
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			Class<C> cls = cast(Class.forName(classname, true, cl));
 			return make(cls, args);
 
-		} catch (Exception e) {
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -213,19 +227,18 @@ public class Reflect {
 	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
 	 * @param <C> the intended class type
-	 * @param loader the class loader to use
+	 * @param cl the class loader to use
 	 * @param classname fully-qualified class name
 	 * @param args constuctor parameter arguments required for instantiation
 	 * @return {@code Result} containing the instantiated class or instantiation
 	 *             error
 	 */
-	public static <C> Result<C> make(ClassLoader loader, String classname, Object... args) {
+	public static <C> Result<C> make(ClassLoader cl, String classname, Object... args) {
 		try {
-			@SuppressWarnings("unchecked")
-			Class<C> cls = (Class<C>) Class.forName(classname, true, loader);
+			Class<C> cls = cast(Class.forName(classname, true, cl));
 			return make(cls, args);
 
-		} catch (Exception e) {
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
 	}
@@ -233,8 +246,6 @@ public class Reflect {
 	/**
 	 * Returns an instantiated instance of the given {@code Class} object using the
 	 * given constuctor parameter arguments.
-	 * <p>
-	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
 	 * @param <C> the intended class type
 	 * @param cls the class to instantiate
@@ -244,15 +255,72 @@ public class Reflect {
 	 */
 	public static <C> Result<C> make(Class<C> cls, Object... args) {
 		try {
-			Class<?>[] types = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
-			Constructor<?> ctor = cls.getConstructor(types);
-			ctor.setAccessible(true);
-			@SuppressWarnings("unchecked")
-			C inst = (C) ctor.newInstance(args);
-			return Result.of(inst);
+			Class<?>[] params = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
+			return make(cls, params, args);
 
-		} catch (Exception e) {
+		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
+	}
+
+	/**
+	 * Returns an instantiated instance of the given {@code Class} object using the
+	 * no-argument constuctor.
+	 *
+	 * @param <C> the intended class type
+	 * @param cls the class to instantiate
+	 * @return {@code Result} containing the instantiated class or instantiation
+	 *             error
+	 */
+	public static <C> Result<C> make(Class<C> cls) {
+		try {
+			Constructor<?> ctor = cls.getConstructor();
+			ctor.setAccessible(true);
+			C inst = cast(ctor.newInstance());
+			return Result.of(inst);
+
+		} catch (Exception | Error e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Returns an instantiated instance of the given {@code Class} object using the
+	 * given constuctor parameter arguments.
+	 *
+	 * @param <C> the intended class type
+	 * @param cls the class to instantiate
+	 * @param params constuctor parameter types required for instantiation
+	 * @param args constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation
+	 *             error
+	 */
+	public static <C> Result<C> make(Class<C> cls, Class<?>[] params, Object[] args) {
+		try {
+			chkArgs(params, args);
+			Constructor<?> ctor = cls.getConstructor(params);
+			ctor.setAccessible(true);
+			C inst = cast(ctor.newInstance(args));
+			return Result.of(inst);
+
+		} catch (Exception | Error e) {
+			return Result.of(e);
+		}
+	}
+
+	private static void chkArgs(Class<?>[] params, Object[] args) {
+		if (params == null && args == null) return;
+		if (params != null && args != null && params.length == args.length) return;
+		throw new AssertionFailedException(ERR_CHK, params, args);
+	}
+
+	@SuppressWarnings("unchecked")
+	static <C> Class<C> cast(Class<?> cls) {
+		return (Class<C>) cls;
+	}
+
+	@SuppressWarnings("unchecked")
+	static <T> T cast(Object obj) {
+		return (T) obj;
 	}
 }

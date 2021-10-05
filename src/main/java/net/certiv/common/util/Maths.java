@@ -8,9 +8,11 @@ package net.certiv.common.util;
 
 import java.math.MathContext;
 import java.util.Collection;
+import java.util.Random;
 
 public class Maths {
 
+	public static final Random RANDOM = new Random(System.currentTimeMillis());
 	public static final MathContext Scale2 = new MathContext(2);
 
 	/** The natural logarithm of 2. */
@@ -18,6 +20,29 @@ public class Maths {
 
 	/** The small deviation allowed in double comparisons */
 	public static double SMALL = 1e-6;
+
+	/**
+	 * Returns the next positive pseudorandom, uniformly distributed {@code long}
+	 * value from the {@code RANDOM} number generator.
+	 *
+	 * @return a next positive pseudorandom {@code long} value
+	 */
+	public static long nextRandom() {
+		return Math.abs(RANDOM.nextLong());
+	}
+
+	/**
+	 * Returns the next positive pseudorandom, uniformly distributed {@code int}
+	 * value, between 0 (inclusive) and the given positive upper bound (exclusive),
+	 * from the {@code RANDOM} number generator.
+	 *
+	 * @param bound the positive upper bound
+	 * @return a next positive pseudorandom {@code int} value
+	 * @throws IllegalArgumentException if the bound parameter is not positive
+	 */
+	public static int nextRandom(int bound) {
+		return Math.abs(RANDOM.nextInt(bound));
+	}
 
 	public static int delta(int a, int b) {
 		return Math.abs(a - b);
