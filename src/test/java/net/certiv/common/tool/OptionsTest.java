@@ -41,7 +41,7 @@ class OptionsTest {
 	void testHelpString() {
 
 		try {
-			Options opts = new Options();
+			Options opts = new Options("Test");
 			Flag.str(opts, "d", "dir", "Root directory");
 			Flag.num(opts, "t", "tabWidth", "Tab width");
 			Flag.bool(opts, "h", "help", "Help");
@@ -58,7 +58,7 @@ class OptionsTest {
 
 	@Test
 	void testHas() {
-		Options opts = new Options();
+		Options opts = new Options("Test");
 		Flag _h = Flag.bool(opts, "h", "help", "help");
 		opts.parse(new String[] { "-h" });
 

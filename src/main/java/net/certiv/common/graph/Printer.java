@@ -1,13 +1,15 @@
 package net.certiv.common.graph;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.TextStringBuilder;
 
+import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
@@ -28,16 +30,20 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	private static final String SUBGRAPH_END = "%s}";
 	private static final String NODE = "%s%s";
 	private static final String EDGE = "%s%s -> %s%s";
-	private static final String LABEL = "%slabel=\"%s\"";
 
 	public Printer() {}
 
 	/** Pretty print out a whole graph. */
 	public String dump(final Graph<N, E> graph) {
+		return dump(graph, graph.roots);
+	}
+
+	/** Pretty print out a graph beginning with the given nodes. */
+	public String dump(final Graph<N, E> graph, Set<N> nodes) {
 		TextStringBuilder sb = new TextStringBuilder();
-		for (N root : graph.roots) {
-			sb.appendln(String.format("// ---- %s:%s ----", graph.name(), root.name()));
-			sb.appendln(dump(root));
+		for (N node : nodes) {
+			sb.appendln(String.format("// ---- %s:%s ----", graph.name(), node.name()));
+			sb.appendln(dump(node));
 			sb.appendNewLine();
 		}
 		return sb.toString();
@@ -106,97 +112,165 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	// --------------------------------
 
+	/**
+	 * Produce a digraph representation of the given graph.
+	 *
+	 * @param graph the source graph
+	 * @return the digraph
+	 */
 	public String toDot(final Graph<N, E> graph) {
+		return toDot(graph, new DotVisitor<>());
+	}
+
+	/**
+	 * Produce a digraph representation of the given graph using the given node
+	 * visitor. Typically used by extending {@code DotVisitor} to constrain node
+	 * selection.
+	 *
+	 * @param graph the source graph
+	 * @param visitor the graph node visitor
+	 * @return a digraph
+	 */
+	public String toDot(Graph<N, E> graph, DotVisitor<N, E> visitor) {
 		TextStringBuilder sb = new TextStringBuilder();
+
 		sb.appendln(GRAPH_BEG, fx(graph.name()));
-		sb.appendln(graphProperties(graph));
+		sb.append(graphProperties(graph, dent(1)));
 
-		Set<N> roots = graph.roots;
-		if (roots.size() == 1) {
-			sb.append(toDot(graph, roots.iterator().next(), dent(1)));
+		switch (graph.roots.size()) {
+			case 0:
+				break;
 
-		} else {
-			for (N root : roots) {
-				sb.appendln(SUBGRAPH_BEG, dent(1), fx(root.name()));
-				sb.append(toDot(graph, root, dent(2)));
-				sb.appendln(SUBGRAPH_END, dent(1));
+			case 1: {
+				N root = graph.roots.iterator().next();
+				sb.append(nodeProperties(graph, root, dent(1)));
+				sb.append(edgeProperties(graph, root, dent(1)));
 				sb.appendNewLine();
+				sb.append(toDot(visitor, root, dent(2)));
 			}
+				break;
+
+			default:
+				for (N root : graph.roots) {
+					if (!root.outEdges.isEmpty()) {
+						sb.appendNewLine();
+						sb.appendln(SUBGRAPH_BEG, dent(1), fx(root.name()));
+						sb.appendln(clusterProperties(graph, root, dent(2)));
+						sb.append(toDot(visitor, root, dent(3)));
+						sb.appendln(SUBGRAPH_END, dent(1));
+					}
+				}
 		}
 
 		sb.appendln(GRAPH_END);
 		return sb.toString();
 	}
 
-	private String graphProperties(Graph<N, E> graph) {
-		if (graph.hasProperty(DotStyle.Property)) {
-			DotStyle ds = (DotStyle) graph.getProperty(DotStyle.Property);
-			return ds.graphAttributes(dent(1));
-		}
+	private String toDot(DotVisitor<N, E> visitor, N beg, String dent) {
+		Walker<N, E> walker = new Walker<>();
+		visitor.setup(dent);
+		walker.descend(visitor, beg);
 
 		TextStringBuilder sb = new TextStringBuilder();
-		sb.appendln(LABEL, dent(1), graph.name());
+		visitor.nodes().forEach(node -> sb.appendln(dent + node));
+		sb.appendNewLine();
+		sb.appendln(visitor.edges());
 		return sb.toString();
 	}
 
-	private String toDot(final Graph<N, E> graph, final N root, final String dent) {
-		Map<N, String> nodes = new LinkedHashMap<>();
-		TextStringBuilder edges = new TextStringBuilder();
+	private TextStringBuilder graphProperties(Graph<N, E> graph, String dent) {
+		TextStringBuilder sb = new TextStringBuilder();
 
-		Walker<N, E> walker = new Walker<>();
-		walker.descend(new Dotter(graph, dent, nodes, edges), root);
-
-		TextStringBuilder dot = new TextStringBuilder();
-		nodes.values().forEach(node -> dot.appendln(dent + node));
-		dot.appendNewLine();
-		dot.appendln(edges);
-		return dot.toString();
+		DotStyle ds = graph.getDotStyle();
+		sb.append(ds.titledAttributes(ON.GRAPHS, dent));
+		return sb;
 	}
 
-	private class Dotter extends NodeVisitor<N> {
+	// TODO: merge graph & root attributes
+	private TextStringBuilder clusterProperties(Graph<N, E> graph, N root, String dent) {
+		TextStringBuilder sb = new TextStringBuilder();
 
-		private Graph<N, E> graph;
-		private Map<N, String> nodes;
-		private TextStringBuilder edges;
+		DotStyle ds = graph.getDotStyle();
+		sb.append(ds.titledAttributes(ON.CLUSTERS, dent));
+		sb.append(ds.titledAttributes(ON.NODES, dent));
+		sb.append(ds.titledAttributes(ON.EDGES, dent));
+		return sb;
+	}
+
+	// TODO: merge graph & root attributes
+	private TextStringBuilder nodeProperties(Graph<N, E> graph, N root, String dent) {
+		TextStringBuilder sb = new TextStringBuilder();
+
+		DotStyle ds = graph.getDotStyle();
+		sb.append(ds.titledAttributes(ON.NODES, dent));
+		return sb;
+	}
+
+	// TODO: merge graph & root attributes
+	private TextStringBuilder edgeProperties(Graph<N, E> graph, N root, String dent) {
+		TextStringBuilder sb = new TextStringBuilder();
+
+		DotStyle ds = graph.getDotStyle();
+		sb.append(ds.titledAttributes(ON.EDGES, dent));
+		return sb;
+	}
+
+	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>> extends NodeVisitor<N> {
+
+		// value=formatted node definition string
+		private List<String> nodes = new LinkedList<>();
+		private TextStringBuilder edges = new TextStringBuilder();
+
 		private String dent;
 
-		public Dotter(Graph<N, E> graph, String dent, Map<N, String> nodes, TextStringBuilder edges) {
-			this.graph = graph;
+		public DotVisitor() {
+			super();
+		}
+
+		protected void setup(String dent) {
 			this.dent = dent;
-			this.nodes = nodes;
-			this.edges = edges;
+			nodes.clear();
+			edges.clear();
+		}
+
+		public List<String> nodes() {
+			return nodes;
+		}
+
+		public TextStringBuilder edges() {
+			return edges;
 		}
 
 		@Override
 		public boolean enter(Sense dir, HashList<N, N> visited, N parent, N node) {
-			nodes.put(node, style(node));
+			nodes.add(style(node));
 			if (parent != null) {
-				for (E edge : graph.findEdges(parent, node)) {
+				for (E edge : parent.to(node)) {
 					edges.appendln(EDGE, dent, fx(parent.name()), fx(node.name()), style(edge));
 				}
 			}
 			return true;
 		}
 
-		private String style(N node) {
-			if (!node.hasProperty(DotStyle.Property)) return fx(node.name());
-			DotStyle ds = (DotStyle) node.getProperty(DotStyle.Property);
-			return String.format(NODE, fx(node.name()), ds.nodeAttributes());
+		protected String style(N node) {
+			if (!node.hasProperty(DotStyle.PropName)) return fx(node.name());
+			DotStyle ds = (DotStyle) node.getProperty(DotStyle.PropName);
+			return String.format(NODE, fx(node.name()), ds.inlineAttributes(ON.NODES));
 		}
 
-		private String style(E edge) {
-			if (!edge.hasProperty(DotStyle.Property)) return Strings.EMPTY;
-			DotStyle ds = (DotStyle) edge.getProperty(DotStyle.Property);
-			return ds.edgeAttributes();
+		protected String style(E edge) {
+			if (!edge.hasProperty(DotStyle.PropName)) return Strings.EMPTY;
+			DotStyle ds = (DotStyle) edge.getProperty(DotStyle.PropName);
+			return ds.inlineAttributes(ON.EDGES);
 		}
 	}
 
-	// fix to a 'dot' compliant name
-	private String fx(String name) {
+	/** Fix a name to be 'dot' compliant. */
+	private static String fx(String name) {
 		return FX.matcher(name).replaceAll(Strings.LOWDASH);
 	}
 
-	private String dent(int cnt) {
+	private static String dent(int cnt) {
 		return Strings.dup(cnt, DENT);
 	}
 }

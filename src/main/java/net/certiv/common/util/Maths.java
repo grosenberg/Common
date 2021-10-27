@@ -44,6 +44,12 @@ public class Maths {
 		return Math.abs(RANDOM.nextInt(bound));
 	}
 
+	/** Computes a modulo value (a%b) that is always positive. */
+	public static int positiveModulo(int a, int b) {
+		int m = a % b;
+		return m >= 0 ? m : m + b;
+	}
+
 	public static int delta(int a, int b) {
 		return Math.abs(a - b);
 	}

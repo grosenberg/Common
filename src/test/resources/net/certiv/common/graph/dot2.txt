@@ -1,21 +1,22 @@
 digraph Two_root_Test_0 {
-  label="Two-root Test.0"
 
   subgraph cluster_A_1 {
-    A_1
-    B_2
-    C_3
 
-    A_1 -> B_2
-    B_2 -> C_3
+      A_1
+      B_2
+      C_3
+
+      A_1 -> B_2
+      B_2 -> C_3
 
   }
 
   subgraph cluster_D_4 {
-    D_4
-    E_5
 
-    D_4 -> E_5
+      D_4
+      E_5
+
+      D_4 -> E_5
 
   }
 

@@ -116,4 +116,9 @@ public class Triple<A, B, C> {
 		Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
 		return Objects.equals(a, other.a) && Objects.equals(b, other.b) && Objects.equals(c, other.c);
 	}
+
+	@Override
+	public String toString() {
+		return String.format("[%s, %s, %s]", a, b, c);
+	}
 }

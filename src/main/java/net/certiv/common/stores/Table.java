@@ -7,6 +7,7 @@
 package net.certiv.common.stores;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class Table<R, C, V> {
 
 	public Table(Table<R, C, V> table) {
 		this();
-		this.table.putAll(table.keyMap());
+		this.table.putAll(table.rowMap());
 	}
 
 	public Table(Map<R, LinkedHashMap<C, V>> keyMap) {
@@ -95,20 +96,29 @@ public class Table<R, C, V> {
 		return r.containsKey(col);
 	}
 
-	public void forEach(BiConsumer<? super R, ? super LinkedHashMap<C, V>> action) {
-		table.forEach(action);
-	}
-
-	public LinkedHashMap<R, LinkedHashMap<C, V>> keyMap() {
-		return table;
+	/** Returns a list view of all values contained in this table. */
+	public LinkedList<V> values() {
+		LinkedList<V> values = new LinkedList<>();
+		for (LinkedHashMap<C, V> x : table.values()) {
+			values.addAll(x.values());
+		}
+		return values;
 	}
 
 	public Set<R> rowSet() {
 		return table.keySet();
 	}
 
-	public Set<Entry<R, LinkedHashMap<C, V>>> rowSetEntry() {
+	public LinkedHashMap<R, LinkedHashMap<C, V>> rowMap() {
+		return table;
+	}
+
+	public Set<Entry<R, LinkedHashMap<C, V>>> entrySet() {
 		return table.entrySet();
+	}
+
+	public void forEach(BiConsumer<? super R, ? super LinkedHashMap<C, V>> action) {
+		table.forEach(action);
 	}
 
 	public void remove(R row) {

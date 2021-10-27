@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.dot.DotAttr;
-import net.certiv.common.dot.DotStyle;
+import net.certiv.common.graph.demo.DemoGraph;
+import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
 class GraphTest {
@@ -36,7 +36,7 @@ class GraphTest {
 	}
 
 	@Test
-	void testGraph_2Roots() {
+	void testMultiRoots() {
 		DemoGraph graph = new DemoGraph("Two-root Test");
 
 		DemoNode a = graph.createNode("A", graph.nextId());
@@ -60,7 +60,7 @@ class GraphTest {
 	}
 
 	@Test
-	void testGraph_cycles() {
+	void testCycles() {
 		DemoGraph graph = new DemoGraph("Cycle Test");
 
 		DemoNode a = graph.createNode("A", graph.nextId());
@@ -85,62 +85,6 @@ class GraphTest {
 		assertEquals(dump, dumptxt);
 
 		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot3.txt");
-		assertEquals(dot, dottxt);
-	}
-
-	@Test
-	void testGraph_styles() {
-		DemoGraph graph = new DemoGraph("Test Styles");
-
-		DotStyle gs = new DotStyle();
-		gs.put(DotAttr.LABEL, graph.name());
-		gs.put(DotAttr.FONTCOLOR, "teal");
-		gs.put(DotAttr.FONTSIZE, 18);
-		graph.putProperty(DotStyle.Property, gs);
-
-		DemoNode a = graph.createNode("A", graph.nextId());
-
-		DotStyle as = new DotStyle();
-		as.put(DotAttr.LABEL, "Styled " + a.name());
-		as.put(DotAttr.COLOR, "blue");
-		as.put(DotAttr.FILLCOLOR, "lightgrey");
-		a.putProperty(DotStyle.Property, as);
-
-		DemoNode b = graph.createNode("B", graph.nextId());
-
-		DotStyle bs = new DotStyle();
-		bs.put(DotAttr.LABEL, "Styled " + b.name());
-		bs.put(DotAttr.COLOR, "red");
-		bs.put(DotAttr.FILLCOLOR, "white");
-		bs.put(DotAttr.SHAPE, "circle");
-		b.putProperty(DotStyle.Property, bs);
-
-		DemoNode c = graph.createNode("C", graph.nextId());
-
-		DemoEdge ab = graph.createEdge(a, b);
-
-		DotStyle abs = new DotStyle();
-		abs.put(DotAttr.LABEL, "Styled Edge " + ab.name());
-		abs.put(DotAttr.COLOR, "blue");
-		abs.put(DotAttr.PENWIDTH, 2);
-		ab.putProperty(DotStyle.Property, abs);
-
-		DemoEdge bc = graph.createEdge(b, c);
-
-		DotStyle bcs = new DotStyle();
-		bcs.put(DotAttr.LABEL, "Styled Edge " + bc.name());
-		bcs.put(DotAttr.ARROWHEAD, "vee");
-		bcs.put(DotAttr.ARROWTAIL, "inv");
-		bcs.put(DotAttr.ARROWSIZE, "0.7");
-		bcs.put(DotAttr.COLOR, "maroon");
-		bcs.put(DotAttr.FONTSIZE, "11");
-		bcs.put(DotAttr.FONTCOLOR, "navy");
-		bcs.put(DotAttr.STYLE, "dotted");
-		bc.putProperty(DotStyle.Property, bcs);
-
-		String dot = graph.dot();
-
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot4.txt");
 		assertEquals(dot, dottxt);
 	}
 }

@@ -16,6 +16,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.config.builder.impl.DefaultConfigurationBuilder;
 
 import net.certiv.common.util.ClassUtil;
+import net.certiv.common.util.FsUtil;
 import net.certiv.common.util.Strings;
 
 public class LogConfig {
@@ -55,7 +56,7 @@ public class LogConfig {
 		}
 
 		// location is an offset relative to the class file
-		URI uri = ClassUtil.locate(cls);
+		URI uri = FsUtil.locate(cls);
 		if (uri != null) {
 			Path path = Path.of(uri);
 			if (path.getFileName().toString().endsWith(ClassUtil.JAR)) {

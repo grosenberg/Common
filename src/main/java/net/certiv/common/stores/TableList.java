@@ -6,6 +6,7 @@
  *******************************************************************************/
 package net.certiv.common.stores;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.function.BiConsumer;
  * A table data-structure implemented as a LinkedHashMap row -> LinkedHashMap
  * column -> LinkedList values.
  */
-public class TableList<R, C, V> {
+public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V>>> {
 
 	private final LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> table;
 
@@ -28,7 +29,7 @@ public class TableList<R, C, V> {
 
 	public TableList(TableList<R, C, V> table) {
 		this();
-		this.table.putAll(table.keyMap());
+		this.table.putAll(table.rowMap());
 	}
 
 	public TableList(Map<R, LinkedHashMap<C, LinkedList<V>>> keyMap) {
@@ -141,7 +142,7 @@ public class TableList<R, C, V> {
 		table.forEach(action);
 	}
 
-	public LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> keyMap() {
+	public LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> rowMap() {
 		return table;
 	}
 
@@ -149,8 +150,44 @@ public class TableList<R, C, V> {
 		return table.keySet();
 	}
 
-	public Set<Entry<R, LinkedHashMap<C, LinkedList<V>>>> rowSetEntry() {
+	public Set<Entry<R, LinkedHashMap<C, LinkedList<V>>>> entrySet() {
 		return table.entrySet();
+	}
+
+	@Override
+	public Iterator<TableCell<R, C, LinkedList<V>>> iterator() {
+		return new TableIterator();
+	}
+
+	private class TableIterator implements Iterator<TableCell<R, C, LinkedList<V>>> {
+
+		Iterator<Entry<R, LinkedHashMap<C, LinkedList<V>>>> rowItr = table.entrySet().iterator();
+		Iterator<Entry<C, LinkedList<V>>> colItr = null;
+		Entry<R, LinkedHashMap<C, LinkedList<V>>> row;
+
+		@Override
+		public boolean hasNext() {
+			return rowItr.hasNext() || colItr != null && colItr.hasNext();
+		}
+
+		@Override
+		public TableCell<R, C, LinkedList<V>> next() {
+			if (colItr == null || !colItr.hasNext()) {
+				row = rowItr.next();
+				colItr = row.getValue().entrySet().iterator();
+			}
+			Entry<C, LinkedList<V>> col = colItr.next();
+			return new TableCell<>(row.getKey(), col.getKey(), col.getValue());
+		}
+
+		@Override
+		public void remove() {
+			colItr.remove();
+			if (row.getValue().isEmpty()) {
+				rowItr.remove();
+				row = null;
+			}
+		}
 	}
 
 	public void remove(R row) {
@@ -160,6 +197,14 @@ public class TableList<R, C, V> {
 	public void remove(R row, C col) {
 		LinkedHashMap<C, LinkedList<V>> r = table.get(row);
 		if (r != null) r.remove(col);
+	}
+
+	public void remove(R row, C col, V val) {
+		LinkedHashMap<C, LinkedList<V>> r = table.get(row);
+		if (r != null) {
+			LinkedList<V> c = r.get(col);
+			if (c != null) c.remove(val);
+		}
 	}
 
 	public boolean isEmpty() {

@@ -8,11 +8,13 @@ import java.util.Deque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Dents {
+import org.apache.commons.text.TextStringBuilder;
+
+public class TxtUtil {
 
 	private static final Pattern NL = Pattern.compile(".*?(\\R)");
 
-	private Dents() {}
+	private TxtUtil() {}
 
 	public static String createIndent(int tabWidth, boolean useTabs, int indents) {
 		if (indents < 1) return Strings.EMPTY;
@@ -265,103 +267,6 @@ public class Dents {
 	}
 
 	/**
-	 * Wraps the given text to lines of length less than the given limit. Preserves
-	 * existing hard returns.
-	 */
-	public static String wrap(String text, int limit) {
-		StringBuilder block = new StringBuilder();
-		String[] lines = text.split("\\R");
-		for (int idx = 0; idx < lines.length; idx++) {
-			String line = _wrap(lines[idx], limit);
-			block.append(line + Strings.EOL);
-		}
-		return block.toString().trim();
-	}
-
-	private static String _wrap(String text, int limit) {
-		StringBuilder block = new StringBuilder();
-		StringBuilder line = new StringBuilder();
-		String[] words = text.split(Strings.SPACE);
-		for (int idx = 0; idx < words.length; idx++) {
-			line.append(words[idx]);
-			if (idx + 1 == words.length || line.length() + words[idx + 1].length() > limit) {
-				block.append(line.toString() + Strings.EOL);
-				line.setLength(0);
-			} else {
-				line.append(Strings.SPACE);
-			}
-		}
-		return block.toString().trim();
-	}
-
-	/**
-	 * Wrap the given text according to the given parameters.
-	 *
-	 * @param txt the text to wrap
-	 * @param wrap the wrap column
-	 * @param prefix a leading prefix to provide on each line
-	 * @param terminal the line terminal
-	 * @param splits a regex used to split the text
-	 * @return the wrapped text
-	 */
-	public static String wrap(String txt, int wrap, String prefix, String terminal, String splits) {
-		if (txt == null || txt.isEmpty()) return Strings.EMPTY;
-		if (prefix == null) prefix = Strings.EMPTY;
-		if (terminal == null) terminal = Strings.EOL;
-		if (splits == null || splits.isEmpty()) splits = Strings.SPACE;
-		if (wrap < 1) wrap = 80;
-
-		final Pattern splitter = Pattern.compile(splits);
-		int len = txt.length();
-		StringBuilder sb = new StringBuilder(len);
-		sb.append(prefix);
-
-		int beg = 0;
-		while (beg < len) {
-			int wrapAt = -1;
-			int end = Math.min((int) Math.min(Integer.MAX_VALUE, beg + wrap + 1L), len);
-			Matcher matcher = splitter.matcher(txt.substring(beg, end));
-			if (matcher.find()) {
-				if (matcher.start() == 0) {
-					beg += matcher.end();
-					continue;
-				}
-				wrapAt = matcher.start() + beg;
-			}
-			// only last line without leading spaces is left
-			if (len - beg <= wrap) break;
-
-			while (matcher.find()) {
-				wrapAt = matcher.start() + beg;
-			}
-
-			if (wrapAt >= beg) {	// normal case
-				sb.append(txt, beg, wrapAt);
-				sb.append(terminal + prefix);
-				beg = wrapAt + 1;
-
-			} else {
-				matcher = splitter.matcher(txt.substring(beg + wrap));
-				if (matcher.find()) {
-					wrapAt = matcher.start() + beg + wrap;
-				}
-
-				if (wrapAt >= 0) {
-					sb.append(txt, beg, wrapAt);
-					sb.append(terminal);
-					beg = wrapAt + 1;
-				} else {
-					sb.append(txt, beg, txt.length());
-					beg = len;
-				}
-			}
-		}
-
-		sb.append(txt, beg, txt.length()); 		// append remainder
-		return sb.toString();
-	}
-
-	/**
 	 * Returns the given string trimmed of any trailing HWS.
 	 *
 	 * @param str the string to check
@@ -451,4 +356,134 @@ public class Dents {
 		return -1;
 	}
 
+	/**
+	 * Wraps the given text defined by the given format and args to lines of up to
+	 * the given length. Uses the system newline string as the line return terminal.
+	 * Preserves existing internal returns.
+	 *
+	 * @param len the target maximum line length
+	 * @param fmt the text format
+	 * @param args the format arguments
+	 * @return the resulting text
+	 */
+	public static String wrap(int len, String fmt, Object... args) {
+		return wrap(Strings.EOL, len, fmt, args);
+	}
+
+	/**
+	 * Wraps the text defined by the given format and args to lines of up to the
+	 * given length. Existing hard internal returns are preserved & converted to the
+	 * given newline terminal.
+	 *
+	 * @param terminal the newline delimiter
+	 * @param len the target maximum line length
+	 * @param fmt the text format
+	 * @param args the format arguments
+	 * @return the resulting text
+	 */
+	public static String wrap(String terminal, int len, String fmt, Object... args) {
+		TextStringBuilder block = new TextStringBuilder();
+		block.setNewLineText(terminal);
+		String[] lines = String.format(fmt, args).split("\\R");
+		for (int idx = 0; idx < lines.length; idx++) {
+			block.appendln(_wrap(terminal, len, lines[idx]));
+		}
+		return trim(block, terminal).toString();
+	}
+
+	private static TextStringBuilder _wrap(String terminal, int len, String text) {
+		TextStringBuilder block = new TextStringBuilder();
+		TextStringBuilder line = new TextStringBuilder();
+		block.setNewLineText(terminal);
+
+		String[] words = text.split(Strings.SPACE);
+		for (int idx = 0; idx < words.length; idx++) {
+			line.append(words[idx]);
+			if (idx + 1 == words.length || line.length() + words[idx + 1].length() > len) {
+				block.appendln(line.toString());
+				line.setLength(0);
+			} else {
+				line.append(Strings.SPACE);
+			}
+		}
+		return trim(block, terminal);
+	}
+
+	private static TextStringBuilder trim(TextStringBuilder sb, String terminal) {
+		while (sb.startsWith(terminal)) {
+			sb.deleteFirst(terminal);
+		}
+		while (sb.endsWith(terminal)) {
+			sb.setLength(sb.length() - terminal.length());
+		}
+		return sb;
+	}
+
+	/**
+	 * Wrap the given text according to the given parameters.
+	 *
+	 * @param txt the text to wrap
+	 * @param col the wrap column
+	 * @param prefix a leading prefix to provide on each line
+	 * @param terminal the line terminal
+	 * @param splits a regex used to split the text
+	 * @return the wrapped text
+	 */
+	@Deprecated
+	public static String wrap(String prefix, String terminal, String splits, int col, String txt) {
+		if (txt == null || txt.isEmpty()) return Strings.EMPTY;
+		if (prefix == null) prefix = Strings.EMPTY;
+		if (terminal == null) terminal = Strings.EOL;
+		if (splits == null || splits.isEmpty()) splits = Strings.SPACE;
+		if (col < 1) col = 80;
+
+		final Pattern splitter = Pattern.compile(splits);
+		int len = txt.length();
+		StringBuilder sb = new StringBuilder(len);
+		sb.append(prefix);
+
+		int beg = 0;
+		while (beg < len) {
+			int wrapAt = -1;
+			int end = Math.min((int) Math.min(Integer.MAX_VALUE, beg + col + 1L), len);
+			Matcher matcher = splitter.matcher(txt.substring(beg, end));
+			if (matcher.find()) {
+				if (matcher.start() == 0) {
+					beg += matcher.end();
+					continue;
+				}
+				wrapAt = matcher.start() + beg;
+			}
+			// only last line without leading spaces is left
+			if (len - beg <= col) break;
+
+			while (matcher.find()) {
+				wrapAt = matcher.start() + beg;
+			}
+
+			if (wrapAt >= beg) { // normal case
+				sb.append(txt, beg, wrapAt);
+				sb.append(terminal + prefix);
+				beg = wrapAt + 1;
+
+			} else {
+				matcher = splitter.matcher(txt.substring(beg + col));
+				if (matcher.find()) {
+					wrapAt = matcher.start() + beg + col;
+				}
+
+				if (wrapAt >= 0) {
+					sb.append(txt, beg, wrapAt);
+					sb.append(terminal);
+					beg = wrapAt + 1;
+				} else {
+					sb.append(txt, beg, txt.length());
+					beg = len;
+				}
+			}
+		}
+
+		sb.append(txt, beg, txt.length()); // append remainder
+		return sb.toString();
+	}
 }

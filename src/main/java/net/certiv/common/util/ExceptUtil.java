@@ -2,6 +2,8 @@ package net.certiv.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExceptUtil {
 
@@ -43,6 +45,27 @@ public class ExceptUtil {
 			}
 		}
 		return Strings.EMPTY;
+	}
+
+	public static List<String> causes(Throwable t) {
+		if (t == null) return List.of();
+
+		List<String> causes = new ArrayList<>();
+		causes.add(msg(t));
+
+		Throwable cause = t.getCause();
+		while (cause != null) {
+			causes.add(msg(t));
+			cause = cause.getCause();
+		}
+
+		return causes;
+	}
+
+	private static String msg(Throwable t) {
+		String msg = t.getMessage();
+		msg = msg != null ? msg : "<no detail>";
+		return String.format("%s [%s]", msg, t.getClass().getSimpleName());
 	}
 
 	public static String stacktrace(Throwable t) {

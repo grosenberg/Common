@@ -84,10 +84,20 @@ public class Dictionary {
 	}
 
 	public enum ON {
-		GRAPHS,
-		CLUSTERS, // subgraphs??
-		NODES,
-		EDGES;
+		GRAPHS("graph"),
+		CLUSTERS("graph"), // same as subgraph
+		NODES("node"),
+		EDGES("edge");
+
+		private final String title;
+
+		ON(String title) {
+			this.title = title;
+		}
+
+		public String title() {
+			return title;
+		}
 	}
 
 	private static final String[] Any = Strings.EMPTY_STRINGS;
@@ -125,6 +135,7 @@ public class Dictionary {
 
 	private static final Map<DotAttr, Entry> AttrMap = new LinkedHashMap<>();
 	private static final Map<String, DotAttr> NameMap = new LinkedHashMap<>();
+
 	static {
 		put(DotAttr.INVALID, TYPE.INVALID, Any, Empty);
 
@@ -204,24 +215,35 @@ public class Dictionary {
 
 	private Dictionary() {}
 
+	/** Returns {@code true} if the given key is defined and not {@code INVALID}. */
+	public static boolean valid(DotAttr key) {
+		return DotAttr.INVALID != key && AttrMap.containsKey(key);
+	}
+
 	/** Lookup the dictionary {@code Entry} for the given name. */
 	public static Entry lookup(String name) {
 		try {
 			return lookup(DotAttr.valueOf(name.toUpperCase()));
 		} catch (Exception e) {
-			return lookup(DotAttr.INVALID);
+			return AttrMap.get(DotAttr.INVALID);
 		}
 	}
 
-	/** Lookup the dictionary {@code Entry} for the given {@code Attr}. */
-	public static Entry lookup(DotAttr name) {
-		return AttrMap.get(name);
+	/** Lookup the dictionary {@code Entry} for the given {@code DotAttr}. */
+	public static Entry lookup(DotAttr attr) {
+		if (AttrMap.containsKey(attr)) return AttrMap.get(attr);
+		return AttrMap.get(DotAttr.INVALID);
 	}
 
 	/** Find the {@code Attr} corresponding to the given name. */
 	public static DotAttr find(String name) {
-		DotAttr dotAttr = NameMap.get(name);
-		return dotAttr != null ? dotAttr : DotAttr.INVALID;
+		DotAttr attr = NameMap.get(name);
+		return attr != null ? attr : DotAttr.INVALID;
+	}
+
+	/** Returns {@code true} if the given key defines a {@code String} type. */
+	public static boolean isStringType(DotAttr key) {
+		return lookup(key).type == TYPE.STRING;
 	}
 
 	/** Returns all known entry names. */

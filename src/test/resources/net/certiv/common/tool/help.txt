@@ -1,3 +1,5 @@
+Usage: Test [options] args...
+Options:
 	-d <STR> 'dir' Root directory
 	-t <INT> 'tabWidth' Tab width
 	-h <BOOL> 'help' Help

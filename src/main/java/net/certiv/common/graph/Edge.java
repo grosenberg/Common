@@ -1,9 +1,11 @@
 package net.certiv.common.graph;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
+import net.certiv.common.dot.Dictionary.ON;
+import net.certiv.common.dot.DotStyle;
+import net.certiv.common.stores.Counter;
 import net.certiv.common.util.Assert;
 
 /**
@@ -12,26 +14,29 @@ import net.certiv.common.util.Assert;
  * two nodes. An edge can only exist between two existing nodes: no dangling
  * edges permitted.
  */
-public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> {
+public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
 	/** Sense of direction. */
 	public enum Sense {
 		IN, OUT;
 	}
 
-	private static final AtomicLong Factor = new AtomicLong();
+	private static final Counter Factor = new Counter();
 	public final long _eid;
 
 	protected final N beg;
 	protected final N end;
-
-	private LinkedHashMap<Object, Object> props;
 
 	protected Edge(N beg, N end) {
 		Assert.notNull(beg, end);
 		this._eid = Factor.getAndIncrement();
 		this.beg = beg;
 		this.end = end;
+	}
+
+	protected Edge(N beg, N end, Map<Object, Object> props) {
+		this(beg, end);
+		putProperties(props);
 	}
 
 	public String name() {
@@ -66,55 +71,29 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@code true} if this edge is fully removed.
 	 */
 	@SuppressWarnings("unchecked")
-	public boolean remove() {
+	boolean remove() {
 		boolean rmvd = beg.remove((E) this, Sense.OUT);
 		rmvd &= end.remove((E) this, Sense.IN);
 		return rmvd;
 	}
 
-	protected void dispose() {
-		remove();
+	/**
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
+	 * containing this properties store. Creates and adds an {@code ON#EDGES}
+	 * default category {@code DotStyle} store, if a store does not exist.
+	 *
+	 * @return the dot style store
+	 */
+	public DotStyle getDotStyle() {
+		return getDotStyle(ON.EDGES);
 	}
 
 	/**
-	 * Adds an arbitrary key/value "property" to this edge. If value is
-	 * {@code null}, the property will be removed.
-	 *
-	 * @param key the property key
-	 * @param value the new property value
-	 * @return the previous property value associated with key, or {@code null} if
-	 *             there was no mapping for the key
+	 * Defines a custom style for this edge. The default implementation does
+	 * nothing.
 	 */
-	public final Object putProperty(Object key, Object value) {
-		if (props == null) {
-			props = new LinkedHashMap<>();
-		}
-		if (value == null) return props.remove(key);
-		return props.put(key, value);
-	}
-
-	/**
-	 * Returns the value of the property with the specified key. Only properties
-	 * added with putProperty will return a non-null value.
-	 *
-	 * @param key the property key
-	 * @return the property value associated with key, or {@code null} if there was
-	 *             no mapping for the key
-	 */
-	public final Object getProperty(Object key) {
-		if (props == null) return null;
-		return props.get(key);
-	}
-
-	/**
-	 * Returns {@code true} if a property value is associated with the given key.
-	 *
-	 * @param key the property key
-	 * @return {@code true} if a property value is associated with key
-	 */
-	public final boolean hasProperty(Object key) {
-		if (props == null) return false;
-		return props.containsKey(key);
+	public DotStyle defineStyle() {
+		return getDotStyle();
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import net.certiv.common.util.Strings;
 
 public class Options {
 
-	enum Kind {
+	enum Flg {
 		STR, DBL, INT, BOOL;
 	}
 
@@ -22,33 +22,33 @@ public class Options {
 		public final String mark;
 		public final String name;
 		public final String desc;
-		public final Kind kind;
+		public final Flg flg;
 
 		public static Flag str(Options opts, String mark, String name, String desc) {
-			Flag flag = new Flag(opts, mark, name, desc, Kind.STR);
+			Flag flag = new Flag(opts, mark, name, desc, Flg.STR);
 			return flag;
 		}
 
 		public static Flag num(Options opts, String mark, String name, String desc) {
-			Flag flag = new Flag(opts, mark, name, desc, Kind.INT);
+			Flag flag = new Flag(opts, mark, name, desc, Flg.INT);
 			return flag;
 		}
 
 		public static Flag dbl(Options opts, String mark, String name, String desc) {
-			Flag flag = new Flag(opts, mark, name, desc, Kind.DBL);
+			Flag flag = new Flag(opts, mark, name, desc, Flg.DBL);
 			return flag;
 		}
 
 		public static Flag bool(Options opts, String mark, String name, String desc) {
-			Flag flag = new Flag(opts, mark, name, desc, Kind.BOOL);
+			Flag flag = new Flag(opts, mark, name, desc, Flg.BOOL);
 			return flag;
 		}
 
-		private Flag(Options opts, String mark, String name, String desc, Kind kind) {
+		private Flag(Options opts, String mark, String name, String desc, Flg flg) {
 			this.mark = chk(mark);
 			this.name = name;
 			this.desc = desc;
-			this.kind = kind;
+			this.flg = flg;
 
 			opts.Flags.put(this.mark, this);
 		}
@@ -71,9 +71,13 @@ public class Options {
 	private final Map<Flag, String> opts = new LinkedHashMap<>();
 	// remaining unknown flag/args
 	private final List<String> rest = new ArrayList<>();
+	// program name
+	private final String name;
 
 	/** Create an {@code Options} parser. */
-	public Options() {}
+	public Options(String name) {
+		this.name = name;
+	}
 
 	public void parse(String[] args) {
 		LinkedList<String> argList = new LinkedList<>(Arrays.asList(args));
@@ -215,9 +219,11 @@ public class Options {
 
 	public String help(String version) {
 		TextStringBuilder sb = new TextStringBuilder();
-		if (!Strings.blank(version)) sb.appendln(version);
+		if (!Strings.blank(version)) sb.appendln("%s (%s)", name, version);
+		sb.appendln("Usage: %s [options] args...", name);
+		sb.appendln("Options:");
 		for (Flag flag : Flags.values()) {
-			sb.appendln(String.format(flag.toString(), flag.kind));
+			sb.appendln(String.format(flag.toString(), flag.flg));
 		}
 		return sb.toString();
 	}
@@ -226,7 +232,7 @@ public class Options {
 		TextStringBuilder sb = new TextStringBuilder();
 		for (Flag flag : opts.keySet()) {
 			Object val = null;
-			switch (flag.kind) {
+			switch (flag.flg) {
 				case BOOL:
 					val = bool(flag);
 					break;

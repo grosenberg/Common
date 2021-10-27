@@ -11,10 +11,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -423,36 +421,38 @@ public class Strings {
 		return s.substring(idx);
 	}
 
-	/**
-	 * Wraps the given text to lines of length less than the given limit. Preserves
-	 * existing hard line returns.
-	 */
-	@Deprecated
-	public static String wrap(String text, int limit) {
-		StringBuilder block = new StringBuilder();
-		String[] lines = text.split("\\R");
-		for (String line : lines) {
-			block.append(_wrap(line, limit) + EOL);
-		}
-		return block.toString().trim();
-	}
-
-	@Deprecated
-	private static String _wrap(String text, int limit) {
-		StringBuilder block = new StringBuilder();
-		StringBuilder line = new StringBuilder();
-		String[] words = text.split(SPACE);
-		for (int idx = 0; idx < words.length; idx++) {
-			line.append(words[idx]);
-			if (idx + 1 == words.length || line.length() + words[idx + 1].length() > limit) {
-				block.append(line.toString() + EOL);
-				line.setLength(0);
-			} else {
-				line.append(SPACE);
-			}
-		}
-		return block.toString().trim();
-	}
+	// /**
+	// * Wraps the given text to lines of length less than the given limit.
+	// Preserves
+	// * existing hard line returns.
+	// */
+	// @Deprecated
+	// public static String wrap(String text, int limit) {
+	// StringBuilder block = new StringBuilder();
+	// String[] lines = text.split("\\R");
+	// for (String line : lines) {
+	// block.append(_wrap(line, limit) + EOL);
+	// }
+	// return block.toString().trim();
+	// }
+	//
+	// @Deprecated
+	// private static String _wrap(String text, int limit) {
+	// StringBuilder block = new StringBuilder();
+	// StringBuilder line = new StringBuilder();
+	// String[] words = text.split(SPACE);
+	// for (int idx = 0; idx < words.length; idx++) {
+	// line.append(words[idx]);
+	// if (idx + 1 == words.length || line.length() + words[idx + 1].length() >
+	// limit) {
+	// block.append(line.toString() + EOL);
+	// line.setLength(0);
+	// } else {
+	// line.append(SPACE);
+	// }
+	// }
+	// return block.toString().trim();
+	// }
 
 	/** Unwraps the given text by replacing all hard returns with a space. */
 	public static String unwrap(String text) {
@@ -494,137 +494,141 @@ public class Strings {
 		if (idx == -1) return txt.length();
 		return txt.substring(idx + 1).length();
 	}
-
-	/**
-	 * Returns the visual width of the given line of text.
-	 *
-	 * @param text the string to measure
-	 * @param tabWidth the visual width of a tab
-	 * @return the visual width of {@code text}
-	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
-	 */
-	@Deprecated
-	public static int measureVisualWidth(CharSequence text, int tabWidth) {
-		return measureVisualWidth(text, tabWidth, 0);
-	}
-
-	/**
-	 * Returns the visual width of the given text starting from the given offset
-	 * within a line. Width is reset each time a line separator character is
-	 * encountered.
-	 *
-	 * @param text the string to measure
-	 * @param tabWidth the visual width of a tab
-	 * @param from the visual starting offset of the text
-	 * @return the visual width of {@code text}
-	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
-	 */
-	@Deprecated
-	public static int measureVisualWidth(CharSequence text, int tabWidth, int from) {
-		if (text == null || tabWidth < 0 || from < 0) throw new IllegalArgumentException();
-
-		int width = from;
-		for (int idx = 0, len = text.length(); idx < len; idx++) {
-			switch (text.charAt(idx)) {
-				case Chars.TAB:
-					if (tabWidth > 0) width += tabWidth - width % tabWidth;
-					break;
-				case Chars.RET:
-				case Chars.NL:
-					width = 0;
-					from = 0;
-					break;
-				default:
-					width++;
-			}
-		}
-		return width - from;
-	}
-
-	@Deprecated
-	public static String expandTabs(String text, int tabWidth) {
-		if (text == null || tabWidth < 1) throw new IllegalArgumentException();
-
-		StringBuilder sb = new StringBuilder();
-		int width = 0;
-		for (int idx = 0, len = text.length(); idx < len; idx++) {
-			char ch = text.charAt(idx);
-			switch (ch) {
-				case Chars.TAB:
-					int delta = tabWidth - width % tabWidth;
-					width += delta;
-					sb.append(dup(delta, SPACE));
-					break;
-				case Chars.RET:
-				case Chars.NL:
-					sb.append(ch);
-					width = 0;
-					break;
-				default:
-					sb.append(ch);
-					width++;
-			}
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Allocates the given text into an array where each entry corresponds to a
-	 * single visual width unit as defined by the given tabWidth. The last entry
-	 * will contain any text lenth excess.
-	 *
-	 * @param text the text to be allocated
-	 * @param tabWidth the defined visual unit with in spaces
-	 * @return
-	 */
-	@Deprecated
-	public static String[] allocateVisualWidth(String text, int tabWidth) {
-		if (text == null || tabWidth < 0) throw new IllegalArgumentException();
-
-		Deque<String> res = new ArrayDeque<>();
-		String buf = EMPTY;
-
-		for (int idx = 0, len = text.length(); idx < len; idx++) {
-			char ch = text.charAt(idx);
-			switch (ch) {
-				case Chars.TAB:
-					if (buf.length() < tabWidth) {
-						res.add(buf + TAB);
-						buf = EMPTY;
-					} else {
-						if (!buf.isEmpty()) res.add(buf);
-						res.add(TAB);
-						buf = EMPTY;
-					}
-					break;
-
-				case Chars.RET:
-				case Chars.NL:
-					res.clear();
-					buf = EMPTY;
-					break;
-
-				default:
-					if (buf.length() < tabWidth) {
-						buf += ch;
-					} else {
-						res.add(buf);
-						buf = EMPTY + ch;
-					}
-			}
-		}
-
-		if (res.size() > 1) {
-			String ultm = res.peekLast();
-			if (!ultm.contains(TAB) && ultm.length() < tabWidth) {
-				res.removeLast();
-				String pent = res.removeLast();
-				res.add(pent + ultm);
-			}
-		}
-
-		return res.toArray(new String[res.size()]);
-	}
+	//
+	// /**
+	// * Returns the visual width of the given line of text.
+	// *
+	// * @param text the string to measure
+	// * @param tabWidth the visual width of a tab
+	// * @return the visual width of {@code text}
+	// * @see
+	// org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
+	// */
+	// @Deprecated
+	// public static int measureVisualWidth(CharSequence text, int tabWidth) {
+	// return measureVisualWidth(text, tabWidth, 0);
+	// }
+	//
+	// /**
+	// * Returns the visual width of the given text starting from the given offset
+	// * within a line. Width is reset each time a line separator character is
+	// * encountered.
+	// *
+	// * @param text the string to measure
+	// * @param tabWidth the visual width of a tab
+	// * @param from the visual starting offset of the text
+	// * @return the visual width of {@code text}
+	// * @see
+	// org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
+	// */
+	// @Deprecated
+	// public static int measureVisualWidth(CharSequence text, int tabWidth, int
+	// from) {
+	// if (text == null || tabWidth < 0 || from < 0) throw new
+	// IllegalArgumentException();
+	//
+	// int width = from;
+	// for (int idx = 0, len = text.length(); idx < len; idx++) {
+	// switch (text.charAt(idx)) {
+	// case Chars.TAB:
+	// if (tabWidth > 0) width += tabWidth - width % tabWidth;
+	// break;
+	// case Chars.RET:
+	// case Chars.NL:
+	// width = 0;
+	// from = 0;
+	// break;
+	// default:
+	// width++;
+	// }
+	// }
+	// return width - from;
+	// }
+	//
+	// @Deprecated
+	// public static String expandTabs(String text, int tabWidth) {
+	// if (text == null || tabWidth < 1) throw new IllegalArgumentException();
+	//
+	// StringBuilder sb = new StringBuilder();
+	// int width = 0;
+	// for (int idx = 0, len = text.length(); idx < len; idx++) {
+	// char ch = text.charAt(idx);
+	// switch (ch) {
+	// case Chars.TAB:
+	// int delta = tabWidth - width % tabWidth;
+	// width += delta;
+	// sb.append(dup(delta, SPACE));
+	// break;
+	// case Chars.RET:
+	// case Chars.NL:
+	// sb.append(ch);
+	// width = 0;
+	// break;
+	// default:
+	// sb.append(ch);
+	// width++;
+	// }
+	// }
+	// return sb.toString();
+	// }
+	//
+	// /**
+	// * Allocates the given text into an array where each entry corresponds to a
+	// * single visual width unit as defined by the given tabWidth. The last entry
+	// * will contain any text lenth excess.
+	// *
+	// * @param text the text to be allocated
+	// * @param tabWidth the defined visual unit with in spaces
+	// * @return
+	// */
+	// @Deprecated
+	// public static String[] allocateVisualWidth(String text, int tabWidth) {
+	// if (text == null || tabWidth < 0) throw new IllegalArgumentException();
+	//
+	// Deque<String> res = new ArrayDeque<>();
+	// String buf = EMPTY;
+	//
+	// for (int idx = 0, len = text.length(); idx < len; idx++) {
+	// char ch = text.charAt(idx);
+	// switch (ch) {
+	// case Chars.TAB:
+	// if (buf.length() < tabWidth) {
+	// res.add(buf + TAB);
+	// buf = EMPTY;
+	// } else {
+	// if (!buf.isEmpty()) res.add(buf);
+	// res.add(TAB);
+	// buf = EMPTY;
+	// }
+	// break;
+	//
+	// case Chars.RET:
+	// case Chars.NL:
+	// res.clear();
+	// buf = EMPTY;
+	// break;
+	//
+	// default:
+	// if (buf.length() < tabWidth) {
+	// buf += ch;
+	// } else {
+	// res.add(buf);
+	// buf = EMPTY + ch;
+	// }
+	// }
+	// }
+	//
+	// if (res.size() > 1) {
+	// String ultm = res.peekLast();
+	// if (!ultm.contains(TAB) && ultm.length() < tabWidth) {
+	// res.removeLast();
+	// String pent = res.removeLast();
+	// res.add(pent + ultm);
+	// }
+	// }
+	//
+	// return res.toArray(new String[res.size()]);
+	// }
 
 	/** Returns a string containing {@code count} spaces. */
 	public static String spaces(int count) {
@@ -658,29 +662,29 @@ public class Strings {
 		return sb;
 	}
 
-	/**
-	 * Returns the given number of spaces.
-	 * <p>
-	 * Use #dup
-	 */
-	@Deprecated
-	public static String getNSpaces(int spaces) {
-		return dup(spaces, Chars.SP);
-	}
-
-	/**
-	 * Returns {@code count} copies of the given character.
-	 * <p>
-	 * Use #dup
-	 */
-	@Deprecated
-	public static String getNChars(int count, char ch) {
-		StringBuffer buf = new StringBuffer(count);
-		for (int i = 0; i < count; i++)
-			buf.append(ch);
-		return buf.toString();
-
-	}
+	// /**
+	// * Returns the given number of spaces.
+	// * <p>
+	// * Use #dup
+	// */
+	// @Deprecated
+	// public static String getNSpaces(int spaces) {
+	// return dup(spaces, Chars.SP);
+	// }
+	//
+	// /**
+	// * Returns {@code count} copies of the given character.
+	// * <p>
+	// * Use #dup
+	// */
+	// @Deprecated
+	// public static String getNChars(int count, char ch) {
+	// StringBuffer buf = new StringBuffer(count);
+	// for (int i = 0; i < count; i++)
+	// buf.append(ch);
+	// return buf.toString();
+	//
+	// }
 
 	// -----
 
@@ -737,16 +741,17 @@ public class Strings {
 		}
 	}
 
-	public static String csvList(List<String> strs) {
-		if (strs == null) return EMPTY;
-		StringBuilder sb = new StringBuilder();
-		for (String str : strs) {
-			sb.append(str + CsvDELIM);
-		}
-		int len = sb.length();
-		sb.delete(len - 2, len);
-		return sb.toString();
-	}
+	// @Deprecated
+	// public static String csvList(List<String> strs) {
+	// if (strs == null) return EMPTY;
+	// StringBuilder sb = new StringBuilder();
+	// for (String str : strs) {
+	// sb.append(str + CsvDELIM);
+	// }
+	// int len = sb.length();
+	// sb.delete(len - 2, len);
+	// return sb.toString();
+	// }
 
 	/**
 	 * Returns the string representation of the given objects joined using the CSV

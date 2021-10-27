@@ -1,69 +1,108 @@
 package net.certiv.common.symtab;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.LinkedList;
 
-import net.certiv.common.log.Log;
+import net.certiv.common.stores.Counter;
+import net.certiv.common.symtab.Scope.ScopeType;
 
 public class SymbolTable {
 
-	private final Stack<Scope> scopeStack = new Stack<>();
-	private final List<Scope> allScopes = new ArrayList<>();
-
-	protected int genId = 0;
+	private final LinkedList<Scope> scopes = new LinkedList<>();
+	private final Counter genCounter = new Counter();
 
 	public SymbolTable() {
-		Scope globals = new Scope(ScopeType.GLOBAL, nextGenId(), null);
-		scopeStack.push(globals);
-		allScopes.add(globals);
+		Scope scope = new Scope(ScopeType.GLOBAL, getGen(), null);
+		scopes.push(scope);
 	}
 
+	/** Adds a named symbol (valueless) to the current scope. */
+	public <V> void add(String name) {
+		scopes.peek().addSymbol(name);
+	}
+
+	/** Adds a named symbol (valueless) to the global scope. */
+	public <V> void addGlobal(String name) {
+		scopes.peekLast().addSymbol(name);
+	}
+
+	/** Adds a named symbol with a value to the current scope. */
+	public <V> void add(String name, V value) {
+		scopes.peek().addSymbol(name, value);
+	}
+
+	/** Adds a named symbol with a value to the global scope. */
+	public <V> void addGlobal(String name, V value) {
+		scopes.peekLast().addSymbol(name, value);
+	}
+
+	/**
+	 * Return the symbol identified by the given name, or {@code null} if not found
+	 * in the current or any ancestral scope. The search starts in the current
+	 * scope, returning the first match found.
+	 */
+	public <V> Symbol<V> resolve(String name) {
+		return scopes.peek().resolve(name);
+	}
+
+	/**
+	 * Return the symbols identified by the given name in the current and all
+	 * ancestral scopes. The search starts in the current scope, returning all
+	 * matches found in order of occurrence.
+	 */
+	public <V> LinkedList<Symbol<V>> resolveAll(String name) {
+		LinkedList<Symbol<V>> symbols = new LinkedList<>();
+		for (Scope scope : scopes) {
+			Symbol<V> symbol = scope.get(name);
+			if (symbol != null) symbols.add(symbol);
+		}
+		return symbols;
+	}
+
+	/** Pushes a new scope onto the symbol table scope stack. */
 	public Scope pushScope() {
-		Scope enclosingScope = scopeStack.peek();
-		Scope scope = new Scope(ScopeType.LOCAL, nextGenId(), enclosingScope);
-		scopeStack.push(scope);
-		allScopes.add(scope);
+		Scope scope = new Scope(ScopeType.LOCAL, nextGen(), scopes.peek());
+		scopes.push(scope);
 		return scope;
 	}
 
+	/** Pops the current scope; will not remove the global scope. */
 	public void popScope() {
-		scopeStack.pop();
+		if (scopes.size() > 1) scopes.pop();
 	}
 
-	public int getScopeDepth() {
-		return scopeStack.size();
+	public void clear() {
+		while (scopes.size() > 1) {
+			Scope scope = scopes.pop();
+			scope.clear();
+		}
+		scopes.peek().clear();
+	}
+
+	public int scopeDepth() {
+		return scopes.size();
 	}
 
 	public Scope currentScope() {
-		if (scopeStack.size() > 0) return scopeStack.peek();
-
-		Log.info(this, "Unbalanced scope stack.");
-		return allScopes.get(0);
+		return scopes.peek();
 	}
 
-	public Scope getScope(int genId) {
-		for (Scope scope : scopeStack) {
-			if (scope.genId == genId) return scope;
+	public Scope getScope(long gen) {
+		for (Scope scope : scopes) {
+			if (scope.gen == gen) return scope;
 		}
 		return null;
 	}
 
-	public int getCurrentGen() {
-		return genId;
+	public long getGen() {
+		return currentScope().gen;
 	}
 
-	private int nextGenId() {
-		genId++;
-		return genId;
+	private long nextGen() {
+		return genCounter.incrementAndGet();
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (Scope scope : scopeStack.subList(0, scopeStack.size())) {
-			sb.append(scope.toString());
-		}
-		return sb.toString();
+		return scopes.toString();
 	}
 }

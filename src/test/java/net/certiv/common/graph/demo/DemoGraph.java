@@ -1,9 +1,12 @@
-package net.certiv.common.graph;
+package net.certiv.common.graph.demo;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.certiv.common.graph.Graph;
+import net.certiv.common.graph.Printer;
+import net.certiv.common.graph.Walker;
 import net.certiv.common.stores.Counter;
 
 public class DemoGraph extends Graph<DemoNode, DemoEdge> {

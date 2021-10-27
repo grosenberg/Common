@@ -3,17 +3,20 @@ package net.certiv.common.graph;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
+import net.certiv.common.dot.Dictionary.ON;
+import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
+import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.HashList;
 import net.certiv.common.stores.HashMultiset;
 
-public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
+public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
-	private static final AtomicLong Factor = new AtomicLong();
+	private static final Counter Factor = new Counter();
 	public final long _nid;
 
 	/** Inbound Edge->Node map: key=in edge; value=distal node. */
@@ -26,10 +29,13 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 	/** Node:Edges index: key=distal node; value={@code out} connecting edge set. */
 	protected final HashMultiset<N, E> outNodes = new HashMultiset<>();
 
-	private LinkedHashMap<Object, Object> props;
-
 	public Node() {
 		_nid = Factor.getAndIncrement();
+	}
+
+	public Node(Map<Object, Object> props) {
+		this();
+		putProperties(props);
 	}
 
 	public String name() {
@@ -250,52 +256,32 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> {
 		return false;
 	}
 
-	protected void clear() {
+	/**
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
+	 * containing this properties store. Creates and adds an {@code ON#NODES}
+	 * default category {@code DotStyle} store, if a store does not exist.
+	 *
+	 * @return the dot style store
+	 */
+	public DotStyle getDotStyle() {
+		return getDotStyle(ON.NODES);
+	}
+
+	/**
+	 * Defines a custom style for this node. The default implementation does
+	 * nothing.
+	 */
+	public DotStyle defineStyle() {
+		return getDotStyle();
+	}
+
+	@Override
+	public void clear() {
 		inEdges.clear();
 		inNodes.clear();
 		outEdges.clear();
 		outNodes.clear();
-	}
-
-	/**
-	 * Adds an arbitrary key/value "property" to this edge. If value is
-	 * {@code null}, the property will be removed.
-	 *
-	 * @param key the property key
-	 * @param value the new property value
-	 * @return the previous property value associated with key, or {@code null} if
-	 *             there was no mapping for the key
-	 */
-	public final Object putProperty(Object key, Object value) {
-		if (props == null) {
-			props = new LinkedHashMap<>();
-		}
-		if (value == null) return props.remove(key);
-		return props.put(key, value);
-	}
-
-	/**
-	 * Returns the value of the property with the specified key. Only properties
-	 * added with putProperty will return a non-null value.
-	 *
-	 * @param key the property key
-	 * @return the property value associated with key, or {@code null} if there was
-	 *             no mapping for the key
-	 */
-	public final Object getProperty(Object key) {
-		if (props == null) return null;
-		return props.get(key);
-	}
-
-	/**
-	 * Returns {@code true} if a property value is associated with the given key.
-	 *
-	 * @param key the property key
-	 * @return {@code true} if a property value is associated with key
-	 */
-	public final boolean hasProperty(Object key) {
-		if (props == null) return false;
-		return props.containsKey(key);
+		super.clear();
 	}
 
 	@Override

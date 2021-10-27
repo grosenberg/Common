@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +34,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
+
+import net.certiv.common.log.Log;
 
 public final class FsUtil {
 
@@ -64,6 +67,35 @@ public final class FsUtil {
 	/** Replaces each dot with a forward slash. */
 	public static String slashify(String name) {
 		return name.replace(Strings.DOT, Strings.SLASH);
+	}
+
+	/**
+	 * Returns a {@code URI} identifying the container of the given class.
+	 * <p>
+	 * For a class file located on the filesystem, returns the URI of the parent
+	 * directory.
+	 * <p>
+	 * For a class file located within a jar, returns the the URI of the jar file.
+	 */
+	public static URI locate(Class<?> cls) {
+		if (cls != null) {
+			try {
+				URI uri = cls.getProtectionDomain().getCodeSource().getLocation().toURI();
+				if (uri != null) {
+					if (uri.getScheme().equalsIgnoreCase("file")) return uri;
+					if (uri.getScheme().equalsIgnoreCase("rsrc")) return null;
+				}
+
+				uri = cls.getResource(cls.getSimpleName() + ClassUtil.CLASS).toURI();
+				if (uri.getScheme().equalsIgnoreCase("jar")) {
+					return Paths.get(uri.getPath()).toUri();
+				}
+
+			} catch (Exception e) {
+				Log.error(ClassUtil.class, "Error identifying base URI for %s.", cls.getName());
+			}
+		}
+		return null;
 	}
 
 	/**

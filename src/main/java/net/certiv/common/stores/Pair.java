@@ -24,11 +24,11 @@ public class Pair<L, R> {
 		return right;
 	}
 
-	public L getKey() {
+	public L key() {
 		return left;
 	}
 
-	public R getValue() {
+	public R value() {
 		return right;
 	}
 
@@ -48,10 +48,10 @@ public class Pair<L, R> {
 
 	@Override
 	public String toString() {
-		return "(" + left + ',' + right + ')';
+		return String.format("[%s, %s]", left, right);
 	}
 
-	public String toString(final String format) {
-		return String.format(format, left, right);
+	public String toString(final String fmt) {
+		return String.format(fmt, left, right);
 	}
 }

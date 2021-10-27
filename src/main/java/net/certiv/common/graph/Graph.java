@@ -1,21 +1,31 @@
 package net.certiv.common.graph;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import net.certiv.common.dot.Dictionary.ON;
+import net.certiv.common.dot.DotAttr;
+import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.util.Assert;
 
-public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
+public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
 	/** Individual roots. */
 	protected final Set<N> roots = new LinkedHashSet<>();
 	/** All nodes. */
 	protected final Set<N> nodes = new LinkedHashSet<>();
 
-	private LinkedHashMap<Object, Object> props;
+	public Graph() {
+		super();
+	}
+
+	public Graph(Map<Object, Object> props) {
+		super();
+		putProperties(props);
+	}
 
 	/**
 	 * Descriptive name of this {@code Graph}. Defaults to the simple class name of
@@ -29,7 +39,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Add the given node; returns {@code true} if not already present. Handles root
 	 * adjustment.
 	 */
-	protected boolean addNode(N node) {
+	public boolean addNode(N node) {
 		Assert.notNull(node);
 		if (node.isRoot()) {
 			roots.add(node);
@@ -43,7 +53,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Removes the given node including all connecting edges. Returns {@code true}
 	 * if the node was present in the graph. Handles root adjustment.
 	 */
-	protected boolean removeNode(N node) {
+	public boolean removeNode(N node) {
 		Assert.notNull(node);
 
 		boolean present = nodes.contains(node);
@@ -61,9 +71,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * edge nodes to the edge and adds the given edge to this graph, adjusting the
 	 * root set accordingly.
 	 *
-	 * @returns {@code true} if not already present.
+	 * @returns {@code true} if the node at either end was not already present.
 	 */
-	protected boolean addEdge(E edge) {
+	public boolean addEdge(E edge) {
 		Assert.notNull(edge);
 		edge.beg.add(edge, Sense.OUT);
 		edge.end.add(edge, Sense.IN);
@@ -72,8 +82,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		return ok;
 	}
 
-	/** Removes the edge between the given nodes. Handles root adjustment. */
-	protected boolean removeEdge(E edge) {
+	/** Removes the given edge. Handles root adjustment. */
+	public boolean removeEdge(E edge) {
 		Assert.notNull(edge);
 		boolean ok = edge.remove();
 		if (edge.beg.isRoot()) roots.add(edge.beg);
@@ -81,60 +91,67 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 		return ok;
 	}
 
+	/** Removes the edges between the given nodes. Handles root adjustment. */
+	public void removeEdges(N src, N dst) {
+		src.to(dst).forEach(e -> removeEdge(e));
+	}
+
+	/** Returns {@code true} if any edge exists between the given nodes. */
+	public boolean hasEdge(N src, N dst) {
+		return !src.to(dst).isEmpty();
+	}
+
 	/** Returns the set of source to destination edges. */
 	public Set<E> findEdges(N src, N dst) {
 		return src.to(dst);
 	}
 
-	public Set<Node<?, ?>> getNodes() {
+	public Set<N> getNodes() {
 		return new LinkedHashSet<>(nodes);
 	}
 
-	protected void clear() {
+	@Override
+	public void clear() {
 		nodes.forEach(n -> n.edges().forEach(e -> e.remove()));
 		roots.clear();
 		nodes.clear();
+		super.clear();
 	}
 
 	/**
-	 * Adds an arbitrary key/value "property" to this graph. If value is
-	 * {@code null}, the property will be removed.
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
+	 * containing this properties store. Creates and adds an {@code ON#GRAPHS}
+	 * default category {@code DotStyle} store, if a store does not exist.
 	 *
-	 * @param key the property key
-	 * @param value the new property value
-	 * @return the previous property value associated with key, or {@code null} if
-	 *             there was no mapping for the key
+	 * @return the dot style store
 	 */
-	public final Object putProperty(Object key, Object value) {
-		if (props == null) {
-			props = new LinkedHashMap<>();
-		}
-		if (value == null) return props.remove(key);
-		return props.put(key, value);
+	public DotStyle getDotStyle() {
+		return getDotStyle(ON.GRAPHS);
 	}
 
 	/**
-	 * Returns the value of the property with the specified key. Only properties
-	 * added with putProperty will return a non-null value.
-	 *
-	 * @param key the property key
-	 * @return the property value associated with key, or {@code null} if there was
-	 *             no mapping for the key
+	 * Defines a custom style for this graph. The default implementation provides
+	 * some sane defaults, but does not overwrite existing style values.
 	 */
-	public final Object getProperty(Object key) {
-		if (props == null) return null;
-		return props.get(key);
-	}
+	public DotStyle defineStyle() {
+		DotStyle ds = getDotStyle();
+		ds.putIfAbsent(DotAttr.LABEL, ON.GRAPHS, name());
+		ds.putIfAbsent(DotAttr.FONTCOLOR, ON.GRAPHS, DotStyle.BLACK);
+		ds.putIfAbsent(DotAttr.FONTNAME, ON.GRAPHS, DotStyle.FONTS);
+		ds.putIfAbsent(DotAttr.FONTSIZE, ON.GRAPHS, 24);
 
-	/**
-	 * Returns {@code true} if a property value is associated with the given key.
-	 *
-	 * @param key the property key
-	 * @return {@code true} if a property value is associated with key
-	 */
-	public final boolean hasProperty(Object key) {
-		if (props == null) return false;
-		return props.containsKey(key);
+		ds.putIfAbsent(DotAttr.FONTCOLOR, ON.CLUSTERS, DotStyle.BLACK);
+		ds.putIfAbsent(DotAttr.FONTNAME, ON.CLUSTERS, DotStyle.FONTS);
+		ds.putIfAbsent(DotAttr.FONTSIZE, ON.CLUSTERS, 18);
+
+		ds.putIfAbsent(DotAttr.FONTCOLOR, ON.NODES, DotStyle.BLACK);
+		ds.putIfAbsent(DotAttr.FONTNAME, ON.NODES, DotStyle.FONTS);
+		ds.putIfAbsent(DotAttr.FONTSIZE, ON.NODES, 12);
+
+		ds.putIfAbsent(DotAttr.FONTCOLOR, ON.EDGES, DotStyle.BLACK);
+		ds.putIfAbsent(DotAttr.FONTNAME, ON.EDGES, DotStyle.FONTS);
+		ds.putIfAbsent(DotAttr.FONTSIZE, ON.EDGES, 10);
+		return ds;
 	}
 
 	@Override

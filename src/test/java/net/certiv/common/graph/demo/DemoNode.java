@@ -1,8 +1,9 @@
-package net.certiv.common.graph;
+package net.certiv.common.graph.demo;
 
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.HashList;
 
