@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.apache.commons.text.TextStringBuilder;
 
@@ -21,8 +20,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	// literal indent spacing used for pretty-printing
 	private static final String DENT = "  ";
-	// fixer for literal dot names
-	private static final Pattern FX = Pattern.compile("[. -]");
 
 	private static final String GRAPH_BEG = "digraph %s {";
 	private static final String GRAPH_END = "}";
@@ -35,7 +32,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	/** Pretty print out a whole graph. */
 	public String dump(final Graph<N, E> graph) {
-		return dump(graph, graph.roots);
+		return dump(graph, graph.getRoots());
 	}
 
 	/** Pretty print out a graph beginning with the given nodes. */
@@ -113,50 +110,50 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	// --------------------------------
 
 	/**
-	 * Produce a digraph representation of the given graph.
+	 * Render a digraph representation of the given graph.
 	 *
 	 * @param graph the source graph
 	 * @return the digraph
 	 */
-	public String toDot(final Graph<N, E> graph) {
-		return toDot(graph, new DotVisitor<>());
+	public String render(final Graph<N, E> graph) {
+		return render(graph, new DotVisitor<>());
 	}
 
 	/**
-	 * Produce a digraph representation of the given graph using the given node
-	 * visitor. Typically used by extending {@code DotVisitor} to constrain node
-	 * selection.
+	 * Render a digraph representation of the given graph using the given node
+	 * visitor. Extend {@code DotVisitor} to, <i>e.g.</i>, constrain node selection.
 	 *
 	 * @param graph the source graph
 	 * @param visitor the graph node visitor
 	 * @return a digraph
 	 */
-	public String toDot(Graph<N, E> graph, DotVisitor<N, E> visitor) {
+	public String render(Graph<N, E> graph, DotVisitor<N, E> visitor) {
 		TextStringBuilder sb = new TextStringBuilder();
 
 		sb.appendln(GRAPH_BEG, fx(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
-		switch (graph.roots.size()) {
+		Set<N> roots = graph.getRoots();
+		switch (roots.size()) {
 			case 0:
 				break;
 
 			case 1: {
-				N root = graph.roots.iterator().next();
+				N root = roots.iterator().next();
 				sb.append(nodeProperties(graph, root, dent(1)));
 				sb.append(edgeProperties(graph, root, dent(1)));
 				sb.appendNewLine();
-				sb.append(toDot(visitor, root, dent(2)));
+				sb.append(render(visitor, root, dent(2)));
 			}
 				break;
 
 			default:
-				for (N root : graph.roots) {
-					if (!root.outEdges.isEmpty()) {
+				for (N root : roots) {
+					if (!root.edges(Sense.OUT).isEmpty()) {
 						sb.appendNewLine();
 						sb.appendln(SUBGRAPH_BEG, dent(1), fx(root.name()));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
-						sb.append(toDot(visitor, root, dent(3)));
+						sb.append(render(visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
 					}
 				}
@@ -166,7 +163,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb.toString();
 	}
 
-	private String toDot(DotVisitor<N, E> visitor, N beg, String dent) {
+	private String render(DotVisitor<N, E> visitor, N beg, String dent) {
 		Walker<N, E> walker = new Walker<>();
 		visitor.setup(dent);
 		walker.descend(visitor, beg);
@@ -265,9 +262,18 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 	}
 
-	/** Fix a name to be 'dot' compliant. */
+	/** Sanitize a name to be 'dot' compliant. */
 	private static String fx(String name) {
-		return FX.matcher(name).replaceAll(Strings.LOWDASH);
+		StringBuilder sb = new StringBuilder(name);
+		for (int idx = 0, len = sb.length(); idx < len; idx++) {
+			char ch = sb.charAt(idx);
+			if (ch >= '0' && ch <= '9') continue;
+			if (ch >= 'A' && ch <= 'Z') continue;
+			if (ch >= 'a' && ch <= 'z') continue;
+			if (ch == '_') continue;
+			sb.setCharAt(idx, '_');
+		}
+		return sb.toString();
 	}
 
 	private static String dent(int cnt) {

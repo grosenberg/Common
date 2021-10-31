@@ -16,8 +16,8 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 
 	private final Counter IdFactory = new Counter();
 
-	/** Nodes index: key=ident; value=node. */
-	public final Map<Long, DemoNode> index = new LinkedHashMap<>();
+	/** Unique node name index: key=name; value=node. */
+	public final Map<String, DemoNode> index = new LinkedHashMap<>();
 
 	public final String name;
 	public final Long id;
@@ -31,23 +31,27 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 		return IdFactory.getAndIncrement();
 	}
 
+	@Override
 	public Set<DemoNode> getRoots() {
-		return roots;
+		return super.getRoots();
 	}
 
 	@Override
 	public String name() {
-		return String.format("%s.%s", name, id);
+		return String.format("%s(%d)", name, id);
 	}
 
-	public DemoNode createNode(String name, Long id) {
-		DemoNode node = index.get(id);
+	public DemoNode createNode(String name) {
+		DemoNode node = index.get(name);
 		if (node != null) return node;
 
-		node = new DemoNode(this, name, id);
-		index.put(id, node);
-		addNode(node);
+		node = new DemoNode(this, name, nextId());
+		index.put(name, node);
 		return node;
+	}
+
+	public DemoEdge createEdge(String parent, String child) {
+		return createEdge(createNode(parent), createNode(child));
 	}
 
 	public DemoEdge createEdge(DemoNode parent, DemoNode child) {
@@ -61,7 +65,7 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 	}
 
 	public String dot() {
-		return PRINTER.toDot(this);
+		return PRINTER.render(this);
 	}
 
 	@Override

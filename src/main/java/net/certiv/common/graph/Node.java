@@ -20,22 +20,22 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public final long _nid;
 
 	/** Inbound Edge->Node map: key=in edge; value=distal node. */
-	protected final LinkedHashMap<E, N> inEdges = new LinkedHashMap<>();
+	private final LinkedHashMap<E, N> inEdges = new LinkedHashMap<>();
 	/** Outbound Edge->Node map: key=out edge; value=distal node. */
-	protected final LinkedHashMap<E, N> outEdges = new LinkedHashMap<>();
+	private final LinkedHashMap<E, N> outEdges = new LinkedHashMap<>();
 
 	/** Node:Edges index: key=distal node; value={@code in} connecting edge set. */
-	protected final HashMultiset<N, E> inNodes = new HashMultiset<>();
+	private final HashMultiset<N, E> inNodes = new HashMultiset<>();
 	/** Node:Edges index: key=distal node; value={@code out} connecting edge set. */
-	protected final HashMultiset<N, E> outNodes = new HashMultiset<>();
+	private final HashMultiset<N, E> outNodes = new HashMultiset<>();
 
-	public Node() {
+	protected Node() {
 		_nid = Factor.getAndIncrement();
 	}
 
-	public Node(Map<Object, Object> props) {
+	protected Node(Map<Object, Object> props) {
 		this();
-		putProperties(props);
+		if (props != null) putProperties(props);
 	}
 
 	public String name() {
@@ -137,6 +137,17 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		Set<E> edges = inNodes.get(beg);
 		if (edges != null) results.addAll(edges);
 		return results;
+	}
+
+	/**
+	 * Returns {@code true} if the edge count, conditionally including self-cyclic
+	 * edges, is zero.
+	 *
+	 * @param selfs {@code true} to include self connected edges
+	 * @return {@code true} on a zero edge count
+	 */
+	public boolean hasEdges(boolean selfs) {
+		return edgeCount(selfs) == 0;
 	}
 
 	/** Returns the set of connected edges. */
@@ -299,6 +310,6 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		return String.format("%s[%s]", name(), isRoot() ? "root" : "child");
+		return String.format("%s%s", name(), isRoot() ? "<root>" : "");
 	}
 }

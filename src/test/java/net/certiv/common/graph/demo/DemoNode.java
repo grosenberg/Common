@@ -25,7 +25,7 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 
 	@Override
 	public String name() {
-		return String.format("%s.%s", name, id);
+		return String.format("%s(%d)", name, id);
 	}
 
 	@Override
@@ -55,10 +55,5 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 		if (!(obj instanceof DemoNode)) return false;
 		DemoNode other = (DemoNode) obj;
 		return Objects.equals(id, other.id);
-	}
-
-	@Override
-	public String toString() {
-		return id.toString();
 	}
 }

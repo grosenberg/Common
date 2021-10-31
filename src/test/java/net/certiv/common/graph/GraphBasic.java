@@ -5,25 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.graph.demo.DemoGraph;
-import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphTest {
+class GraphBasic {
 
 	@Test
 	void testGraph() {
 		DemoGraph graph = new DemoGraph("Test");
 
-		DemoNode a = graph.createNode("A", graph.nextId());
-		DemoNode b = graph.createNode("B", graph.nextId());
-		DemoNode c = graph.createNode("C", graph.nextId());
-		DemoNode d = graph.createNode("D", graph.nextId());
-		DemoNode e = graph.createNode("E", graph.nextId());
-
-		graph.createEdge(a, b);
-		graph.createEdge(b, c);
-		graph.createEdge(b, d);
-		graph.createEdge(d, e);
+		graph.createEdge("A", "B");
+		graph.createEdge("B", "C");
+		graph.createEdge("C", "D");
+		graph.createEdge("D", "E");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
@@ -39,15 +32,10 @@ class GraphTest {
 	void testMultiRoots() {
 		DemoGraph graph = new DemoGraph("Two-root Test");
 
-		DemoNode a = graph.createNode("A", graph.nextId());
-		DemoNode b = graph.createNode("B", graph.nextId());
-		DemoNode c = graph.createNode("C", graph.nextId());
-		DemoNode d = graph.createNode("D", graph.nextId());
-		DemoNode e = graph.createNode("E", graph.nextId());
-
-		graph.createEdge(a, b);
-		graph.createEdge(b, c);
-		graph.createEdge(d, e);
+		graph.createEdge("A", "B");
+		graph.createEdge("B", "C");
+		graph.createEdge("C", "D");
+		graph.createEdge("D", "E");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
@@ -63,20 +51,13 @@ class GraphTest {
 	void testCycles() {
 		DemoGraph graph = new DemoGraph("Cycle Test");
 
-		DemoNode a = graph.createNode("A", graph.nextId());
-		DemoNode b = graph.createNode("B", graph.nextId());
-		DemoNode c = graph.createNode("C", graph.nextId());
-		DemoNode d = graph.createNode("D", graph.nextId());
-		DemoNode e = graph.createNode("E", graph.nextId());
-		DemoNode f = graph.createNode("F", graph.nextId());
+		graph.createEdge("A", "B");
+		graph.createEdge("B", "C");
+		graph.createEdge("C", "D");
+		graph.createEdge("D", "E");
 
-		graph.createEdge(a, b);
-		graph.createEdge(b, c);
-		graph.createEdge(c, d);
-		graph.createEdge(d, e);
-
-		graph.createEdge(d, f);
-		graph.createEdge(f, b);
+		graph.createEdge("D", "F");
+		graph.createEdge("F", "B");
 
 		String dump = graph.dump();
 		String dot = graph.dot();

@@ -16,11 +16,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.certiv.common.util.Strings;
+
 /**
  * The color information contained by this class has been taken from the
  * graphviz website: http://www.graphviz.org/content/color-names
- *
- * @author miklossy
  */
 public class DotColors {
 
@@ -38,7 +38,7 @@ public class DotColors {
 	}
 
 	public static String[] getColorNames() {
-		return getColorNames("").toArray(new String[0]);
+		return getColorNames(Strings.EMPTY).toArray(new String[0]);
 	}
 
 	/**

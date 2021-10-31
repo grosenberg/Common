@@ -11,7 +11,7 @@ import net.certiv.common.graph.demo.DemoGraph;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphTestDot {
+class GraphDot {
 
 	@Test
 	void testStyles() {
@@ -22,20 +22,22 @@ class GraphTestDot {
 		ds.put(DotAttr.FONTCOLOR, "teal");
 		ds.put(DotAttr.FONTSIZE, 32);
 
-		DemoNode a = graph.createNode("A", graph.nextId());
+		DemoNode a = graph.createNode("A");
 		ds = a.getDotStyle();
 		ds.put(DotAttr.LABEL, "Node " + a.name());
 		ds.put(DotAttr.COLOR, "blue");
-		ds.put(DotAttr.FILLCOLOR, "lightgrey");
+		ds.put(DotAttr.FILLCOLOR, "lightblue");
+		ds.put(DotAttr.STYLE, "filled");
 
-		DemoNode b = graph.createNode("B", graph.nextId());
+		DemoNode b = graph.createNode("B");
 		ds = b.getDotStyle();
 		ds.put(DotAttr.LABEL, "Node " + b.name());
 		ds.put(DotAttr.COLOR, "red");
-		ds.put(DotAttr.FILLCOLOR, "white");
-		ds.put(DotAttr.SHAPE, "circle");
+		ds.put(DotAttr.FILLCOLOR, "teal");
+		ds.put(DotAttr.SHAPE, "rectangle");
+		ds.put(DotAttr.STYLE, "filled, rounded");
 
-		DemoNode c = graph.createNode("C", graph.nextId());
+		DemoNode c = graph.createNode("C");
 
 		DemoEdge ab = graph.createEdge(a, b);
 		ds = ab.getDotStyle();
@@ -52,7 +54,7 @@ class GraphTestDot {
 		ds.put(DotAttr.COLOR, "maroon");
 		ds.put(DotAttr.FONTSIZE, "11");
 		ds.put(DotAttr.FONTCOLOR, "navy");
-		ds.put(DotAttr.STYLE, "dotted");
+		ds.put(DotAttr.STYLE, "dashed");
 
 		String dot = graph.dot();
 

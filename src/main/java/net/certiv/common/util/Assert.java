@@ -186,8 +186,8 @@ public final class Assert {
 
 	/**
 	 * Asserts that the given object is not {@code null} and, if determinable, is
-	 * not {@code empty}. On failure, some kind of unchecked exception is thrown.
-	 * The given message is included in that exception, to aid debugging.
+	 * not {@code empty}. On failure, an unchecked {@code AssertionFailedException}
+	 * is thrown with the given message.
 	 *
 	 * @param object the value to test
 	 * @param msg the message to include in the exception
@@ -198,20 +198,27 @@ public final class Assert {
 			Object[] arr = (Object[]) value;
 			if (arr.length == 0) throw exception(EMPTY_ARG, msg);
 			Arrays.asList(arr).forEach(obj -> notEmpty(obj, msg));
-		}
-		if (value instanceof Collection<?>) {
+
+		} else if (value instanceof Collection<?>) {
 			Collection<?> coll = (Collection<?>) value;
 			if (coll.isEmpty()) throw exception(EMPTY_ARG, msg);
 			coll.forEach(obj -> notEmpty(obj, msg));
+
+		} else if (value instanceof Iterable<?>) {
+			Iterable<?> itr = (Iterable<?>) value;
+			if (!itr.iterator().hasNext()) throw exception(EMPTY_ARG, msg);
+			itr.forEach(obj -> notEmpty(obj, msg));
+
+		} else if (value.toString().isEmpty()) {
+			throw exception(EMPTY_ARG, msg);
 		}
-		if (value.toString().isEmpty()) throw exception(EMPTY_ARG, msg);
 	}
 
-	private static AssertionFailedException exception(String lead, String text) {
-		String msg = lead;
-		if (text != null && !text.isEmpty()) {
-			msg = String.format(MSG, lead, text);
+	private static AssertionFailedException exception(String reason, String msg) {
+		String detail = reason;
+		if (msg != null && !msg.isBlank()) {
+			detail = String.format(MSG, reason, msg);
 		}
-		return new AssertionFailedException(msg);
+		return new AssertionFailedException(detail);
 	}
 }

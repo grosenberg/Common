@@ -3,6 +3,7 @@ package net.certiv.common.graph;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
@@ -26,6 +27,10 @@ public class Props {
 			putProperty(DotStyle.PropName, ds);
 		}
 		return ds;
+	}
+
+	protected void clearDotStyle() {
+		if (props != null) putProperty(DotStyle.PropName, null);
 	}
 
 	/**
@@ -84,5 +89,23 @@ public class Props {
 			props.clear();
 			props = null;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(props);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof Props)) return false;
+		Props other = (Props) obj;
+		return Objects.equals(props, other.props);
+	}
+
+	@Override
+	public String toString() {
+		return props.toString();
 	}
 }
