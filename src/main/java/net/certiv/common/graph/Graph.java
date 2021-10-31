@@ -36,6 +36,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return getClass().getSimpleName();
 	}
 
+	/** Returns {@code true} if the graph contains the given node. */
+	public boolean hasNode(N node) {
+		return nodes.contains(node);
+	}
+
 	/** Returns a copy of the current graph node set. */
 	public Set<N> getNodes() {
 		return new LinkedHashSet<>(nodes);
