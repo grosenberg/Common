@@ -57,13 +57,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * : given an {@code E} edge defined with respect to two {@code N} nodes, the
-	 * call to {@link #addEdge()} connects the edge nodes to the edge and adds the
-	 * given edge including terminal nodes to this graph, adjusting the root node
-	 * set accordingly.
+	 * Add the given edge to the graph. This is the primary graph tree constuction
+	 * entry point, since discretely constucting a node or edge does not add it to
+	 * the graph.
 	 * <p>
-	 * Primary graph tree constuction entry point: constucting a node or edge does
-	 * not add it to the graph.
+	 * Internally performs all operations necessar to connect the edge terminal
+	 * nodes to the edge and to incorporate the edge and terminal nodes into the
+	 * graph.
 	 *
 	 * @param edge a graph edge
 	 * @returns {@code true} if either terminal node was not already present in the
