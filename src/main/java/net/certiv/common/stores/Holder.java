@@ -21,8 +21,8 @@ public class Holder<T> {
 	}
 
 	/**
-	 * Returns {@code true} if the contained {@code value} is {@code null} or, if an array
-	 * or standard collection, is empty.
+	 * Returns {@code true} if the contained {@code value} is {@code null} or, if an
+	 * array or standard collection, is empty.
 	 *
 	 * @return
 	 */
@@ -31,5 +31,10 @@ public class Holder<T> {
 		if (value.getClass().isArray()) return ((Object[]) value).length == 0;
 		if (value instanceof Collection) return ((Collection<?>) value).isEmpty();
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return value.toString();
 	}
 }
