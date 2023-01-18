@@ -1,24 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
 	<version>0.6.3</version>
-
 	<name>net.certiv :: certiv-util</name>
 	<description>General utilities including logging</description>
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<jdk.version>11</jdk.version>
 	</properties>
-
 	<dependencies>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -29,7 +23,6 @@
 			<artifactId>commons-text</artifactId>
 			<version>1.9</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -40,12 +33,15 @@
 			<artifactId>log4j-core</artifactId>
 			<version>2.14.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>io.github.java-diff-utils</groupId>
+			<artifactId>java-diff-utils</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
-
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
@@ -53,8 +49,8 @@
 					<release>${jdk.version}</release>
 				</configuration>
 			</plugin>
-
-			<plugin> <!-- create src jar -->
+			<plugin>
+				<!-- create src jar -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.0.1</version>
@@ -66,8 +62,8 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin> <!-- create javadoc jar -->
+			<plugin>
+				<!-- create javadoc jar -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.10.4</version>
@@ -83,7 +79,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

@@ -137,7 +137,7 @@ public class DotStyle {
 	public String titledAttributes(ON category, String dent) {
 		String attrs = inlineAttributes(category);
 		if (attrs.isEmpty()) return attrs;
-		return String.format("%s%s%s\n", dent, category.title(), attrs);
+		return String.format("%s%s%s" + Strings.EOL, dent, category.title(), attrs);
 	}
 
 	/** Returns an untitled style string, without newline. */

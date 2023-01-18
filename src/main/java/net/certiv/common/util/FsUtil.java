@@ -412,7 +412,7 @@ public final class FsUtil {
 		try {
 			return loadResourceString(cls, name);
 		} catch (IOException e) {
-			return null;
+			return "";
 		}
 	}
 
@@ -432,13 +432,13 @@ public final class FsUtil {
 		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
 			return rs.readAllBytes();
 
-		} catch (NullPointerException e) {
+		} catch (NullPointerException | SecurityException e) {
 			String pkg = slashify(cls.getPackageName());
-			Path fqname = Path.of(pkg, name);
-			try (InputStream rs = cls.getClassLoader().getResourceAsStream(fqname.toString())) {
+			String res = String.join(Strings.SLASH, pkg, name);
+			try (InputStream rs = cls.getClassLoader().getResourceAsStream(res)) {
 				return rs.readAllBytes();
 
-			} catch (NullPointerException ex) {
+			} catch (NullPointerException | SecurityException ex) {
 				throw new IOException(ex);
 			}
 		}

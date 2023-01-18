@@ -1,10 +1,10 @@
 package net.certiv.common.graph;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.text.TextStringBuilder;
 
@@ -56,6 +56,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	private class Dumper extends NodeVisitor<N> {
 
 		private TextStringBuilder sb;
+
 		// key=node; value=node name beg/end column
 		private Map<N, Pair<Integer, Integer>> levels = new HashMap<>();
 		private N last;
@@ -130,7 +131,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	public String render(Graph<N, E> graph, DotVisitor<N, E> visitor) {
 		TextStringBuilder sb = new TextStringBuilder();
 
-		sb.appendln(GRAPH_BEG, fx(graph.name()));
+		sb.appendln(GRAPH_BEG, fix(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
 		Set<N> roots = graph.getRoots();
@@ -151,7 +152,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				for (N root : roots) {
 					if (!root.edges(Sense.OUT).isEmpty()) {
 						sb.appendNewLine();
-						sb.appendln(SUBGRAPH_BEG, dent(1), fx(root.name()));
+						sb.appendln(SUBGRAPH_BEG, dent(1), fix(root.name()));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
 						sb.append(render(visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
@@ -183,7 +184,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	// TODO: merge graph & root attributes
 	private TextStringBuilder clusterProperties(Graph<N, E> graph, N root, String dent) {
 		TextStringBuilder sb = new TextStringBuilder();
 
@@ -194,7 +194,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	// TODO: merge graph & root attributes
 	private TextStringBuilder nodeProperties(Graph<N, E> graph, N root, String dent) {
 		TextStringBuilder sb = new TextStringBuilder();
 
@@ -203,7 +202,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	// TODO: merge graph & root attributes
 	private TextStringBuilder edgeProperties(Graph<N, E> graph, N root, String dent) {
 		TextStringBuilder sb = new TextStringBuilder();
 
@@ -215,7 +213,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>> extends NodeVisitor<N> {
 
 		// value=formatted node definition string
-		private List<String> nodes = new LinkedList<>();
+		private Set<String> nodes = new LinkedHashSet<>();
 		private TextStringBuilder edges = new TextStringBuilder();
 
 		private String dent;
@@ -230,7 +228,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 			edges.clear();
 		}
 
-		public List<String> nodes() {
+		public Set<String> nodes() {
 			return nodes;
 		}
 
@@ -243,16 +241,16 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 			nodes.add(style(node));
 			if (parent != null) {
 				for (E edge : parent.to(node)) {
-					edges.appendln(EDGE, dent, fx(parent.name()), fx(node.name()), style(edge));
+					edges.appendln(EDGE, dent, fix(parent.name()), fix(node.name()), style(edge));
 				}
 			}
 			return true;
 		}
 
 		protected String style(N node) {
-			if (!node.hasProperty(DotStyle.PropName)) return fx(node.name());
+			if (!node.hasProperty(DotStyle.PropName)) return fix(node.name());
 			DotStyle ds = (DotStyle) node.getProperty(DotStyle.PropName);
-			return String.format(NODE, fx(node.name()), ds.inlineAttributes(ON.NODES));
+			return String.format(NODE, fix(node.name()), ds.inlineAttributes(ON.NODES));
 		}
 
 		protected String style(E edge) {
@@ -262,18 +260,26 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 	}
 
-	/** Sanitize a name to be 'dot' compliant. */
-	private static String fx(String name) {
-		StringBuilder sb = new StringBuilder(name);
-		for (int idx = 0, len = sb.length(); idx < len; idx++) {
-			char ch = sb.charAt(idx);
-			if (ch >= '0' && ch <= '9') continue;
-			if (ch >= 'A' && ch <= 'Z') continue;
-			if (ch >= 'a' && ch <= 'z') continue;
-			if (ch == '_') continue;
-			sb.setCharAt(idx, '_');
-		}
-		return sb.toString();
+	// private static String NM = "[0-9]+(?:\\.[0-9]+)*";
+
+	// simple DOT name
+	private static String ID = "[a-zA-Z\\0200-\\0377_](?:[a-zA-Z\\0200-\\0377_0-9])*";
+	private static Pattern P = Pattern.compile(ID);
+
+	// Sanitize a name to be 'dot' compliant.
+	// name -> name
+	// name1 -> name1
+	// name_1 -> name_1
+	// name 1 -> "name 1"
+	// name.1 -> "name.1"
+	// name(1) -> "name(1)"
+	private static String fix(String name) {
+		name = name.trim();
+
+		if (name.isEmpty()) return Strings.UNKNOWN;
+		if (P.matcher(name).matches()) return name;
+
+		return Strings.QUOTE + name + Strings.QUOTE;
 	}
 
 	private static String dent(int cnt) {

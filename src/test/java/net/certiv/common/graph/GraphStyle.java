@@ -11,7 +11,7 @@ import net.certiv.common.graph.demo.DemoGraph;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphDot {
+class GraphStyle {
 
 	@Test
 	void testStyles() {
@@ -58,7 +58,13 @@ class GraphDot {
 
 		String dot = graph.dot();
 
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot4.txt");
+		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dotStyle.txt");
+
+		// Patch<String> patch = DiffUtils.diff(dot, dottxt, null);
+		// for (AbstractDelta<String> delta : patch.getDeltas()) {
+		// System.out.println(delta);
+		// }
+
 		assertEquals(dot, dottxt);
 	}
 }

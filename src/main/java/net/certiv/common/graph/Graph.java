@@ -57,13 +57,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Add the given edge to the graph. This is the primary graph tree constuction
-	 * entry point, since discretely constucting a node or edge does not add it to
-	 * the graph.
+	 * Primary graph tree constuction entry point. Constructs the edge and adds the
+	 * given edge to the graph.
 	 * <p>
-	 * Internally performs all operations necessar to connect the edge terminal
-	 * nodes to the edge and to incorporate the edge and terminal nodes into the
-	 * graph.
+	 * Internally performs all operations necessary to create the edge terminal
+	 * nodes, if not prior existing, and to incorporate the edge and terminal nodes
+	 * into the graph.
+	 * <p>
+	 * Note: discretely constucting a node or edge does not add it to the graph.
 	 *
 	 * @param edge a graph edge
 	 * @returns {@code true} if either terminal node was not already present in the
@@ -177,14 +178,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Reterminate the given edge to connect between the given terminal nodes.
-	 * Removes the edge if retermination would create an impermissble cycle. The
-	 * prior edge terminal nodes are removed if retermination leaves them
-	 * unconnected in the graph.
+	 * Reterminate the given edge to newly connect between the given terminal nodes.
+	 * Conditionally removes the edge if retermination would create a single
+	 * terminal node cycle. The prior edge terminal nodes are removed if
+	 * retermination leaves them unconnected in the graph.
 	 *
-	 * @param edge a graph edge
+	 * @param edge an existing graph edge
 	 * @param beg the new begin node
-	 * @param end a new end node
+	 * @param end the new end node
 	 * @param cycles {@code true} to permit creation of single edge cycles
 	 * @return {@code true} if the edge was reterminated, or {@code false} if
 	 *             removed
@@ -192,7 +193,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	public boolean reterminate(E edge, N beg, N end, boolean cycles) {
 		Assert.notNull(edge, beg, end);
 
-		if (beg.equals(edge.end()) && !cycles) { // impermissble cycle
+		if (beg.equals(edge.end()) && !cycles) { // impermissble self cycle
 			removeEdge(edge);
 			return false;
 		}

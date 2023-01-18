@@ -15,7 +15,7 @@ class GraphBasic {
 
 		graph.createEdge("A", "B");
 		graph.createEdge("B", "C");
-		graph.createEdge("C", "D");
+		graph.createEdge("B", "D");
 		graph.createEdge("D", "E");
 
 		String dump = graph.dump();
@@ -34,7 +34,6 @@ class GraphBasic {
 
 		graph.createEdge("A", "B");
 		graph.createEdge("B", "C");
-		graph.createEdge("C", "D");
 		graph.createEdge("D", "E");
 
 		String dump = graph.dump();
