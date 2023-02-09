@@ -1,72 +1,84 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.6.3</version>
-	<name>net.certiv :: certiv-util</name>
-	<description>General utilities including logging</description>
+	<version>0.7.0</version>
+
+	<name>net.certiv :: common</name>
+	<description>Common utilities</description>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<jdk.version>11</jdk.version>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<comm-lang3.version>3.12.0</comm-lang3.version>
+		<comm-text.version>1.10.0</comm-text.version>
+		<log4j.version>2.19.0</log4j.version>
+		<diff.version>4.12</diff.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.11</version>
+			<version>${comm-lang3.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<version>1.9</version>
+			<version>${comm-text.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.14.0</version>
+			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.14.0</version>
+			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.java-diff-utils</groupId>
 			<artifactId>java-diff-utils</artifactId>
-			<version>4.12</version>
+			<version>${diff.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
+
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<release>${jdk.version}</release>
-				</configuration>
+				<version>3.10.1</version>
 			</plugin>
+			
 			<plugin>
 				<!-- create src jar -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<!-- create javadoc jar -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.4.1</version>
 				<configuration>
 					<javadocVersion>${jdk.version}</javadocVersion>
 					<failOnError>false</failOnError>
@@ -79,6 +91,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

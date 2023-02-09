@@ -814,12 +814,8 @@ public class Strings {
 	 * @return the concatenated lines
 	 */
 	public static String concatenate(String[] lines, String delimiter) {
-		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < lines.length; i++) {
-			if (i > 0) buffer.append(delimiter);
-			buffer.append(lines[i]);
-		}
-		return buffer.toString();
+		String buffer = String.join(delimiter, lines);
+		return buffer;
 	}
 
 	/**

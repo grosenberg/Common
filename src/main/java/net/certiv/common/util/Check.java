@@ -76,10 +76,46 @@ public final class Check {
 	}
 
 	/**
-	 * Checks that the given {@code arg} is not {@code null} and not {@code empty}.
+	 * Checks that the given {@code arg} is {@code null} or its string equivalent is
+	 * {@code empty}.
 	 *
 	 * @param arg the object to test
-	 * @return {@code true} if the arg object is not {@code empty}
+	 * @return {@code true} if the arg object is effectively {@code empty}
+	 */
+	public static boolean empty(Object arg) {
+		return arg == null || arg.toString().isEmpty();
+	}
+
+	/**
+	 * Checks that the given {@code arg} array is {@code null}, contains no
+	 * elements, or all elements are string equivalent to {@code empty}.
+	 *
+	 * @param arg the args array to test
+	 * @return {@code true} if the args array or contained elements are effectively
+	 *             {@code empty}
+	 */
+	public static boolean empty(Object... args) {
+		return args == null || args.length == 0 || Arrays.stream(args).allMatch(v -> empty(v));
+	}
+
+	/**
+	 * Checks that the given {@code arg} collection is {@code null}, contains no
+	 * elements, or all elements are string equivalent to {@code empty}.
+	 *
+	 * @param arg the args collection to test
+	 * @return {@code true} if the collection or contained elements are effectively
+	 *             {@code empty}
+	 */
+	public static boolean empty(Collection<?> args) {
+		return args == null || args.isEmpty() || args.stream().allMatch(v -> empty(v));
+	}
+
+	/**
+	 * Checks that the given {@code arg} is not {@code null} and its string
+	 * equivalent is not {@code empty}.
+	 *
+	 * @param arg the object to test
+	 * @return {@code true} if the arg object is effectively not {@code empty}
 	 */
 	public static boolean notEmpty(Object arg) {
 		return arg != null && !arg.toString().isEmpty();
@@ -90,8 +126,8 @@ public final class Check {
 	 * {@code empty}, and the individual elements are {@code notEmpty}.
 	 *
 	 * @param arg the args array to test
-	 * @return {@code true} if the args array and contained elements are not
-	 *             {@code empty}
+	 * @return {@code true} if the args array and contained elements are effectively
+	 *             not {@code empty}
 	 */
 	public static boolean notEmpty(Object... args) {
 		return args != null && args.length > 0 && Arrays.stream(args).allMatch(v -> notEmpty(v));

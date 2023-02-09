@@ -446,7 +446,11 @@ public final class FsUtil {
 
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {
-			sysTmp = new File(TmpDir);
+			if (!TmpDir.endsWith(File.separator)) {
+				sysTmp = new File(TmpDir + File.separator);
+			} else {
+				sysTmp = new File(TmpDir);
+			}
 			if (!sysTmp.exists()) sysTmp.mkdirs();
 		}
 		return sysTmp;
