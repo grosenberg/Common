@@ -45,11 +45,11 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Allocates the given text into an array where each entry corresponds to a
-	 * single visual width unit as defined by the given tabWidth. The last entry
-	 * will contain any text lenth excess.
+	 * Allocates the given text into an array where each entry corresponds to a single
+	 * visual width unit as defined by the given tabWidth. The last entry will contain any
+	 * text lenth excess.
 	 *
-	 * @param text the text to be allocated
+	 * @param text     the text to be allocated
 	 * @param tabWidth the defined visual unit with in spaces
 	 * @return
 	 */
@@ -145,21 +145,22 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Returns the indentation of the given line in indentation units. Odd spaces
-	 * are not counted. This method only analyzes the content of <code>line</code>
-	 * up to the first non-whitespace character.
+	 * Returns the indentation of the given line in indentation units. Odd spaces are not
+	 * counted. This method only analyzes the content of <code>line</code> up to the first
+	 * non-whitespace character.
 	 *
-	 * @param line the string to measure the indent of
-	 * @param tabWidth the width of one tab character in space equivalents
+	 * @param line        the string to measure the indent of
+	 * @param tabWidth    the width of one tab character in space equivalents
 	 * @param indentWidth the width of one indentation unit in space equivalents
 	 * @return the number of indentation units that line is indented by
 	 * @exception IllegalArgumentException if:
-	 *                <ul>
-	 *                <li>the given <code>indentWidth</code> is lower or equals to
-	 *                zero</li>
-	 *                <li>the given <code>tabWidth</code> is lower than zero</li>
-	 *                <li>the given <code>line</code> is null</li>
-	 *                </ul>
+	 *                                     <ul>
+	 *                                     <li>the given <code>indentWidth</code> is lower
+	 *                                     or equals to zero</li>
+	 *                                     <li>the given <code>tabWidth</code> is lower
+	 *                                     than zero</li>
+	 *                                     <li>the given <code>line</code> is null</li>
+	 *                                     </ul>
 	 */
 	public static int measureIndentUnits(CharSequence line, int tabWidth, int indentWidth) {
 		if (indentWidth <= 0 || tabWidth < 0 || line == null) {
@@ -173,19 +174,20 @@ public class TxtUtil {
 	/**
 	 * Returns the indentation of the given line in space equivalents.
 	 * <p>
-	 * Tab characters are counted using the given <code>tabWidth</code> and every
-	 * other indent character as one. This method analyzes the content of
-	 * <code>line</code> up to the first non-whitespace character.
+	 * Tab characters are counted using the given <code>tabWidth</code> and every other
+	 * indent character as one. This method analyzes the content of <code>line</code> up
+	 * to the first non-whitespace character.
 	 * </p>
 	 *
-	 * @param line the string to measure the indent of
+	 * @param line     the string to measure the indent of
 	 * @param tabWidth the width of one tab in space equivalents
 	 * @return the measured indent width in space equivalents
 	 * @exception IllegalArgumentException if:
-	 *                <ul>
-	 *                <li>the given <code>line</code> is null</li>
-	 *                <li>the given <code>tabWidth</code> is lower than zero</li>
-	 *                </ul>
+	 *                                     <ul>
+	 *                                     <li>the given <code>line</code> is null</li>
+	 *                                     <li>the given <code>tabWidth</code> is lower
+	 *                                     than zero</li>
+	 *                                     </ul>
 	 */
 	public static int measureIndentInSpaces(CharSequence line, int tabWidth) {
 		if (tabWidth < 0 || line == null) throw new IllegalArgumentException();
@@ -207,7 +209,7 @@ public class TxtUtil {
 	/**
 	 * Returns the visual width of the given line of text.
 	 *
-	 * @param text the string to measure
+	 * @param text     the string to measure
 	 * @param tabWidth the visual width of a tab
 	 * @return the visual width of <code>text</code>
 	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
@@ -217,13 +219,12 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Returns the visual width of the given text starting from the given offset
-	 * within a line. Width is reset each time a line separator character is
-	 * encountered.
+	 * Returns the visual width of the given text starting from the given offset within a
+	 * line. Width is reset each time a line separator character is encountered.
 	 *
-	 * @param text the string to measure
+	 * @param text     the string to measure
 	 * @param tabWidth the visual width of a tab
-	 * @param from the visual starting offset of the text
+	 * @param from     the visual starting offset of the text
 	 * @return the visual width of <code>text</code>
 	 * @see org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/javaeditor/IndentUtil.java
 	 */
@@ -284,8 +285,8 @@ public class TxtUtil {
 	 * characters.
 	 *
 	 * @param ch the given character
-	 * @return Returns <code>true</code> if this the character is a indent
-	 *             character, <code>false</code> otherwise
+	 * @return Returns <code>true</code> if this the character is a indent character,
+	 *         <code>false</code> otherwise
 	 */
 	public static boolean isHWs(char ch) {
 		return Character.isWhitespace(ch) && !Strings.isLineDelimiterChar(ch);
@@ -325,8 +326,8 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Returns the index of the first non-horizontal whitespace character in the
-	 * given string.
+	 * Returns the index of the first non-horizontal whitespace character in the given
+	 * string.
 	 *
 	 * @param str the string to check
 	 * @return index of the first non-whitespace character
@@ -341,8 +342,8 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Returns the index of the last non-horizontal whitespace character in the
-	 * given string.
+	 * Returns the index of the last non-horizontal whitespace character in the given
+	 * string.
 	 *
 	 * @param str the string to check
 	 * @return index of the last non-whitespace character
@@ -357,38 +358,21 @@ public class TxtUtil {
 	}
 
 	/**
-	 * Wraps the given text defined by the given format and args to lines of up to
-	 * the given length. Uses the system newline string as the line return terminal.
-	 * Preserves existing internal returns.
+	 * Wraps the given text to lines of up to the given length. Uses the system newline
+	 * string as the line return terminal. Preserves existing internal returns.
 	 *
-	 * @param len the target maximum line length
-	 * @param fmt the text format
-	 * @param args the format arguments
+	 * @param len  the target maximum line length
+	 * @param text the source text
 	 * @return the resulting text
 	 */
-	public static String wrap(int len, String fmt, Object... args) {
-		return wrap(Strings.EOL, len, fmt, args);
-	}
-
-	/**
-	 * Wraps the text defined by the given format and args to lines of up to the
-	 * given length. Existing hard internal returns are preserved & converted to the
-	 * given newline terminal.
-	 *
-	 * @param terminal the newline delimiter
-	 * @param len the target maximum line length
-	 * @param fmt the text format
-	 * @param args the format arguments
-	 * @return the resulting text
-	 */
-	public static String wrap(String terminal, int len, String fmt, Object... args) {
+	public static String wrap(int len, String text) {
 		TextStringBuilder block = new TextStringBuilder();
-		block.setNewLineText(terminal);
-		String[] lines = String.format(fmt, args).split("\\R");
-		for (int idx = 0; idx < lines.length; idx++) {
-			block.appendln(_wrap(terminal, len, lines[idx]));
+		block.setNewLineText(Strings.EOL);
+		String[] lines = text.split("\\R");
+		for (String line : lines) {
+			block.appendln(_wrap(Strings.EOL, len, line));
 		}
-		return trim(block, terminal).toString();
+		return _trim(Strings.EOL, block).toString();
 	}
 
 	private static TextStringBuilder _wrap(String terminal, int len, String text) {
@@ -406,10 +390,10 @@ public class TxtUtil {
 				line.append(Strings.SPACE);
 			}
 		}
-		return trim(block, terminal);
+		return _trim(terminal, block);
 	}
 
-	private static TextStringBuilder trim(TextStringBuilder sb, String terminal) {
+	private static TextStringBuilder _trim(String terminal, TextStringBuilder sb) {
 		while (sb.startsWith(terminal)) {
 			sb.deleteFirst(terminal);
 		}
@@ -419,71 +403,116 @@ public class TxtUtil {
 		return sb;
 	}
 
-	/**
-	 * Wrap the given text according to the given parameters.
-	 *
-	 * @param txt the text to wrap
-	 * @param col the wrap column
-	 * @param prefix a leading prefix to provide on each line
-	 * @param terminal the line terminal
-	 * @param splits a regex used to split the text
-	 * @return the wrapped text
-	 */
-	@Deprecated
-	public static String wrap(String prefix, String terminal, String splits, int col, String txt) {
-		if (txt == null || txt.isEmpty()) return Strings.EMPTY;
-		if (prefix == null) prefix = Strings.EMPTY;
-		if (terminal == null) terminal = Strings.EOL;
-		if (splits == null || splits.isEmpty()) splits = Strings.SPACE;
-		if (col < 1) col = 80;
-
-		final Pattern splitter = Pattern.compile(splits);
-		int len = txt.length();
-		StringBuilder sb = new StringBuilder(len);
-		sb.append(prefix);
-
-		int beg = 0;
-		while (beg < len) {
-			int wrapAt = -1;
-			int end = Math.min((int) Math.min(Integer.MAX_VALUE, beg + col + 1L), len);
-			Matcher matcher = splitter.matcher(txt.substring(beg, end));
-			if (matcher.find()) {
-				if (matcher.start() == 0) {
-					beg += matcher.end();
-					continue;
-				}
-				wrapAt = matcher.start() + beg;
-			}
-			// only last line without leading spaces is left
-			if (len - beg <= col) break;
-
-			while (matcher.find()) {
-				wrapAt = matcher.start() + beg;
-			}
-
-			if (wrapAt >= beg) { // normal case
-				sb.append(txt, beg, wrapAt);
-				sb.append(terminal + prefix);
-				beg = wrapAt + 1;
-
-			} else {
-				matcher = splitter.matcher(txt.substring(beg + col));
-				if (matcher.find()) {
-					wrapAt = matcher.start() + beg + col;
-				}
-
-				if (wrapAt >= 0) {
-					sb.append(txt, beg, wrapAt);
-					sb.append(terminal);
-					beg = wrapAt + 1;
-				} else {
-					sb.append(txt, beg, txt.length());
-					beg = len;
-				}
-			}
-		}
-
-		sb.append(txt, beg, txt.length()); // append remainder
-		return sb.toString();
-	}
+	// /**
+	// * Wraps the given text defined by the given format and args to lines of up to the
+	// * given length. Uses the system newline string as the line return terminal.
+	// Preserves
+	// * existing internal returns.
+	// * <p>
+	// * Should expand text prior to wrapping.
+	// *
+	// * @param len the target maximum line length
+	// * @param fmt the text format
+	// * @param args the format arguments
+	// * @return the resulting text
+	// */
+	// @Deprecated
+	// public static String wrap(int len, String fmt, Object... args) {
+	// return wrap(Strings.EOL, len, fmt, args);
+	// }
+	//
+	// /**
+	// * Wraps the text defined by the given format and args to lines of up to the given
+	// * length. Existing hard internal returns are preserved & converted to the given
+	// * newline terminal.
+	// * <p>
+	// * Should expand text prior to wrapping.
+	// *
+	// * @param terminal the newline delimiter
+	// * @param len the target maximum line length
+	// * @param fmt the text format
+	// * @param args the format arguments
+	// * @return the resulting text
+	// */
+	// @Deprecated
+	// public static String wrap(String terminal, int len, String fmt, Object... args) {
+	// TextStringBuilder block = new TextStringBuilder();
+	// block.setNewLineText(terminal);
+	// String[] lines = String.format(fmt, args).split("\\R");
+	// for (String line : lines) {
+	// block.appendln(_wrap(terminal, len, line));
+	// }
+	// return _trim(terminal, block).toString();
+	// }
+	//
+	// /**
+	// * Wrap the given text according to the given parameters.
+	// * <p>
+	// * Should expand text prior to wrapping.
+	// *
+	// * @param txt the text to wrap
+	// * @param col the wrap column
+	// * @param prefix a leading prefix to provide on each line
+	// * @param terminal the line terminal
+	// * @param splits a regex used to split the text
+	// * @return the wrapped text
+	// */
+	// @Deprecated
+	// public static String wrap(String prefix, String terminal, String splits, int col,
+	// String txt) {
+	// if (txt == null || txt.isEmpty()) return Strings.EMPTY;
+	// if (prefix == null) prefix = Strings.EMPTY;
+	// if (terminal == null) terminal = Strings.EOL;
+	// if (splits == null || splits.isEmpty()) splits = Strings.SPACE;
+	// if (col < 1) col = 80;
+	//
+	// final Pattern splitter = Pattern.compile(splits);
+	// int len = txt.length();
+	// StringBuilder sb = new StringBuilder(len);
+	// sb.append(prefix);
+	//
+	// int beg = 0;
+	// while (beg < len) {
+	// int wrapAt = -1;
+	// int end = Math.min((int) Math.min(Integer.MAX_VALUE, beg + col + 1L), len);
+	// Matcher matcher = splitter.matcher(txt.substring(beg, end));
+	// if (matcher.find()) {
+	// if (matcher.start() == 0) {
+	// beg += matcher.end();
+	// continue;
+	// }
+	// wrapAt = matcher.start() + beg;
+	// }
+	// // only last line without leading spaces is left
+	// if (len - beg <= col) break;
+	//
+	// while (matcher.find()) {
+	// wrapAt = matcher.start() + beg;
+	// }
+	//
+	// if (wrapAt >= beg) { // normal case
+	// sb.append(txt, beg, wrapAt);
+	// sb.append(terminal + prefix);
+	// beg = wrapAt + 1;
+	//
+	// } else {
+	// matcher = splitter.matcher(txt.substring(beg + col));
+	// if (matcher.find()) {
+	// wrapAt = matcher.start() + beg + col;
+	// }
+	//
+	// if (wrapAt >= 0) {
+	// sb.append(txt, beg, wrapAt);
+	// sb.append(terminal);
+	// beg = wrapAt + 1;
+	// } else {
+	// sb.append(txt, beg, txt.length());
+	// beg = len;
+	// }
+	// }
+	// }
+	//
+	// sb.append(txt, beg, txt.length()); // append remainder
+	// return sb.toString();
+	// }
 }

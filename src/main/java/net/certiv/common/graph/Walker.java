@@ -25,7 +25,7 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	private void walk(Sense dir, HashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
 		boolean ok = enter(dir, visited, visitor, parent, node);
 		if (debug) {
-			Integer cnt = node != null ? node.edgeCount(dir, false) : null;
+			Integer cnt = node != null ? node.size(dir, e -> !e.selfCyclic()) : null;
 			Log.debug(this, "[enter=%s] %s -> %s (%s)", ok, parent, node, cnt);
 		}
 
@@ -38,17 +38,18 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Invoke the delegate visitor with the given parameters. Return {@code true} if
-	 * the walker should walk the children of the given node.
+	 * Invoke the delegate visitor with the given parameters. Return {@code true} if the
+	 * walker should walk the children of the given node.
 	 *
-	 * @param dir the walk traversal direction
+	 * @param dir     the walk traversal direction
 	 * @param visited collection of previously visited parent/node combinations
 	 * @param visitor the delegate visitor
-	 * @param parent the parent node
-	 * @param node the current node
+	 * @param parent  the parent node
+	 * @param node    the current node
 	 * @return {@code true} to walk the children of the current node
 	 */
-	protected boolean enter(Sense dir, HashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
+	protected boolean enter(Sense dir, HashList<N, N> visited, NodeVisitor<N> visitor, N parent,
+			N node) {
 		if (parent == null && node == null) return false;
 		if (visited.containsEntry(parent, node)) return false;
 
@@ -57,7 +58,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		return ok;
 	}
 
-	protected boolean exit(Sense dir, HashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
+	protected boolean exit(Sense dir, HashList<N, N> visited, NodeVisitor<N> visitor, N parent,
+			N node) {
 		return node.exit(dir, visited, visitor, parent);
 	}
 
@@ -68,10 +70,10 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 * the given node. Return {@code true} if the walker should walk the children of
 		 * the given node.
 		 *
-		 * @param dir the walk traversal direction
+		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations
-		 * @param parent the parent node
-		 * @param node the current node
+		 * @param parent  the parent node
+		 * @param node    the current node
 		 * @return {@code true} to walk the children of the current node
 		 */
 		public boolean enter(Sense dir, HashList<T, T> visited, T parent, T node) {
@@ -79,13 +81,13 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		/**
-		 * Evaluate given parameters on {@code exit} -- after walking the children of
-		 * the given node. Return {@code true} on success (not currently used).
+		 * Evaluate given parameters on {@code exit} -- after walking the children of the
+		 * given node. Return {@code true} on success (not currently used).
 		 *
-		 * @param dir the walk traversal direction
+		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations
-		 * @param parent the parent node
-		 * @param node the current node
+		 * @param parent  the parent node
+		 * @param node    the current node
 		 * @return {@code true} on success
 		 */
 		public boolean exit(Sense dir, HashList<T, T> visited, T parent, T node) {

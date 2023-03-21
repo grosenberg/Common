@@ -3,14 +3,17 @@ package net.certiv.common.stores;
 import java.util.Objects;
 
 /**
- * A container object for potentially null objects. Includes a {@code Throwable}
- * error field. If a result is present ({@code non-null}) without an error being
- * present, {@code valid()} returns {@code true}.
+ * A container object for potentially null objects. Includes a {@code Throwable} error
+ * field. If a result is present ({@code non-null}) without an error being present,
+ * {@code valid()} returns {@code true}.
  *
  * @apiNote This is an alternative to {@code Optional}.
  * @param <T> the type of value
  */
 public class Result<T> {
+
+	public static final Result<Boolean> OK = new Result<>(true, null);
+	public static final Result<Boolean> FAIL = new Result<>(false, null);
 
 	public final T result;
 	public final Throwable err;
@@ -74,8 +77,7 @@ public class Result<T> {
 
 	@Override
 	public String toString() {
-		String msg = result != null ? result.toString() : "Null";
-		if (err != null) return String.format("%s [%s]", msg, err.getMessage());
-		return msg;
+		if (err == null) return String.valueOf(result);
+		return String.format("%s [%s]", String.valueOf(result), err.getMessage());
 	}
 }

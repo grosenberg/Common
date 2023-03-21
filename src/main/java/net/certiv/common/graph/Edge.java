@@ -9,10 +9,9 @@ import net.certiv.common.stores.Counter;
 import net.certiv.common.util.Assert;
 
 /**
- * An edge connects two nodes and form a self-loop where both nodes are the
- * same. Edges are unique, permiting multiple distinct edges to connect the same
- * two nodes. An edge can only exist between two existing nodes: no dangling
- * edges permitted.
+ * An edge connects two nodes and form a self-loop where both nodes are the same. Edges
+ * are unique, permiting multiple distinct edges to connect the same two nodes. An edge
+ * can only exist between two existing nodes: no dangling edges permitted.
  */
 public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
@@ -21,10 +20,12 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		/** Edge in direction; in through begin node. */
 		IN,
 		/** Edge out direction; out through end node. */
-		OUT;
+		OUT,
+		/** Bidirection or both. */
+		BOTH;
 	}
 
-	private static final Counter Factor = new Counter();
+	private static final Counter CTR = new Counter();
 	public final long _eid;
 
 	private N beg;
@@ -32,14 +33,14 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	protected Edge(N beg, N end) {
 		Assert.notNull(beg, end);
-		this._eid = Factor.getAndIncrement();
+		this._eid = CTR.getAndIncrement();
 		this.beg = beg;
 		this.end = end;
 	}
 
 	protected Edge(N beg, N end, Map<Object, Object> props) {
 		this(beg, end);
-		if (props != null) putProperties(props);
+		putProperties(props);
 	}
 
 	public String name() {
@@ -85,18 +86,36 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return beg.equals(node) ? end : beg;
 	}
 
+	/** Returns the node of the given sense direction. */
+	public N other(Sense dir) {
+		Assert.isLegal(dir != Sense.BOTH);
+		if (dir == Sense.IN) return beg;
+		return end;
+	}
+
 	/** Returns {@code true} if this edge connects to the given node. */
 	public boolean connectsTo(N node) {
 		return node.equals(beg) || node.equals(end);
 	}
 
-	public boolean selfLoop() {
+	/**
+	 * Returns {@code true} if this edge is a self-cyclic edge, defined where the begin
+	 * and end nodes are the same.
+	 */
+	public boolean selfCyclic() {
 		return beg.equals(end);
 	}
 
 	/**
-	 * Internal use only. Removes this edge from the internal lists of begin and end
-	 * node connections. Callthrough from {@link Graph#remove(edge)}.
+	 * Internal use only. Removes this edge from the internal lists of begin and end node
+	 * connections. Callthrough from {@code Graph#remove(edge)}.
+	 *
+	 * <pre>
+	 * before:
+	 * 	A -> Beg -> End -> D
+	 * after
+	 * 	A -> Beg    End -> D
+	 * </pre>
 	 *
 	 * @return {@code true} if this edge is fully removed.
 	 */
@@ -108,9 +127,9 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
-	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
-	 * containing this properties store. Creates and adds an {@code ON#EDGES}
-	 * default category {@code DotStyle} store, if a store does not exist.
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
+	 * this properties store. Creates and adds an {@code ON#EDGES} default category
+	 * {@code DotStyle} store, if a store does not exist.
 	 *
 	 * @return the dot style store
 	 */
@@ -119,8 +138,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
-	 * Defines a custom style for this edge. The default implementation does
-	 * nothing.
+	 * Defines a custom style for this edge. The default implementation does nothing.
 	 */
 	public DotStyle defineStyle() {
 		return getDotStyle();

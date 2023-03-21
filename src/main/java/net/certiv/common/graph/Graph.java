@@ -29,8 +29,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Descriptive name of this {@code Graph}. Defaults to the simple class name of
-	 * the implementing class.
+	 * Descriptive name of this {@code Graph}. Defaults to the simple class name of the
+	 * implementing class.
 	 */
 	public String name() {
 		return getClass().getSimpleName();
@@ -57,18 +57,16 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Primary graph tree constuction entry point. Constructs the edge and adds the
-	 * given edge to the graph.
+	 * Primary graph tree constuction entry point. Constructs the edge and adds the given
+	 * edge to the graph.
 	 * <p>
-	 * Internally performs all operations necessary to create the edge terminal
-	 * nodes, if not prior existing, and to incorporate the edge and terminal nodes
-	 * into the graph.
+	 * Internally performs all operations necessary to create the edge terminal nodes, if
+	 * not prior existing, and to incorporate the edge and terminal nodes into the graph.
 	 * <p>
 	 * Note: discretely constucting a node or edge does not add it to the graph.
 	 *
 	 * @param edge a graph edge
-	 * @returns {@code true} if either terminal node was not already present in the
-	 *              graph
+	 * @returns {@code true} if either terminal node was not already present in the graph
 	 */
 	public boolean addEdge(E edge) {
 		Assert.notNull(edge);
@@ -115,8 +113,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Removes the given edge from the graph. Removes either terminal node if the
-	 * node has no remaining edge connections.
+	 * Removes the given edge from the graph. Removes either terminal node if the node has
+	 * no remaining edge connections.
 	 *
 	 * @param edge a graph edge
 	 * @return {@code true} if the edge was removed
@@ -125,8 +123,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		Assert.notNull(edge);
 		boolean rmvd = edge.remove(); // disconnect from end-points
 		if (rmvd) {
-			if (!edge.beg().hasEdges(false)) remove(edge.beg());
-			if (!edge.end().hasEdges(false)) remove(edge.end());
+			if (!edge.beg().hasEdges(Sense.BOTH, false)) remove(edge.beg());
+			if (!edge.end().hasEdges(Sense.BOTH, false)) remove(edge.end());
 		}
 		return rmvd;
 	}
@@ -134,7 +132,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Removes the given edge if the edge satisfies the given filter predicate.
 	 *
-	 * @param edge a graph edge
+	 * @param edge   a graph edge
 	 * @param filter a predicate returning {@code true} to select for removal
 	 * @return {@code true} if the edge was removed
 	 */
@@ -158,13 +156,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Removes all edges directly connecting the given nodes and that satisfy the
-	 * given filter predicate. Handles root node adjustment.
+	 * Removes all edges directly connecting the given nodes and that satisfy the given
+	 * filter predicate. Handles root node adjustment.
 	 *
-	 * @param src a source node
-	 * @param dst a destination node
-	 * @param filter a predicate returning {@code true} to select an edge for
-	 *            removal from the graph
+	 * @param src    a source node
+	 * @param dst    a destination node
+	 * @param filter a predicate returning {@code true} to select an edge for removal from
+	 *               the graph
 	 * @return {@code true} if any element was removed
 	 */
 	public boolean removeEdgesIf(N src, N dst, Predicate<? super E> filter) {
@@ -179,16 +177,15 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/**
 	 * Reterminate the given edge to newly connect between the given terminal nodes.
-	 * Conditionally removes the edge if retermination would create a single
-	 * terminal node cycle. The prior edge terminal nodes are removed if
-	 * retermination leaves them unconnected in the graph.
+	 * Conditionally removes the edge if retermination would create a single terminal node
+	 * cycle. The prior edge terminal nodes are removed if retermination leaves them
+	 * unconnected in the graph.
 	 *
-	 * @param edge an existing graph edge
-	 * @param beg the new begin node
-	 * @param end the new end node
+	 * @param edge   an existing graph edge
+	 * @param beg    the new begin node
+	 * @param end    the new end node
 	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated, or {@code false} if
-	 *             removed
+	 * @return {@code true} if the edge was reterminated, or {@code false} if removed
 	 */
 	public boolean reterminate(E edge, N beg, N end, boolean cycles) {
 		Assert.notNull(edge, beg, end);
@@ -208,14 +205,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/**
 	 * Reterminate the given edge with the given begin node. Removes the edge if
-	 * retermination would create an impermissble cycle. The prior begin terminal
-	 * node is removed if retermination leaves it unconnected in the graph.
+	 * retermination would create an impermissble cycle. The prior begin terminal node is
+	 * removed if retermination leaves it unconnected in the graph.
 	 *
-	 * @param beg the new edge beg node
-	 * @param edge a graph edge
+	 * @param beg    the new edge beg node
+	 * @param edge   a graph edge
 	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated, or {@code false} if
-	 *             removed
+	 * @return {@code true} if the edge was reterminated, or {@code false} if removed
 	 */
 	public boolean reterminate(N beg, E edge, boolean cycles) {
 		return reterminate(edge, beg, edge.end(), cycles);
@@ -223,14 +219,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/**
 	 * Reterminate the given edge with the given end node. Removes the edge if
-	 * retermination would create an impermissble cycle. The prior end terminal node
-	 * is removed if retermination leaves it unconnected in the graph.
+	 * retermination would create an impermissble cycle. The prior end terminal node is
+	 * removed if retermination leaves it unconnected in the graph.
 	 *
-	 * @param edge a graph edge
-	 * @param end a new edge end node
+	 * @param edge   a graph edge
+	 * @param end    a new edge end node
 	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated, or {@code false} if
-	 *             removed
+	 * @return {@code true} if the edge was reterminated, or {@code false} if removed
 	 */
 	public boolean reterminate(E edge, N end, boolean cycles) {
 		return reterminate(edge, edge.beg(), end, cycles);
@@ -238,11 +233,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/**
 	 * Reterminate the given edges to share the given begin node. Removes edges if
-	 * retermination would create an impermissble cycle. Prior begin terminal nodes
-	 * are removed if retermination leaves them unconnected in the graph.
+	 * retermination would create an impermissble cycle. Prior begin terminal nodes are
+	 * removed if retermination leaves them unconnected in the graph.
 	 *
-	 * @param beg the final shared edge beging node
-	 * @param edges graph edges
+	 * @param beg    the final shared edge beging node
+	 * @param edges  graph edges
 	 * @param cycles {@code true} to permit creation of single edge cycles
 	 */
 	public void reterminate(N beg, Set<? extends E> edges, boolean cycles) {
@@ -252,11 +247,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/**
 	 * Reterminate the given edges to share the given end node. Removes edges if
-	 * retermination would create an impermissble cycle. Prior end terminal nodes
-	 * are removed if retermination leaves them unconnected in the graph.
+	 * retermination would create an impermissble cycle. Prior end terminal nodes are
+	 * removed if retermination leaves them unconnected in the graph.
 	 *
-	 * @param edges graph edges
-	 * @param end the final shared edge end node
+	 * @param edges  graph edges
+	 * @param end    the final shared edge end node
 	 * @param cycles {@code true} to permit creation of single edge cycles
 	 */
 	public void reterminate(Set<? extends E> edges, N end, boolean cycles) {
@@ -265,9 +260,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
-	 * containing this properties store. Creates and adds an {@code ON#GRAPHS}
-	 * default category {@code DotStyle} store, if a store does not exist.
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
+	 * this properties store. Creates and adds an {@code ON#GRAPHS} default category
+	 * {@code DotStyle} store, if a store does not exist.
 	 *
 	 * @return the dot style store
 	 */
@@ -276,8 +271,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Defines a custom style for this graph. The default implementation provides
-	 * some sane style values, but will not overwrite any existing styles.
+	 * Defines a custom style for this graph. The default implementation provides some
+	 * sane style values, but will not overwrite any existing styles.
 	 */
 	public DotStyle defineStyle() {
 		DotStyle ds = getDotStyle();

@@ -121,10 +121,10 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Render a digraph representation of the given graph using the given node
-	 * visitor. Extend {@code DotVisitor} to, <i>e.g.</i>, constrain node selection.
+	 * Render a digraph representation of the given graph using the given node visitor.
+	 * Extend {@code DotVisitor} to, <i>e.g.</i>, constrain node selection.
 	 *
-	 * @param graph the source graph
+	 * @param graph   the source graph
 	 * @param visitor the graph node visitor
 	 * @return a digraph
 	 */
@@ -150,7 +150,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 			default:
 				for (N root : roots) {
-					if (!root.edges(Sense.OUT).isEmpty()) {
+					if (root.hasEdges(Sense.OUT, true)) {
 						sb.appendNewLine();
 						sb.appendln(SUBGRAPH_BEG, dent(1), fix(root.name()));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
@@ -210,7 +210,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>> extends NodeVisitor<N> {
+	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>>
+			extends NodeVisitor<N> {
 
 		// value=formatted node definition string
 		private Set<String> nodes = new LinkedHashSet<>();

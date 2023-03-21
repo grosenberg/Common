@@ -13,8 +13,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<jdk.version>11</jdk.version>
+		<maven.compiler.source>${jdk.version}</maven.compiler.source>
+		<maven.compiler.target>${jdk.version}</maven.compiler.target>
+		
 		<comm-lang3.version>3.12.0</comm-lang3.version>
 		<comm-text.version>1.10.0</comm-text.version>
 		<log4j.version>2.19.0</log4j.version>

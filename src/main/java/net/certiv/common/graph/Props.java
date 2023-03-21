@@ -10,12 +10,12 @@ import net.certiv.common.dot.DotStyle;
 
 public class Props {
 
-	private LinkedHashMap<Object, Object> props;
+	private final LinkedHashMap<Object, Object> propMap = new LinkedHashMap<>();
 
 	/**
-	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge}
-	 * containing this properties store. Creates and adds a {@code DotStyle} store,
-	 * using the given default {@code ON} category, if a store does not exist.
+	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
+	 * this properties store. Creates and adds a {@code DotStyle} store, using the given
+	 * default {@code ON} category, if a store does not exist.
 	 *
 	 * @param category a default {@code ON} category
 	 * @return the dot style store
@@ -30,7 +30,7 @@ public class Props {
 	}
 
 	protected void clearDotStyle() {
-		if (props != null) putProperty(DotStyle.PropName, null);
+		putProperty(DotStyle.PropName, null);
 	}
 
 	/**
@@ -40,60 +40,66 @@ public class Props {
 	 * @return {@code true} if a property value is associated with key
 	 */
 	public final boolean hasProperty(Object key) {
-		if (props == null) return false;
-		return props.containsKey(key);
+		return propMap.containsKey(key);
 	}
 
 	/**
-	 * Returns the value of the property with the specified key. Only properties
-	 * added with putProperty will return a non-null value.
+	 * Returns the value of the property with the specified key. Only properties added
+	 * with putProperty will return a non-null value.
 	 *
 	 * @param key the property key
-	 * @return the property value associated with key, or {@code null} if there was
-	 *             no mapping for the key
+	 * @return the property value associated with key, or {@code null} if there was no
+	 *         mapping for the key
 	 */
 	public final Object getProperty(Object key) {
-		if (props == null) return null;
-		return props.get(key);
+		return propMap.get(key);
 	}
 
 	/**
-	 * Adds an arbitrary key/value "property" to this edge. If value is
-	 * {@code null}, the property will be removed.
+	 * Returns the value of the property with the specified key, or the default value if
+	 * no such property key mapping exists. The default value is not retained.
 	 *
 	 * @param key the property key
+	 * @param def the default value
+	 * @return the property value associated with key, or the {@code def} value if no
+	 *         mapping for the key exists
+	 */
+	public Object getProperty(Object key, Object def) {
+		Object val = getProperty(key);
+		return val != null ? val : def;
+	}
+
+	/**
+	 * Adds an arbitrary key/value "property" to this edge. If value is {@code null}, the
+	 * property will be removed.
+	 *
+	 * @param key   the property key
 	 * @param value the new property value
-	 * @return the previous property value associated with key, or {@code null} if
-	 *             there was no mapping for the key
+	 * @return the previous property value associated with key, or {@code null} if there
+	 *         was no mapping for the key
 	 */
 	public final Object putProperty(Object key, Object value) {
-		if (props == null) {
-			props = new LinkedHashMap<>();
-		}
-		if (value == null) return props.remove(key);
-		return props.put(key, value);
+		if (value == null) return propMap.remove(key);
+		return propMap.put(key, value);
 	}
 
 	/** Adds the given map of properties. */
 	public final void putProperties(Map<Object, Object> props) {
-		props.forEach((k, v) -> putProperty(k, v));
+		if (props != null) props.forEach((k, v) -> putProperty(k, v));
 	}
 
 	/** Returns the properties map. */
 	public final Map<Object, Object> properties() {
-		return props != null ? props : Collections.emptyMap();
+		return Collections.unmodifiableMap(propMap);
 	}
 
 	public void clear() {
-		if (props != null) {
-			props.clear();
-			props = null;
-		}
+		propMap.clear();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(props);
+		return Objects.hash(propMap);
 	}
 
 	@Override
@@ -101,11 +107,11 @@ public class Props {
 		if (this == obj) return true;
 		if (!(obj instanceof Props)) return false;
 		Props other = (Props) obj;
-		return Objects.equals(props, other.props);
+		return Objects.equals(propMap, other.propMap);
 	}
 
 	@Override
 	public String toString() {
-		return props.toString();
+		return propMap.toString();
 	}
 }

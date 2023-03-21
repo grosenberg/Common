@@ -1,14 +1,15 @@
 package net.certiv.common.graph;
 
+import static net.certiv.common.dot.DotAttr.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.demo.DiffUtil;
 import net.certiv.common.util.FsUtil;
 
 class GraphStyle {
@@ -19,52 +20,46 @@ class GraphStyle {
 		graph.defineStyle();
 
 		DotStyle ds = graph.getDotStyle();
-		ds.put(DotAttr.FONTCOLOR, "teal");
-		ds.put(DotAttr.FONTSIZE, 32);
+		ds.put(FONTCOLOR, "teal");
+		ds.put(FONTSIZE, 32);
 
 		DemoNode a = graph.createNode("A");
 		ds = a.getDotStyle();
-		ds.put(DotAttr.LABEL, "Node " + a.name());
-		ds.put(DotAttr.COLOR, "blue");
-		ds.put(DotAttr.FILLCOLOR, "lightblue");
-		ds.put(DotAttr.STYLE, "filled");
+		ds.put(LABEL, "Node " + a.name());
+		ds.put(COLOR, "blue");
+		ds.put(FILLCOLOR, "lightblue");
+		ds.put(STYLE, "filled");
 
 		DemoNode b = graph.createNode("B");
 		ds = b.getDotStyle();
-		ds.put(DotAttr.LABEL, "Node " + b.name());
-		ds.put(DotAttr.COLOR, "red");
-		ds.put(DotAttr.FILLCOLOR, "teal");
-		ds.put(DotAttr.SHAPE, "rectangle");
-		ds.put(DotAttr.STYLE, "filled, rounded");
+		ds.put(LABEL, "Node " + b.name());
+		ds.put(COLOR, "red");
+		ds.put(FILLCOLOR, "teal");
+		ds.put(SHAPE, "rectangle");
+		ds.put(STYLE, "filled, rounded");
 
 		DemoNode c = graph.createNode("C");
 
 		DemoEdge ab = graph.createEdge(a, b);
 		ds = ab.getDotStyle();
-		ds.put(DotAttr.LABEL, "Edge " + ab.name());
-		ds.put(DotAttr.COLOR, "blue");
-		ds.put(DotAttr.PENWIDTH, 2);
+		ds.put(LABEL, "Edge " + ab.name());
+		ds.put(COLOR, "blue");
+		ds.put(PENWIDTH, 2);
 
 		DemoEdge bc = graph.createEdge(b, c);
 		ds = bc.getDotStyle();
-		ds.put(DotAttr.LABEL, "Edge " + bc.name());
-		ds.put(DotAttr.ARROWHEAD, "vee");
-		ds.put(DotAttr.ARROWTAIL, "inv");
-		ds.put(DotAttr.ARROWSIZE, "0.7");
-		ds.put(DotAttr.COLOR, "maroon");
-		ds.put(DotAttr.FONTSIZE, "11");
-		ds.put(DotAttr.FONTCOLOR, "navy");
-		ds.put(DotAttr.STYLE, "dashed");
+		ds.put(LABEL, "Edge " + bc.name());
+		ds.put(ARROWHEAD, "vee");
+		ds.put(ARROWTAIL, "inv");
+		ds.put(ARROWSIZE, "0.7");
+		ds.put(COLOR, "maroon");
+		ds.put(FONTSIZE, "11");
+		ds.put(FONTCOLOR, "navy");
+		ds.put(STYLE, "dashed");
 
 		String dot = graph.dot();
-
 		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dotStyle.txt");
-
-		// Patch<String> patch = DiffUtils.diff(dot, dottxt, null);
-		// for (AbstractDelta<String> delta : patch.getDeltas()) {
-		// System.out.println(delta);
-		// }
-
+		System.out.println(DiffUtil.diff(dot, dottxt));
 		assertEquals(dot, dottxt);
 	}
 }

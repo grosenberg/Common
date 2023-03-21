@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
+import net.certiv.common.graph.demo.DiffUtil;
 import net.certiv.common.util.FsUtil;
 
 class GraphStructure {
@@ -26,6 +27,7 @@ class GraphStructure {
 
 		String dot = graph.dot();
 		String txt = FsUtil.loadResourceStringChecked(getClass(), "dotStructure.txt");
+		System.out.println(DiffUtil.diff(dot, txt));
 		assertEquals(dot, txt);
 	}
 }

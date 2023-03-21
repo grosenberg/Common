@@ -1,6 +1,7 @@
 package net.certiv.common.dot;
 
 public enum DotAttr {
+
 	ARROWHEAD("arrowhead"),
 	ARROWSIZE("arrowsize"),
 	ARROWTAIL("arrowtail"),

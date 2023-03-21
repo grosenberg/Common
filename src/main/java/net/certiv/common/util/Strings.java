@@ -76,7 +76,7 @@ public class Strings {
 	public static final String[] EMPTY_STRINGS = {};
 	public static final Object[] EMPTY_ARRAY = {};
 
-	public static final String UNKNOWN = "Unknown";
+	public static final String UNKNOWN = "Unknown"; //$NON-NLS-1$
 
 	public static final String TAB_UBAR_MARK = "\u1E6F"; 	// t underbar ṯ
 	public static final String DIAMOND_MARK = "\u2666";		// diamond ♦
@@ -192,9 +192,9 @@ public class Strings {
 	}
 
 	/**
-	 * Returns the given input string conditionally truncated and with an added
-	 * ellipsis mark if the string exceeds the given {@code len}. If {@code len} is
-	 * positive, truncation occurs at the string tail, otherwise at the head.
+	 * Returns the given input string conditionally truncated and with an added ellipsis mark if the
+	 * string exceeds the given {@code len}. If {@code len} is positive, truncation occurs at the
+	 * string tail, otherwise at the head.
 	 */
 	public static String ellipsize(String input, int len) {
 		if (len == 0) return EMPTY;
@@ -212,12 +212,11 @@ public class Strings {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given character is a line delimiter
-	 * character.
+	 * Returns <code>true</code> if the given character is a line delimiter character.
 	 *
 	 * @param ch the given character
-	 * @return Returns <code>true</code> if this the character is a line delimiter
-	 *             character, <code>false</code> otherwise
+	 * @return Returns <code>true</code> if this the character is a line delimiter character,
+	 *         <code>false</code> otherwise
 	 */
 	public static boolean isLineDelimiterChar(char ch) {
 		return ch == Chars.NL || ch == Chars.RET;
@@ -302,8 +301,7 @@ public class Strings {
 		int prefixLength = prefix.length();
 		if (textLength < prefixLength) return false;
 		for (int i = prefixLength - 1; i >= 0; i--) {
-			if (Character.toLowerCase(prefix.charAt(i)) != Character.toLowerCase(text.charAt(i)))
-				return false;
+			if (Character.toLowerCase(prefix.charAt(i)) != Character.toLowerCase(text.charAt(i))) return false;
 		}
 		return true;
 	}
@@ -313,8 +311,7 @@ public class Strings {
 	}
 
 	/**
-	 * Return {@code true} if the given text is {@code null}, empty, or only
-	 * contains whitespace.
+	 * Return {@code true} if the given text is {@code null}, empty, or only contains whitespace.
 	 */
 	public static boolean blank(String text) {
 		return text == null || text.trim().isEmpty();
@@ -335,8 +332,8 @@ public class Strings {
 	}
 
 	/**
-	 * Remove one level of quotes surrounding the literal. No error if quotes are
-	 * not present or are mixed.
+	 * Remove one level of quotes surrounding the literal. No error if quotes are not present or are
+	 * mixed.
 	 */
 	public static String deQuote(String literal) {
 		int endIdx = literal.length() - 1;
@@ -398,8 +395,8 @@ public class Strings {
 	}
 
 	/**
-	 * Trims the leading and trailing brace, if present, along with adjacent
-	 * whitespace. A trailing brace is trimmed only if a leading brace is found.
+	 * Trims the leading and trailing brace, if present, along with adjacent whitespace. A trailing
+	 * brace is trimmed only if a leading brace is found.
 	 */
 	public static String trimBraces(String block) {
 		if (block == null) return EMPTY;
@@ -689,13 +686,13 @@ public class Strings {
 	// -----
 
 	/**
-	 * Returns a separator delimited string representation of the given list values.
-	 * The returned string will not include a trailing separator.
+	 * Returns a separator delimited string representation of the given list values. The returned
+	 * string will not include a trailing separator.
 	 *
-	 * @param values ordered list of string values
-	 * @param asPrefix if {@code true}, the separator is positioned as a prefix to
-	 *            each list value, otherwise as a suffix
-	 * @param sep the string literal to be used as a list string separator
+	 * @param values   ordered list of string values
+	 * @param asPrefix if {@code true}, the separator is positioned as a prefix to each list value,
+	 *                 otherwise as a suffix
+	 * @param sep      the string literal to be used as a list string separator
 	 * @return separator delimited string
 	 */
 	public static String asString(List<String> values, boolean asPrefix, String sep) {
@@ -754,16 +751,14 @@ public class Strings {
 	// }
 
 	/**
-	 * Returns the string representation of the given objects joined using the CSV
-	 * delimiter.
+	 * Returns the string representation of the given objects joined using the CSV delimiter.
 	 */
 	public static String join(Collection<?> objs) {
 		return join(CsvDELIM, objs);
 	}
 
 	/**
-	 * Returns the string representation of the given objects joined using the given
-	 * delimiter.
+	 * Returns the string representation of the given objects joined using the given delimiter.
 	 */
 	public static String join(CharSequence delimiter, Collection<?> objs) {
 		List<String> list = new ArrayList<>();
@@ -793,8 +788,7 @@ public class Strings {
 	}
 
 	/**
-	 * Remove leading reference identifier. No error if the identifier is not
-	 * present.
+	 * Remove leading reference identifier. No error if the identifier is not present.
 	 */
 	public static String varName(String varRef) {
 		for (char element : R) {
@@ -806,10 +800,10 @@ public class Strings {
 	}
 
 	/**
-	 * Concatenate the given strings into one string using the passed line delimiter
-	 * as a delimiter. No delimiter is added to the last line.
+	 * Concatenate the given strings into one string using the passed line delimiter as a delimiter.
+	 * No delimiter is added to the last line.
 	 *
-	 * @param lines the lines
+	 * @param lines     the lines
 	 * @param delimiter line delimiter
 	 * @return the concatenated lines
 	 */
@@ -819,10 +813,9 @@ public class Strings {
 	}
 
 	/**
-	 * Returns a new array adding the second array at the end of first array. It
-	 * answers null if the first and second are null. If the first array is null or
-	 * if it is empty, then a new array is created with second. If the second array
-	 * is null, then the first array is returned. <br>
+	 * Returns a new array adding the second array at the end of first array. It answers null if the
+	 * first and second are null. If the first array is null or if it is empty, then a new array is
+	 * created with second. If the second array is null, then the first array is returned. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -854,10 +847,10 @@ public class Strings {
 	 * </li>
 	 * </ol>
 	 *
-	 * @param first the first array to concatenate
+	 * @param first  the first array to concatenate
 	 * @param second the array to add at the end of the first array
-	 * @return a new array adding the second array at the end of first array, or
-	 *             null if the two arrays are null.
+	 * @return a new array adding the second array at the end of first array, or null if the two
+	 *         arrays are null.
 	 */
 	public static String[] arrayConcat(String[] first, String second) {
 		if (second == null) return first;
@@ -908,13 +901,13 @@ public class Strings {
 	}
 
 	/**
-	 * Returns {@code true} if the given string only consists of white spaces
-	 * according to Java. If the string is empty, <code>true
+	 * Returns {@code true} if the given string only consists of white spaces according to Java. If
+	 * the string is empty, <code>true
 	 * </code> is returned.
 	 *
 	 * @param s the string to test
-	 * @return {@code true} if the string only consists of white spaces; otherwise
-	 *             {@code false} is returned
+	 * @return {@code true} if the string only consists of white spaces; otherwise {@code false} is
+	 *         returned
 	 * @see java.lang.Character#isWhitespace(char)
 	 */
 	public static boolean containsOnlyWhitespaces(String s) {
@@ -944,8 +937,7 @@ public class Strings {
 	public static boolean equals(String s, char[] c) {
 		if (s.length() != c.length) return false;
 
-		for (int i = c.length; --i >= 0;)
-			if (s.charAt(i) != c[i]) return false;
+		for (int i = c.length; --i >= 0;) if (s.charAt(i) != c[i]) return false;
 		return true;
 	}
 
@@ -969,11 +961,8 @@ public class Strings {
 				break;
 			}
 		}
-		if (end == size)
-			return text;
-		else if (end == 0)
-			return EMPTY;
-		else
-			return text.substring(0, end);
+		if (end == size) return text;
+		else if (end == 0) return EMPTY;
+		else return text.substring(0, end);
 	}
 }
