@@ -1,4 +1,6 @@
-/**/.settings
-/**/attic/
+.settings
+attic/
+bin/
+target/
+
 /**/resources/logs/
-/**/target/
