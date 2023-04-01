@@ -21,79 +21,103 @@ public class Props {
 	 * @return the dot style store
 	 */
 	protected DotStyle getDotStyle(ON category) {
-		DotStyle ds = (DotStyle) getProperty(DotStyle.PropName);
+		DotStyle ds = (DotStyle) get(DotStyle.PropName);
 		if (ds == null) {
 			ds = new DotStyle(category);
-			putProperty(DotStyle.PropName, ds);
+			put(DotStyle.PropName, ds);
 		}
 		return ds;
 	}
 
 	protected void clearDotStyle() {
-		putProperty(DotStyle.PropName, null);
+		put(DotStyle.PropName, null);
 	}
 
 	/**
-	 * Returns {@code true} if a property value is associated with the given key.
+	 * Determines {@code true} if a property value is associated with the given key. The
+	 * store records a {@code null} valued properties by the nonexistence of the property.
 	 *
 	 * @param key the property key
 	 * @return {@code true} if a property value is associated with key
 	 */
-	public final boolean hasProperty(Object key) {
+	public final boolean has(Object key) {
 		return propMap.containsKey(key);
 	}
 
 	/**
-	 * Returns the value of the property with the specified key. Only properties added
-	 * with putProperty will return a non-null value.
+	 * Gets the value of the property with the specified key. Only properties added with
+	 * putProperty will return a non-null value.
 	 *
 	 * @param key the property key
 	 * @return the property value associated with key, or {@code null} if there was no
 	 *         mapping for the key
 	 */
-	public final Object getProperty(Object key) {
-		return propMap.get(key);
+	@SuppressWarnings("unchecked")
+	public final <T> T get(Object key) {
+		return (T) propMap.get(key);
 	}
 
 	/**
-	 * Returns the value of the property with the specified key, or the default value if
-	 * no such property key mapping exists. The default value is not retained.
+	 * Gets the value of the property with the specified key, or the default value if no
+	 * such property key mapping exists. The default value is not retained.
 	 *
 	 * @param key the property key
 	 * @param def the default value
 	 * @return the property value associated with key, or the {@code def} value if no
 	 *         mapping for the key exists
 	 */
-	public Object getProperty(Object key, Object def) {
-		Object val = getProperty(key);
+	public final <T> T get(Object key, T def) {
+		@SuppressWarnings("unchecked")
+		T val = (T) get(key);
 		return val != null ? val : def;
 	}
 
 	/**
-	 * Adds an arbitrary key/value "property" to this edge. If value is {@code null}, the
-	 * property will be removed.
+	 * Adds a property, defined by a key and non-null value, to this element. If value is
+	 * {@code null}, the property key will be removed.
 	 *
 	 * @param key   the property key
 	 * @param value the new property value
 	 * @return the previous property value associated with key, or {@code null} if there
 	 *         was no mapping for the key
 	 */
-	public final Object putProperty(Object key, Object value) {
-		if (value == null) return propMap.remove(key);
-		return propMap.put(key, value);
+	@SuppressWarnings("unchecked")
+	public final <T> T put(Object key, T value) {
+		if (value == null) return (T) propMap.remove(key);
+		return (T) propMap.put(key, value);
+	}
+
+	/**
+	 * Adds a property, defined by a key and non-null value, to this element if the key is
+	 * not already present. If value is {@code null}, the property key will be removed.
+	 *
+	 * @param key   the property key
+	 * @param value the new property value
+	 * @return the previous property value associated with key, or {@code null} if there
+	 *         was no mapping for the key
+	 */
+	@SuppressWarnings("unchecked")
+	public final <T> T putIfAbsent(Object key, T value) {
+		if (value == null) return (T) propMap.remove(key);
+		return (T) propMap.putIfAbsent(key, value);
 	}
 
 	/** Adds the given map of properties. */
-	public final void putProperties(Map<Object, Object> props) {
-		if (props != null) props.forEach((k, v) -> putProperty(k, v));
+	public final void putAll(Map<Object, Object> props) {
+		if (props != null) props.forEach((k, v) -> put(k, v));
+	}
+
+	public final void putAllIfAbsent(Map<Object, Object> props) {
+		if (props != null) props.forEach((k, v) -> putIfAbsent(k, v));
 	}
 
 	/** Returns the properties map. */
-	public final Map<Object, Object> properties() {
+	public final Map<Object, Object> getAll() {
 		return Collections.unmodifiableMap(propMap);
 	}
 
-	public void clear() {
+	/** Clears the structure. */
+	void clear() {
 		propMap.clear();
 	}
 

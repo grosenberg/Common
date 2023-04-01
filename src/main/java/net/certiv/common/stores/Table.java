@@ -7,6 +7,7 @@
 package net.certiv.common.stores;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,8 +15,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
- * A table data-structure implemented as a LinkedHashMap with LinkedHashMap
- * instance values.
+ * A table data-structure implemented as a LinkedHashMap with LinkedHashMap instance
+ * values.
  */
 public class Table<R, C, V> {
 
@@ -46,9 +47,25 @@ public class Table<R, C, V> {
 	}
 
 	/**
-	 * Copies all of the mappings from the given map to this map to the col/value
-	 * mappings identified by the given row key. The copied mappings will be added
-	 * to or replace, as appropriate, any prior existing col/value mappings.
+	 * Get the row keys for the rows that contain the given column value.
+	 *
+	 * @param col a column value
+	 * @return set of row keys for rows containing the given column value
+	 */
+	public Set<R> getRows(C col) {
+		Set<R> values = new LinkedHashSet<>();
+		for (Entry<R, LinkedHashMap<C, V>> row : table.entrySet()) {
+			LinkedHashMap<C, V> map = row.getValue();
+			if (map.containsKey(col)) values.add(row.getKey());
+		}
+		return values;
+
+	}
+
+	/**
+	 * Copies all of the mappings from the given map to this map to the col/value mappings
+	 * identified by the given row key. The copied mappings will be added to or replace,
+	 * as appropriate, any prior existing col/value mappings.
 	 *
 	 * @throws NullPointerException if the row or map is {@code null}
 	 */
@@ -62,8 +79,8 @@ public class Table<R, C, V> {
 	}
 
 	/**
-	 * Replaces the col/value mappings identified by the given row key with the
-	 * given map, or adds the mappings at the given row key.
+	 * Replaces the col/value mappings identified by the given row key with the given map,
+	 * or adds the mappings at the given row key.
 	 *
 	 * @throws NullPointerException if the row or map is {@code null}
 	 */

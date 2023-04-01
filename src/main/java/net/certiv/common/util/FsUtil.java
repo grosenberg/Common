@@ -52,8 +52,8 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns a {@code long} represeting the last modified date/time of the file at
-	 * the given path location.
+	 * Returns a {@code long} represeting the last modified date/time of the file at the
+	 * given path location.
 	 */
 	public static long getLastModified(Path path) {
 		try {
@@ -99,8 +99,8 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the file exension of the given pathname or {@code EMPTY} if there is
-	 * no extension.
+	 * Returns the file exension of the given pathname or {@code EMPTY} if there is no
+	 * extension.
 	 *
 	 * @param pathname a pathname string
 	 * @return the pathname extension
@@ -126,11 +126,10 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the given pathname with the filename modified to have the given
-	 * extension.
+	 * Returns the given pathname with the filename modified to have the given extension.
 	 *
 	 * @param pathname a pathname
-	 * @param ext the new extension
+	 * @param ext      the new extension
 	 * @return the modified pathname
 	 */
 	public static String replaceExt(String pathname, String ext) {
@@ -139,11 +138,10 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the given pathname with the filename modified to have the given
-	 * extension.
+	 * Returns the given pathname with the filename modified to have the given extension.
 	 *
 	 * @param pathname a pathname
-	 * @param ext the new extension
+	 * @param ext      the new extension
 	 * @return the modified pathname
 	 */
 	public static Path replaceExt(Path pathname, String ext) {
@@ -209,8 +207,8 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns a String from an InputStream that is aware of its encoding. If the
-	 * encoding is {@code null} it sets the platform's default encoding
+	 * Returns a String from an InputStream that is aware of its encoding. If the encoding
+	 * is {@code null} it sets the platform's default encoding
 	 * ({@code ResourcesPlugin.getEncoding()}).
 	 */
 	public static String readFromStream(InputStream stream, String encoding) throws IOException {
@@ -297,9 +295,9 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the given input stream's contents as a byte array. If a length is
-	 * specified (i.e. if length != -1), only length bytes are returned. Otherwise
-	 * all bytes in the stream are returned. Note this doesn't close the stream.
+	 * Returns the given input stream's contents as a byte array. If a length is specified
+	 * (i.e. if length != -1), only length bytes are returned. Otherwise all bytes in the
+	 * stream are returned. Note this doesn't close the stream.
 	 *
 	 * @throws IOException if a problem occured reading the stream.
 	 */
@@ -345,9 +343,9 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the given input stream's contents as a character array. If a length
-	 * is specified, i.e., length != -1, only length chars are returned. Otherwise
-	 * all chars in the stream are returned.
+	 * Returns the given input stream's contents as a character array. If a length is
+	 * specified, i.e., length != -1, only length chars are returned. Otherwise all chars
+	 * in the stream are returned.
 	 *
 	 * @throws IOException if a problem occured reading the stream.
 	 */
@@ -385,7 +383,8 @@ public final class FsUtil {
 			int readSize = 0;
 			while (readSize != -1 && len != length) {
 				// See PR 1FMS89U
-				// We record first the read size. In this case len is the actual read size.
+				// We record first the read size. In this case len is the actual read
+				// size.
 				len += readSize;
 				readSize = reader.read(contents, len, length - len);
 			}
@@ -403,10 +402,10 @@ public final class FsUtil {
 	/**
 	 * Returns the content of the given named resource as a {@code String}.
 	 *
-	 * @param cls a resource classloader relative class
+	 * @param cls  a resource classloader relative class
 	 * @param name the resource name
 	 * @return the resource content as a {@code String} or {@code null} on any IO
-	 *             exception
+	 *         exception
 	 */
 	public static String loadResourceStringChecked(Class<?> cls, String name) {
 		try {
@@ -419,7 +418,7 @@ public final class FsUtil {
 	/**
 	 * Returns the content of the given named resource as a {@code String}.
 	 *
-	 * @param cls a resource classloader relative class
+	 * @param cls  a resource classloader relative class
 	 * @param name the resource name
 	 * @return the resource content as a {@code String}
 	 * @throws IOException on load IO exception
@@ -477,7 +476,7 @@ public final class FsUtil {
 
 	public static File createTmpFolder(File root, String path) throws IOException {
 		Assert.notNull(root, path);
-		Assert.isLegal(root.isDirectory());
+		Assert.isTrue(root.isDirectory());
 
 		File dir = new File(root, path);
 		dir.mkdirs();
@@ -485,23 +484,21 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Create a new empty file in the given directory, using the given prefix and
-	 * suffix strings to define the filename. If this method returns successfully
-	 * then it is guaranteed that:
+	 * Create a new empty file in the given directory, using the given prefix and suffix
+	 * strings to define the filename. If this method returns successfully then it is
+	 * guaranteed that:
 	 * <p>
-	 * If the {@code prefix} argument is {@code null}, the prefix {@code "Tmp"} is
-	 * used.
+	 * If the {@code prefix} argument is {@code null}, the prefix {@code "Tmp"} is used.
 	 * <p>
-	 * If the {@code suffix} argument is {@code null}, the suffix {@code ".tmp"} is
-	 * used.
+	 * If the {@code suffix} argument is {@code null}, the suffix {@code ".tmp"} is used.
 	 * <p>
 	 * If the {@code dir} argument is {@code null}, the system-dependent default
 	 * temporary-file directory is used.
 	 *
 	 * @param prefix a filename prefix
 	 * @param suffix a filename suffix
-	 * @param dir the directory that will contain the created file, or {@code null}
-	 *            select the default system temporary-file directory
+	 * @param dir    the directory that will contain the created file, or {@code null}
+	 *               select the default system temporary-file directory
 	 * @return the the newly-created file
 	 * @throws IOException if a file could not be created
 	 */

@@ -8,12 +8,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** Table implemented with two levels of {@link ConcurrentHashMap}. */
-public class HashTable<R, C, V> {
+public class ConcurrentTable<R, C, V> {
 
 	private final Map<R, ConcurrentHashMap<C, V>> map;
 
 	/** Constructs a new, empty table. */
-	public HashTable() {
+	public ConcurrentTable() {
 		this.map = new ConcurrentHashMap<>();
 	}
 
@@ -27,7 +27,7 @@ public class HashTable<R, C, V> {
 	 * @throws NullPointerException if the specified map or any of its keys or
 	 *             values are null
 	 */
-	public HashTable(HashTable<R, C, V> m) {
+	public ConcurrentTable(ConcurrentTable<R, C, V> m) {
 		this();
 		putAll(m);
 	}
@@ -69,7 +69,7 @@ public class HashTable<R, C, V> {
 		}
 	}
 
-	public void putAll(HashTable<R, C, V> t) {
+	public void putAll(ConcurrentTable<R, C, V> t) {
 		for (Entry<R, ConcurrentHashMap<C, V>> e : t.entrySet()) {
 			R row = e.getKey();
 			for (Entry<C, V> m : e.getValue().entrySet()) {
@@ -139,8 +139,8 @@ public class HashTable<R, C, V> {
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
-		if (!(obj instanceof HashTable)) return false;
-		HashTable<?, ?, ?> other = (HashTable<?, ?, ?>) obj;
+		if (!(obj instanceof ConcurrentTable)) return false;
+		ConcurrentTable<?, ?, ?> other = (ConcurrentTable<?, ?, ?>) obj;
 		return Objects.equals(map, other.map);
 	}
 }

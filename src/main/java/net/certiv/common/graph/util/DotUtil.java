@@ -17,15 +17,15 @@ public class DotUtil {
 	 * @return the dot style store
 	 */
 	public static DotStyle getDotStyle(Props props, ON category) {
-		DotStyle ds = (DotStyle) props.getProperty(DotStyle.PropName);
+		DotStyle ds = (DotStyle) props.get(DotStyle.PropName);
 		if (ds == null) {
 			ds = new DotStyle(category);
-			props.putProperty(DotStyle.PropName, ds);
+			props.put(DotStyle.PropName, ds);
 		}
 		return ds;
 	}
 
 	public static void clearDotStyle(Props props) {
-		props.putProperty(DotStyle.PropName, null);
+		props.put(DotStyle.PropName, null);
 	}
 }

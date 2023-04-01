@@ -74,8 +74,10 @@ public class LogConfig {
 
 	private static Configuration create(String logname, ConfigurationBuilder<BuiltConfiguration> builder,
 			String pathname, String layout) {
-		builder.setStatusLevel(Level.DEBUG);
+
 		builder.setConfigurationName(logname);
+		builder.setStatusLevel(Level.DEBUG);
+		builder.setVerbosity("disable");
 
 		// threshold filter
 		builder.add(builder.newFilter("ThresholdFilter", Filter.Result.ACCEPT, Filter.Result.NEUTRAL)

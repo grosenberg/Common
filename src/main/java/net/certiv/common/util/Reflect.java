@@ -7,8 +7,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
-import net.certiv.common.ex.AssertionFailedException;
 import net.certiv.common.stores.Result;
+import net.certiv.common.util.ex.AssertEx;
+import net.certiv.common.util.ex.IAssertException.Test;
 
 public class Reflect {
 
@@ -123,6 +124,43 @@ public class Reflect {
 		}
 	}
 
+	public static Result<Field> findField(Object target, String name) {
+		Class<?> parent = target.getClass();
+		while (parent != Object.class) {
+			try {
+				return Result.of(parent.getDeclaredField(name));
+			} catch (Exception | Error e) {
+				parent = parent.getSuperclass();
+				continue;
+			}
+		}
+		return Result.of(null);
+	}
+
+	/**
+	 * Returns {@code true} if the field is found and successfully set. Searches for the
+	 * field in the given target and ordered inheritance classes. Attempts to set the
+	 * first found.
+	 *
+	 * @param target the object to search for the named field
+	 * @param name   the field name
+	 * @param value  the value to assign to the field
+	 * @return a {@code Result} containing {@code true} on success, {@code false} on
+	 *         failure to find, or {@code Throwable} on failure to set
+	 */
+	public static Result<Boolean> setField(Object target, String name, Object value) {
+		Result<Field> field = findField(target, name);
+		if (!field.valid()) return Result.of(false);
+		try {
+			field.result.setAccessible(true);
+			field.result.set(target, value);
+			return Result.of(true);
+
+		} catch (Exception | Error e) {
+			return Result.of(e);
+		}
+	}
+
 	public static Result<Boolean> hasMethod(Object target, String methodName, Class<?>[] params) {
 		if (params == null) params = NoParams;
 		try {
@@ -137,7 +175,7 @@ public class Reflect {
 	/**
 	 * Returns the class type of the first generic field parameter
 	 *
-	 * @param target the target object
+	 * @param target    the target object
 	 * @param fieldname the name of the target contained field
 	 * @return the class type of the first generic parameter
 	 */
@@ -148,9 +186,9 @@ public class Reflect {
 	/**
 	 * Returns the class type of the generic field parameter at the given index
 	 *
-	 * @param target the target object
+	 * @param target    the target object
 	 * @param fieldname the name of the target contained field
-	 * @param idx the position index of the generic parameter being queried
+	 * @param idx       the position index of the generic parameter being queried
 	 * @return the class type of the generic parameter at the given index
 	 */
 	public static <C> Result<Class<C>> typeOf(Object target, String fieldname, int idx) {
@@ -166,8 +204,8 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an initialized class instance corresponding to the given class name
-	 * using the bootstrap class loader.
+	 * Returns an initialized class instance corresponding to the given class name using
+	 * the bootstrap class loader.
 	 *
 	 * @param name fully qualified name of the desired class
 	 * @return {@code Result} object representing the desired class
@@ -177,11 +215,11 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an initialized class instance corresponding to the given class name
-	 * using the given class loader.
+	 * Returns an initialized class instance corresponding to the given class name using
+	 * the given class loader.
 	 *
 	 * @param loader the class loader to use to load the class
-	 * @param name fully qualified name of the desired class
+	 * @param name   fully qualified name of the desired class
 	 * @return {@code Result} object representing the desired class
 	 */
 	public static <C> Result<Class<C>> forName(String name, ClassLoader loader) {
@@ -194,18 +232,16 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an instantiated instance of the {@code Class} object identified by
-	 * the given fully-qualified class name (in the same format returned by
-	 * {@code getName}), using the bootstrap class loader and given constuctor
-	 * parameter arguments.
+	 * Returns an instantiated instance of the {@code Class} object identified by the
+	 * given fully-qualified class name (in the same format returned by {@code getName}),
+	 * using the bootstrap class loader and given constuctor parameter arguments.
 	 * <p>
 	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
-	 * @param <C> the intended class type
+	 * @param <C>       the intended class type
 	 * @param classname fully-qualified class name
-	 * @param args constuctor parameter arguments required for instantiation
-	 * @return {@code Result} containing the instantiated class or instantiation
-	 *             error
+	 * @param args      constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(String classname, Object... args) {
 		try {
@@ -219,19 +255,17 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an instantiated instance of the {@code Class} object identified by
-	 * the given fully-qualified class name (in the same format returned by
-	 * {@code getName}), using the given class loader and constuctor parameter
-	 * arguments.
+	 * Returns an instantiated instance of the {@code Class} object identified by the
+	 * given fully-qualified class name (in the same format returned by {@code getName}),
+	 * using the given class loader and constuctor parameter arguments.
 	 * <p>
 	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
-	 * @param <C> the intended class type
-	 * @param cl the class loader to use
+	 * @param <C>       the intended class type
+	 * @param cl        the class loader to use
 	 * @param classname fully-qualified class name
-	 * @param args constuctor parameter arguments required for instantiation
-	 * @return {@code Result} containing the instantiated class or instantiation
-	 *             error
+	 * @param args      constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(ClassLoader cl, String classname, Object... args) {
 		try {
@@ -244,14 +278,13 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an instantiated instance of the given {@code Class} object using the
-	 * given constuctor parameter arguments.
+	 * Returns an instantiated instance of the given {@code Class} object using the given
+	 * constuctor parameter arguments.
 	 *
-	 * @param <C> the intended class type
-	 * @param cls the class to instantiate
+	 * @param <C>  the intended class type
+	 * @param cls  the class to instantiate
 	 * @param args constuctor parameter arguments required for instantiation
-	 * @return {@code Result} containing the instantiated class or instantiation
-	 *             error
+	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(Class<C> cls, Object... args) {
 		try {
@@ -269,8 +302,7 @@ public class Reflect {
 	 *
 	 * @param <C> the intended class type
 	 * @param cls the class to instantiate
-	 * @return {@code Result} containing the instantiated class or instantiation
-	 *             error
+	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(Class<C> cls) {
 		try {
@@ -285,15 +317,14 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an instantiated instance of the given {@code Class} object using the
-	 * given constuctor parameter arguments.
+	 * Returns an instantiated instance of the given {@code Class} object using the given
+	 * constuctor parameter arguments.
 	 *
-	 * @param <C> the intended class type
-	 * @param cls the class to instantiate
+	 * @param <C>    the intended class type
+	 * @param cls    the class to instantiate
 	 * @param params constuctor parameter types required for instantiation
-	 * @param args constuctor parameter arguments required for instantiation
-	 * @return {@code Result} containing the instantiated class or instantiation
-	 *             error
+	 * @param args   constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(Class<C> cls, Class<?>[] params, Object[] args) {
 		try {
@@ -311,7 +342,7 @@ public class Reflect {
 	private static void chkArgs(Class<?>[] params, Object[] args) {
 		if (params == null && args == null) return;
 		if (params != null && args != null && params.length == args.length) return;
-		throw new AssertionFailedException(ERR_CHK, params, args);
+		throw AssertEx.of(Test.OTHER, ERR_CHK, params, args);
 	}
 
 	@SuppressWarnings("unchecked")

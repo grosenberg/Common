@@ -9,11 +9,16 @@ import net.certiv.common.stores.Counter;
 import net.certiv.common.util.Assert;
 
 /**
- * An edge connects two nodes and form a self-loop where both nodes are the same. Edges
- * are unique, permiting multiple distinct edges to connect the same two nodes. An edge
- * can only exist between two existing nodes: no dangling edges permitted.
+ * An edge connects two nodes. Single edge cycles -- where both nodes are the same -- are
+ * permitted. Edges are unique, permiting multiple distinct edges to connect the same two
+ * nodes.
+ * <p>
+ * An edge can only exist between two existing nodes: no dangling edges permitted.
  */
 public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
+
+	// private static final GraphException ERR_REMOVE = GraphException.of(Test.NOT_NULL,
+	// "Redundant remove");
 
 	/** Sense of direction. */
 	public enum Sense {
@@ -25,7 +30,9 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		BOTH;
 	}
 
-	private static final Counter CTR = new Counter();
+	static final Counter CTR = new Counter();
+
+	/** Unique numerical edge identifier */
 	public final long _eid;
 
 	private N beg;
@@ -40,7 +47,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	protected Edge(N beg, N end, Map<Object, Object> props) {
 		this(beg, end);
-		putProperties(props);
+		putAll(props);
 	}
 
 	public String name() {
@@ -63,7 +70,8 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param beg the new edge begin node
 	 * @return the prior edge begin node
 	 */
-	public N beg(N beg) {
+	public N setBeg(N beg) {
+		Assert.notNull(beg);
 		N prior = this.beg;
 		this.beg = beg;
 		return prior;
@@ -75,10 +83,21 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param end the new edge end node
 	 * @return the prior edge end node
 	 */
-	public N end(N end) {
+	public N setEnd(N end) {
+		Assert.notNull(end);
 		N prior = this.end;
 		this.end = end;
 		return prior;
+	}
+
+	/**
+	 * Checks whether the edge endpoint nodes are {@code null}. A valid edge may exist
+	 * disconnected from the graph, <i>i.e.</i> pending reconnection.
+	 *
+	 * @return {@code true} if this edge is valid
+	 */
+	public boolean valid() {
+		return beg != null && end != null;
 	}
 
 	/** Returns the node at the 'other' end of this edge. */
@@ -88,12 +107,12 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/** Returns the node of the given sense direction. */
 	public N other(Sense dir) {
-		Assert.isLegal(dir != Sense.BOTH);
+		Assert.isTrue(dir != Sense.BOTH);
 		if (dir == Sense.IN) return beg;
 		return end;
 	}
 
-	/** Returns {@code true} if this edge connects to the given node. */
+	/** Returns {@code true} if this edge directly connects to the given node. */
 	public boolean connectsTo(N node) {
 		return node.equals(beg) || node.equals(end);
 	}
@@ -102,13 +121,16 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * Returns {@code true} if this edge is a self-cyclic edge, defined where the begin
 	 * and end nodes are the same.
 	 */
-	public boolean selfCyclic() {
+	public boolean cyclic() {
 		return beg.equals(end);
 	}
 
 	/**
-	 * Internal use only. Removes this edge from the internal lists of begin and end node
-	 * connections. Callthrough from {@code Graph#remove(edge)}.
+	 * Removes this edge from the graph by disconnecting from the internal edge sets of
+	 * the edge begin and end node connections. Specify {@code delete==true} to clear the
+	 * edge. Otherwise the edge remains intact and potentially available for reuse.
+	 * <p>
+	 * Internal use only. Callthrough from {@code Graph#remove(edge)}.
 	 *
 	 * <pre>
 	 * before:
@@ -117,12 +139,17 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * 	A -> Beg    End -> D
 	 * </pre>
 	 *
+	 * @param delete {@code true} to clear the edge
 	 * @return {@code true} if this edge is fully removed.
 	 */
 	@SuppressWarnings("unchecked")
-	boolean remove() {
-		boolean rmvd = beg.remove((E) this, Sense.OUT);
-		rmvd |= end.remove((E) this, Sense.IN);
+	boolean remove(boolean delete) {
+		boolean rmvd = beg != null && beg.remove((E) this, Sense.OUT);
+		rmvd |= end != null && end.remove((E) this, Sense.IN);
+		if (delete) {
+			beg = end = null;
+			clear();
+		}
 		return rmvd;
 	}
 
@@ -139,6 +166,8 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/**
 	 * Defines a custom style for this edge. The default implementation does nothing.
+	 * <p>
+	 * Override to define a custom configured style.
 	 */
 	public DotStyle defineStyle() {
 		return getDotStyle();
@@ -159,6 +188,6 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		return String.format("%s -> %s", beg, end);
+		return String.format("%s -{%s}-> %s", beg, _eid, end);
 	}
 }

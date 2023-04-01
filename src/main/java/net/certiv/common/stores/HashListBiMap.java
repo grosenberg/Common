@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class HashListBiMap<K, V> {
 
-	private final HashList<K, V> forward = new HashList<>();
+	private final LinkedHashList<K, V> forward = new LinkedHashList<>();
 	private final HashMap<V, K> reverse = new LinkedHashMap<>();
 
 	public HashListBiMap() {}
@@ -84,7 +84,7 @@ public class HashListBiMap<K, V> {
 	}
 
 	public int size() {
-		return forward.size();
+		return forward.sizeKeys();
 	}
 
 	public int sizeValues() {

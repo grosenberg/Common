@@ -12,14 +12,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import net.certiv.common.stores.TableList.TableRow;
+
 /**
- * A table data-structure implemented as a LinkedHashMap row -> LinkedHashMap
- * column -> LinkedList values.
+ * A table data-structure implemented as a LinkedHashMap row -> LinkedHashMap column ->
+ * LinkedList values.
  */
-public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V>>> {
+public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>>> {
 
 	private final LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> table;
 
@@ -62,11 +65,11 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 	}
 
 	/**
-	 * Adds the given value to the list at the given row and column if the value is
-	 * not already present.
+	 * Adds the given value to the list at the given row and column if the value is not
+	 * already present.
 	 *
-	 * @param row the table row
-	 * @param col the table column
+	 * @param row   the table row
+	 * @param col   the table column
 	 * @param value a value to add to the value list if not present
 	 * @return {@code true} if this collection changed as a result of thecall
 	 */
@@ -85,9 +88,9 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 	}
 
 	/**
-	 * Puts all entries from the given map into the table at the given row and the
-	 * columns defined by the map. The entries are added to the end of the value
-	 * lists at the given row and map columns.
+	 * Puts all entries from the given map into the table at the given row and the columns
+	 * defined by the map. The entries are added to the end of the value lists at the
+	 * given row and map columns.
 	 */
 	public void putAll(R row, Map<C, List<V>> map) {
 		LinkedHashMap<C, LinkedList<V>> colList = table.get(row);
@@ -106,9 +109,9 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 	}
 
 	/**
-	 * Replaces any existing value lists at the given row and columns defined by the
-	 * given map. If a value list does not exist, the value list is added at the
-	 * given row and map column.
+	 * Replaces any existing value lists at the given row and columns defined by the given
+	 * map. If a value list does not exist, the value list is added at the given row and
+	 * map column.
 	 */
 	public void replace(R row, Map<C, List<V>> map) {
 		LinkedHashMap<C, LinkedList<V>> colList = table.get(row);
@@ -155,11 +158,11 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 	}
 
 	@Override
-	public Iterator<TableCell<R, C, LinkedList<V>>> iterator() {
+	public Iterator<TableRow<R, C, LinkedList<V>>> iterator() {
 		return new TableIterator();
 	}
 
-	private class TableIterator implements Iterator<TableCell<R, C, LinkedList<V>>> {
+	private class TableIterator implements Iterator<TableRow<R, C, LinkedList<V>>> {
 
 		Iterator<Entry<R, LinkedHashMap<C, LinkedList<V>>>> rowItr = table.entrySet().iterator();
 		Iterator<Entry<C, LinkedList<V>>> colItr = null;
@@ -171,13 +174,13 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 		}
 
 		@Override
-		public TableCell<R, C, LinkedList<V>> next() {
+		public TableRow<R, C, LinkedList<V>> next() {
 			if (colItr == null || !colItr.hasNext()) {
 				row = rowItr.next();
 				colItr = row.getValue().entrySet().iterator();
 			}
 			Entry<C, LinkedList<V>> col = colItr.next();
-			return new TableCell<>(row.getKey(), col.getKey(), col.getValue());
+			return new TableRow<>(row.getKey(), col.getKey(), col.getValue());
 		}
 
 		@Override
@@ -187,6 +190,51 @@ public class TableList<R, C, V> implements Iterable<TableCell<R, C, LinkedList<V
 				rowItr.remove();
 				row = null;
 			}
+		}
+	}
+
+	/** {@code Table} support class. */
+	public static class TableRow<R, C, V> {
+
+		private final R row;
+		private final C col;
+		private final V val;
+
+		public TableRow(R row, C col, V val) {
+			this.row = row;
+			this.col = col;
+			this.val = val;
+		}
+
+		public R row() {
+			return row;
+		}
+
+		public C col() {
+			return col;
+		}
+
+		public V val() {
+			return val;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(col, row, val);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (!(obj instanceof TableList.TableRow)) return false;
+			TableRow<?, ?, ?> other = (TableRow<?, ?, ?>) obj;
+			return Objects.equals(col, other.col) && Objects.equals(row, other.row)
+					&& Objects.equals(val, other.val);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("(%s, %s)=%s", row, col, val);
 		}
 	}
 

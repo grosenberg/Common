@@ -4,29 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.graph.demo.DemoGraph;
-import net.certiv.common.graph.demo.DiffUtil;
+import net.certiv.common.diff.Differ;
 import net.certiv.common.util.FsUtil;
 
-class GraphBasic {
+class GraphBasic extends TestBase {
 
 	@Test
 	void testGraphMinimal() {
-		DemoGraph graph = new DemoGraph("Test");
+		graph.put(Graph.GRAPH_NAME, "Minimal");
 
 		graph.createEdge("A", "B");
 
 		String dot = graph.dot();
 		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot0.txt");
-
-		System.out.println(DiffUtil.diff(dot, txt));
-
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
 
 	@Test
 	void testGraph() {
-		DemoGraph graph = new DemoGraph("Test");
+		graph.put(Graph.GRAPH_NAME, "Test");
 
 		graph.createEdge("A", "B");
 		graph.createEdge("B", "C");
@@ -36,37 +33,36 @@ class GraphBasic {
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String dumptxt = FsUtil.loadResourceStringChecked(getClass(), "dump1.txt");
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot1.txt");
+		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot1.txt");
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
 
-		System.out.println(DiffUtil.diff(dot, dottxt));
-
-		assertEquals(dump, dumptxt);
-		assertEquals(dot, dottxt);
+		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump1.txt");
+		assertEquals(dump, dtxt);
 	}
 
 	@Test
 	void testMultiRoots() {
-		DemoGraph graph = new DemoGraph("Two-root Test");
+		graph.put(Graph.GRAPH_NAME, "Two-root Test");
 
 		graph.createEdge("A", "B");
 		graph.createEdge("B", "C");
 		graph.createEdge("D", "E");
 
-		String dump = graph.dump();
 		String dot = graph.dot();
+		String dump = graph.dump();
 
-		String dumptxt = FsUtil.loadResourceStringChecked(getClass(), "dump2.txt");
-		assertEquals(dump, dumptxt);
+		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot2.txt");
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
 
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot2.txt");
-		System.out.println(DiffUtil.diff(dot, dottxt));
-		assertEquals(dot, dottxt);
+		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump2.txt");
+		assertEquals(dump, dtxt);
 	}
 
 	@Test
 	void testCycles() {
-		DemoGraph graph = new DemoGraph("Cycle Test");
+		graph.put(Graph.GRAPH_NAME, "Cycle Test");
 
 		graph.createEdge("A", "B");
 		graph.createEdge("B", "C");
@@ -79,11 +75,11 @@ class GraphBasic {
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String dumptxt = FsUtil.loadResourceStringChecked(getClass(), "dump3.txt");
-		assertEquals(dump, dumptxt);
+		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot3.txt");
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
 
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dot3.txt");
-		System.out.println(DiffUtil.diff(dot, dottxt));
-		assertEquals(dot, dottxt);
+		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump3.txt");
+		assertEquals(dump, dtxt);
 	}
 }

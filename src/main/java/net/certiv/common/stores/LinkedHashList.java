@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Certiv Analytics. All rights reserved.
+ * Copyright (c) 2017, 2023 Certiv Analytics. All rights reserved.
  * Use of this file is governed by the Eclipse Public License v1.0
  * that can be found in the LICENSE.txt file in the project root,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 package net.certiv.common.stores;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,77 +19,85 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
- * Multimap implemented as a LinkedHashMap with LinkedList implemented instance
- * values.
+ * Multimap store supporing 1:N relations. Implemented as a LinkedHashMap with LinkedList
+ * implemented instance values. Supports restriction of the value list to unique values on
+ * a per-key basis.
  *
  * @param <K> the key type
  * @param <V> the list value type
  */
-public class HashList<K, V> {
+public class LinkedHashList<K, V> {
 
 	private final LinkedHashMap<K, LinkedList<V>> map = new LinkedHashMap<>();
 	private boolean unique = false;
 
-	public HashList() {}
+	public LinkedHashList() {}
 
-	public HashList(HashList<K, V> data) {
+	public LinkedHashList(LinkedHashList<K, V> data) {
 		for (K key : data.keys()) {
 			put(key, data.get(key));
 		}
 	}
 
-	public HashList(Map<K, List<V>> data) {
+	public LinkedHashList(Map<K, List<V>> data) {
 		for (Entry<K, List<V>> entry : data.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
 
 	/**
-	 * Returns the value mapped to the specified key, or {@code null} if this map
+	 * Returns the value list mapped to the specified key, or {@code null} if this map
 	 * contains no mapping for the key.
 	 */
 	public LinkedList<V> get(K key) {
-		return map.get(key);
+		LinkedList<V> list = map.get(key);
+		if (list == null) return null;
+		return new LinkedList<>(list);
 	}
 
-	public LinkedList<V> getOrDefault(K key, Collection<V> defValue) {
+	public LinkedList<V> getOrDefault(K key, Collection<V> defaults) {
 		LinkedList<V> res = map.get(key);
-		if (res != null) return res;
-		return new LinkedList<>(defValue);
+		if (res != null) return new LinkedList<>(res);
+		return new LinkedList<>(defaults);
 	}
 
 	/**
 	 * Adds the given value to the list of values identified by the given key. If
-	 * {@link unique} is {@code true}, the value is added only if not already
-	 * present (based on object equality).
+	 * {@link unique} is {@code true}, the value is added only if not already present
+	 * (based on object equality).
 	 */
 	public boolean put(K key, V value) {
-		LinkedList<V> values = map.get(key);
-		if (values == null) {
-			values = new LinkedList<>();
-			map.put(key, values);
+		LinkedList<V> list = map.get(key);
+		if (list == null) {
+			list = new LinkedList<>();
+			map.put(key, list);
 		}
-		if (unique && values.contains(value)) return false;
-		return values.add(value);
+		if (unique && list.contains(value)) return false;
+		return list.add(value);
 	}
 
 	/**
-	 * Appends the given values to the list of values identified by the given key.
-	 * If {@link unique} is set to {@code true}, each value is added only if value
-	 * is not already present (based on object equality).
+	 * Appends the given values to the list of values identified by the given key. If
+	 * {@link unique} is set to {@code true}, each value is added only if value is not
+	 * already present (based on object equality).
 	 */
 	public LinkedList<V> put(K key, Collection<V> values) {
 		for (V value : values) {
 			put(key, value);
 		}
-		return map.get(key);
+		return new LinkedList<>(map.get(key));
 	}
 
-	public List<V> putIfAbsent(K key, Collection<V> values) {
-		LinkedList<V> cur = get(key);
-		if (cur != null) return cur;
-		put(key, values);
-		return null;
+	/**
+	 * Puts the given values as the list of values identified by the given key if no such
+	 * value list preexists. If {@link unique} is set to {@code true}, each value in the
+	 * value list filtered to being unique (based on object equality).
+	 */
+	public LinkedList<V> putIfAbsent(K key, Collection<V> values) {
+		LinkedList<V> list = map.get(key);
+		if (list == null) return put(key, values);
+		// return map.get(key);
+		return null; // TODO: return result or null signalling not absent?
 	}
 
 	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
@@ -105,7 +113,7 @@ public class HashList<K, V> {
 	}
 
 	public boolean containsEntry(K key, V value) {
-		List<V> values = get(key);
+		List<V> values = map.get(key);
 		if (values == null) return false;
 		return values.contains(value);
 	}
@@ -115,48 +123,46 @@ public class HashList<K, V> {
 	}
 
 	public Set<K> keySet() {
-		return map.keySet();
-	}
-
-	public List<K> keyList() {
-		return new ArrayList<>(map.keySet());
+		return new HashSet<>(map.keySet());
 	}
 
 	public LinkedList<K> keys() {
 		return new LinkedList<>(map.keySet());
 	}
 
-	/** Returns a list of the value lists held in this HashList. */
-	public List<List<V>> values() {
-		return new ArrayList<>(map.values());
+	/** Returns a list of the value lists held in this LinkedHashList. */
+	public LinkedList<LinkedList<V>> values() {
+		return new LinkedList<>(map.values());
 	}
 
-	/** Returns a list of all values held in this HashList. */
-	public List<V> valuesAll() {
-		List<V> values = new ArrayList<>();
-		for (List<V> subList : map.values()) {
+	/** Returns a list of all values held in this LinkedHashList. */
+	public LinkedList<V> valuesAll() {
+		LinkedList<V> values = new LinkedList<>();
+		for (LinkedList<V> subList : map.values()) {
 			values.addAll(subList);
 		}
-		return values;
+		return new LinkedList<>(values);
 	}
 
 	/** Remove all values associated with the given key. */
-	public List<V> remove(K key) {
+	public LinkedList<V> remove(K key) {
 		return map.remove(key);
 	}
 
 	public boolean remove(K key, V value) {
-		List<V> values = get(key);
-		if (values == null) return false;
-		return values.remove(value);
+		LinkedList<V> list = map.get(key);
+		if (list == null) return false;
+		boolean ok = list.remove(value);
+		if (ok && list.isEmpty()) map.remove(key);
+		return ok;
 	}
 
-	public void enforceUniqueValues(boolean unique) {
-		this.unique = unique;
-	}
-
-	public boolean enforcingUniqueValues() {
+	public boolean isUniqueValued() {
 		return unique;
+	}
+
+	public void setUniqueValued(boolean unique) {
+		this.unique = unique;
 	}
 
 	public void sort(Comparator<V> comp) {
@@ -174,11 +180,11 @@ public class HashList<K, V> {
 		map.clear();
 	}
 
-	public int size() {
+	public int sizeKeys() {
 		return map.size();
 	}
 
-	/** Returns the size (total number of held values) of this HashList. */
+	/** Returns the total size (total number of held values) of this LinkedHashList. */
 	public int sizeValues() {
 		int cnt = 0;
 		for (List<V> values : map.values()) {
@@ -204,8 +210,8 @@ public class HashList<K, V> {
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
-		if (!(obj instanceof HashList)) return false;
-		HashList<?, ?> other = (HashList<?, ?>) obj;
+		if (!(obj instanceof LinkedHashList)) return false;
+		LinkedHashList<?, ?> other = (LinkedHashList<?, ?>) obj;
 		return unique == other.unique && Objects.equals(map, other.map);
 	}
 

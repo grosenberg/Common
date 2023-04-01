@@ -12,8 +12,9 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.stores.HashList;
+import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.Pair;
+import net.certiv.common.stores.UniqueDeque;
 import net.certiv.common.util.Strings;
 
 public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
@@ -23,7 +24,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	private static final String GRAPH_BEG = "digraph %s {";
 	private static final String GRAPH_END = "}";
-	private static final String SUBGRAPH_BEG = "%ssubgraph cluster_%s {";
+	private static final String SUBGRAPH_BEG = "%ssubgraph %s {";
+	private static final String SUBGRAPH_NAME = "cluster_%s";
 	private static final String SUBGRAPH_END = "%s}";
 	private static final String NODE = "%s%s";
 	private static final String EDGE = "%s%s -> %s%s";
@@ -36,7 +38,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/** Pretty print out a graph beginning with the given nodes. */
-	public String dump(final Graph<N, E> graph, Set<N> nodes) {
+	public String dump(final Graph<N, E> graph, UniqueDeque<N> nodes) {
 		TextStringBuilder sb = new TextStringBuilder();
 		for (N node : nodes) {
 			sb.appendln(String.format("// ---- %s:%s ----", graph.name(), node.name()));
@@ -66,7 +68,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		@Override
-		public boolean enter(Sense dir, HashList<N, N> visited, N parent, N node) {
+		public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
 			if (parent == null) {
 				// starting a new flow
 				String str = String.format("%s ", node.name());
@@ -76,7 +78,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 			} else if (parent == last) {
 				// continuing a subflow
-				Set<E> edges = parent.to(node);
+				UniqueDeque<E> edges = parent.to(node);
 				int edgeCnt = edges.size();
 				String str = String.format("-%s-> %s ", edgeCnt, node.name());
 				sb.append(str);
@@ -134,7 +136,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		sb.appendln(GRAPH_BEG, fix(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
-		Set<N> roots = graph.getRoots();
+		UniqueDeque<N> roots = graph.getRoots();
 		switch (roots.size()) {
 			case 0:
 				break;
@@ -152,7 +154,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				for (N root : roots) {
 					if (root.hasEdges(Sense.OUT, true)) {
 						sb.appendNewLine();
-						sb.appendln(SUBGRAPH_BEG, dent(1), fix(root.name()));
+						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.name())));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
 						sb.append(render(visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
@@ -210,8 +212,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb;
 	}
 
-	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>>
-			extends NodeVisitor<N> {
+	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>> extends NodeVisitor<N> {
 
 		// value=formatted node definition string
 		private Set<String> nodes = new LinkedHashSet<>();
@@ -238,7 +239,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		@Override
-		public boolean enter(Sense dir, HashList<N, N> visited, N parent, N node) {
+		public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
 			nodes.add(style(node));
 			if (parent != null) {
 				for (E edge : parent.to(node)) {
@@ -249,14 +250,14 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		protected String style(N node) {
-			if (!node.hasProperty(DotStyle.PropName)) return fix(node.name());
-			DotStyle ds = (DotStyle) node.getProperty(DotStyle.PropName);
+			if (!node.has(DotStyle.PropName)) return fix(node.name());
+			DotStyle ds = (DotStyle) node.get(DotStyle.PropName);
 			return String.format(NODE, fix(node.name()), ds.inlineAttributes(ON.NODES));
 		}
 
 		protected String style(E edge) {
-			if (!edge.hasProperty(DotStyle.PropName)) return Strings.EMPTY;
-			DotStyle ds = (DotStyle) edge.getProperty(DotStyle.PropName);
+			if (!edge.has(DotStyle.PropName)) return Strings.EMPTY;
+			DotStyle ds = (DotStyle) edge.get(DotStyle.PropName);
 			return ds.inlineAttributes(ON.EDGES);
 		}
 	}
@@ -279,7 +280,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 		if (name.isEmpty()) return Strings.UNKNOWN;
 		if (P.matcher(name).matches()) return name;
-
 		return Strings.QUOTE + name + Strings.QUOTE;
 	}
 

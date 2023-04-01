@@ -101,7 +101,7 @@ public class Log {
 
 	public static void log(Object source, Level level, String msg, Throwable e) {
 		Class<?> origin = source != null ? source.getClass() : Log.class;
-		if (loggable(source, level)) {
+		if (loggable(origin, level)) {
 			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
 			log.logIfEnabled(FQCN, level, null, msg, e);
 		}
@@ -133,11 +133,10 @@ public class Log {
 	/**
 	 * Returns {@code true} if the logger has been initialized.
 	 * <p>
-	 * The first call to use the logger will force initialization. The
-	 * initialization will use the currently set log name and location to create a
-	 * log file. If no log name or location is set, defaults are used. If the name
-	 * or location is set, or reset, after any initialization, the logger is forced
-	 * to reinitialize.
+	 * The first call to use the logger will force initialization. The initialization will
+	 * use the currently set log name and location to create a log file. If no log name or
+	 * location is set, defaults are used. If the name or location is set, or reset, after
+	 * any initialization, the logger is forced to reinitialize.
 	 *
 	 * @return the current initialization state
 	 */
@@ -159,10 +158,10 @@ public class Log {
 	/**
 	 * Sets a log pathname.
 	 *
-	 * @param logname the log base filename ('.log' will be appended)
+	 * @param logname  the log base filename ('.log' will be appended)
 	 * @param location if relative, a path fragment specifiying the offset from the
-	 *            effective class location; if absolute, the absolute location of
-	 *            the directory that will contain the log file
+	 *                 effective class location; if absolute, the absolute location of the
+	 *                 directory that will contain the log file
 	 */
 	public static void setName(String logname, String location) {
 		logname_ = logname;
@@ -173,7 +172,7 @@ public class Log {
 	/**
 	 * Sets a log pathname.
 	 *
-	 * @param cls a class defining the effective location of the log file
+	 * @param cls     a class defining the effective location of the log file
 	 * @param logname the log base filename ('.log' will be appended)
 	 */
 	public static void setName(Class<?> cls, String logname) {
@@ -185,11 +184,11 @@ public class Log {
 	/**
 	 * Sets a log pathname.
 	 *
-	 * @param cls a class defining the effective location of the log file
-	 * @param logname the log base filename ('.log' will be appended)
+	 * @param cls      a class defining the effective location of the log file
+	 * @param logname  the log base filename ('.log' will be appended)
 	 * @param location if relative, a path fragment specifiying the offset from the
-	 *            effective class location; if absolute, the absolute location of
-	 *            the directory that will contain the log file
+	 *                 effective class location; if absolute, the absolute location of the
+	 *                 directory that will contain the log file
 	 */
 	public static void setName(Class<?> cls, String logname, String location) {
 		refCls_ = cls;
@@ -204,9 +203,9 @@ public class Log {
 	}
 
 	/**
-	 * Sets a log level as a default for a class type. In the absence of a class
-	 * specific level, the global default is applied. For a log message to be
-	 * printed, the log level must be GTE the log level set for the source class.
+	 * Sets a log level as a default for a class type. In the absence of a class specific
+	 * level, the global default is applied. For a log message to be printed, the log
+	 * level must be GTE the log level set for the source class.
 	 */
 	public static void defLevel(Level level) {
 		setLevel(null, level);

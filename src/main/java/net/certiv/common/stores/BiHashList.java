@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class BiHashList<K, V> {
 
-	private final HashList<K, V> forward = new HashList<>();
-	private final HashList<V, K> reverse = new HashList<>();
+	private final LinkedHashList<K, V> forward = new LinkedHashList<>();
+	private final LinkedHashList<V, K> reverse = new LinkedHashList<>();
 
 	public BiHashList() {}
 
@@ -79,11 +79,11 @@ public class BiHashList<K, V> {
 	}
 
 	public int size() {
-		return forward.size();
+		return forward.sizeKeys();
 	}
 
 	public int sizeValues() {
-		return reverse.size();
+		return reverse.sizeKeys();
 	}
 
 	public boolean isEmpty() {

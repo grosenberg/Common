@@ -3,10 +3,9 @@ package net.certiv.common.util;
 import java.util.Objects;
 
 /**
- * A status object represents the outcome of an operation. All
- * {@code CoreException}s carry a status object to indicate what went wrong.
- * Status objects are also returned by methods needing to provide details of
- * failures (e.g., validation methods).
+ * A status object represents the outcome of an operation. All {@code CoreException}s
+ * carry a status object to indicate what went wrong. Status objects are also returned by
+ * methods needing to provide details of failures (e.g., validation methods).
  * <p>
  * A status carries the following information:
  * <ul>
@@ -14,23 +13,25 @@ import java.util.Objects;
  * <li>severity (required)
  * <li>status code (required)
  * <li>message (required) - localized to current locale
- * <li>exception (optional) - for problems stemming from a failure at a lower
- * level
+ * <li>exception (optional) - for problems stemming from a failure at a lower level
  * </ul>
  * <p>
- * Some status objects, known as multi-statuses, have other status objects as
- * children.
+ * Some status objects, known as multi-statuses, have other status objects as children.
  * <p>
- * The class {@code Status} is the standard public implementation of status
- * objects; the subclass {@code MultiStatus} is the implements multi-status
- * objects.
+ * The class {@code Status} is the standard public implementation of status objects; the
+ * subclass {@code MultiStatus} is the implements multi-status objects.
  */
 public class Status {
 
 	private static final Status[] EMPTY_STATUS = {};
 
 	public enum Severity {
-		OK, DEBUG, INFO, WARNING, ERROR, CANCEL;
+		OK,
+		DEBUG,
+		INFO,
+		WARNING,
+		ERROR,
+		CANCEL;
 	}
 
 	/** Standard OK status. */
@@ -60,13 +61,13 @@ public class Status {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is
-	 * {@code OK} and exception is {@code null}. The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is {@code OK} and
+	 * exception is {@code null}. The created status has no children.
 	 *
 	 * @param severity the severity; one of {@code OK}, {@code ERROR}, {@code INFO},
-	 *            {@code WARNING}, or {@code CANCEL}
-	 * @param source the unique identifier of the relevant plug-in
-	 * @param message a human-readable message, localized to the current locale
+	 *                 {@code WARNING}, or {@code CANCEL}
+	 * @param source   the unique identifier of the relevant plug-in
+	 * @param message  a human-readable message, localized to the current locale
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(Severity severity, Object source, String message) {
@@ -74,13 +75,13 @@ public class Status {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is
-	 * {@code OK}. The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is {@code OK}. The
+	 * created status has no children.
 	 *
-	 * @param severity the severity; one of {@code OK}, {@code ERROR}, {@code INFO},
-	 *            {@code WARNING}, or {@code CANCEL}
-	 * @param source the unique identifier of the relevant plug-in
-	 * @param message a human-readable message, localized to the current locale
+	 * @param severity  the severity; one of {@code OK}, {@code ERROR}, {@code INFO},
+	 *                  {@code WARNING}, or {@code CANCEL}
+	 * @param source    the unique identifier of the relevant plug-in
+	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or {@code null} if not applicable
 	 * @since org.eclipse.equinox.common 3.3
 	 */
@@ -91,10 +92,10 @@ public class Status {
 	/**
 	 * Creates a new status object. The created status has no children.
 	 *
-	 * @param severity the severity
-	 * @param source the unique identifier of the relevant plug-in
-	 * @param code the plug-in-specific status code, or {@code OK}
-	 * @param message a human-readable message, localized to the current locale
+	 * @param severity  the severity
+	 * @param source    the unique identifier of the relevant plug-in
+	 * @param code      the plug-in-specific status code, or {@code OK}
+	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or {@code null} if not applicable
 	 */
 	public Status(Severity severity, Object source, int code, String message, Throwable exception) {
@@ -106,11 +107,11 @@ public class Status {
 	}
 
 	/**
-	 * Returns whether this status indicates everything is okay (neither info,
-	 * warning, nor error).
+	 * Returns whether this status indicates everything is okay (neither info, warning,
+	 * nor error).
 	 *
-	 * @return {@code true} if this status has severity {@code OK}, and
-	 *             {@code false} otherwise
+	 * @return {@code true} if this status has severity {@code OK}, and {@code false}
+	 *         otherwise
 	 */
 	public boolean isOK() {
 		return severity == Severity.OK;
@@ -126,11 +127,11 @@ public class Status {
 	 * <li>{@code INFO} - an informational ("fyi") message (least severe)
 	 * </ul>
 	 * <p>
-	 * The severity of a multi-status is defined to be the maximum severity of any
-	 * of its children, or {@code OK} if it has no children.
+	 * The severity of a multi-status is defined to be the maximum severity of any of its
+	 * children, or {@code OK} if it has no children.
 	 *
 	 * @return the severity: one of {@code OK}, {@code ERROR}, {@code INFO},
-	 *             {@code WARNING}, or {@code CANCEL}
+	 *         {@code WARNING}, or {@code CANCEL}
 	 * @see #matches(int)
 	 */
 	public Severity getSeverity() {
@@ -147,8 +148,8 @@ public class Status {
 	}
 
 	/**
-	 * Returns the unique identifier of the source associated with this status (this
-	 * is the source that defines the meaning of the status code).
+	 * Returns the unique identifier of the source associated with this status (this is
+	 * the source that defines the meaning of the status code).
 	 *
 	 * @return the unique identifier of the relevant source
 	 */
@@ -162,13 +163,13 @@ public class Status {
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 */
 	protected void setSource(String source) {
-		Assert.isLegal(source != null && source.length() > 0);
+		Assert.notEmpty(source);
 		this.source = source;
 	}
 
 	/**
-	 * Returns the message describing the outcome. The message is localized to the
-	 * current locale.
+	 * Returns the message describing the outcome. The message is localized to the current
+	 * locale.
 	 *
 	 * @return a localized message
 	 */
@@ -182,17 +183,14 @@ public class Status {
 	 * @param message a human-readable message, localized to the current locale
 	 */
 	protected void setMessage(String message) {
-		if (message == null)
-			this.message = ""; //$NON-NLS-1$
-		else
-			this.message = message;
+		if (message == null) this.message = ""; //$NON-NLS-1$
+		else this.message = message;
 	}
 
 	/**
-	 * Returns the relevant low-level exception, or {@code null} if none. For
-	 * example, when an operation fails because of a network communications failure,
-	 * this might return the {@code java.io.IOException} describing the exact nature
-	 * of that failure.
+	 * Returns the relevant low-level exception, or {@code null} if none. For example,
+	 * when an operation fails because of a network communications failure, this might
+	 * return the {@code java.io.IOException} describing the exact nature of that failure.
 	 *
 	 * @return the relevant low-level exception, or {@code null} if none
 	 */
@@ -228,14 +226,13 @@ public class Status {
 	}
 
 	/**
-	 * Returns whether this status is a multi-status. A multi-status describes the
-	 * outcome of an operation involving multiple operands.
+	 * Returns whether this status is a multi-status. A multi-status describes the outcome
+	 * of an operation involving multiple operands.
 	 * <p>
-	 * The severity of a multi-status is derived from the severities of its
-	 * children; a multi-status with no children is {@code OK} by definition. A
-	 * multi-status carries a source identifier, a status code, a message, and an
-	 * optional exception. Clients may treat multi-status objects in a multi-status
-	 * unaware way.
+	 * The severity of a multi-status is derived from the severities of its children; a
+	 * multi-status with no children is {@code OK} by definition. A multi-status carries a
+	 * source identifier, a status code, a message, and an optional exception. Clients may
+	 * treat multi-status objects in a multi-status unaware way.
 	 *
 	 * @return {@code true} for a multi-status, {@code false} otherwise
 	 * @see #getChildren()
@@ -245,8 +242,8 @@ public class Status {
 	}
 
 	/**
-	 * Returns a list of status object immediately contained in this multi-status,
-	 * or an empty list if this is not a multi-status.
+	 * Returns a list of status object immediately contained in this multi-status, or an
+	 * empty list if this is not a multi-status.
 	 *
 	 * @return an array of status objects
 	 * @see #isMultiStatus()

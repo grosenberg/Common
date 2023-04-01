@@ -23,11 +23,11 @@ public class Dictionary {
 		/**
 		 * A dictionary entry.
 		 *
-		 * @param attr the entry defining attribute
-		 * @param type value type
+		 * @param attr   the entry defining attribute
+		 * @param type   value type
 		 * @param values permitted values or {@code Any}
 		 * @param defval default value or {@code Empty}
-		 * @param where valid locations
+		 * @param where  valid locations
 		 */
 		private Entry(DotAttr attr, TYPE type, String[] values, String defval, ON... where) {
 			this.attr = attr;
@@ -244,6 +244,20 @@ public class Dictionary {
 	/** Returns {@code true} if the given key defines a {@code String} type. */
 	public static boolean isStringType(DotAttr key) {
 		return lookup(key).type == TYPE.STRING;
+	}
+
+	/**
+	 * Returns {@code true} if the given key defines a {@code List} or {@code String}
+	 * type.
+	 */
+	public static boolean isCompoundType(DotAttr key) {
+		switch (lookup(key).type) {
+			case LIST:
+			case STRING:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	/** Returns all known entry names. */

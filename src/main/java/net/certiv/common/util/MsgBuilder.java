@@ -4,13 +4,31 @@ public class MsgBuilder {
 
 	private final StringBuilder sb;
 
+	public static MsgBuilder of() {
+		return new MsgBuilder();
+	}
+
+	public static MsgBuilder of(String msg) {
+		return new MsgBuilder(msg);
+	}
+
+	public static MsgBuilder of(String fmt, Object... args) {
+		return new MsgBuilder(fmt, args);
+	}
+
+	// --------------------------------
+
 	public MsgBuilder() {
 		sb = new StringBuilder();
 	}
 
 	public MsgBuilder(String format, Object... args) {
 		this();
-		sb.append(String.format(format, args));
+		if (args != null && args.length > 0) {
+			sb.append(String.format(format, args));
+		} else {
+			sb.append(format);
+		}
 	}
 
 	/**
@@ -84,6 +102,11 @@ public class MsgBuilder {
 	 */
 	public MsgBuilder nl() {
 		sb.append(System.lineSeparator());
+		return this;
+	}
+
+	public MsgBuilder sp() {
+		sb.append(Strings.SPACE);
 		return this;
 	}
 

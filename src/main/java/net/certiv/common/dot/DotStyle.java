@@ -1,5 +1,7 @@
 package net.certiv.common.dot;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.text.TextStringBuilder;
 
 import net.certiv.common.dot.Dictionary.ON;
@@ -35,10 +37,10 @@ public class DotStyle {
 	}
 
 	/**
-	 * Returns {@code true} if a value is associated with the given key and
-	 * {@code ON} category.
+	 * Returns {@code true} if a value is associated with the given key and {@code ON}
+	 * category.
 	 *
-	 * @param key the dot attribute key
+	 * @param key      the dot attribute key
 	 * @param category the dot defining category
 	 * @return {@code true} if a value is associated with key
 	 */
@@ -47,8 +49,8 @@ public class DotStyle {
 	}
 
 	/**
-	 * Returns the value for the specified key and the default {@code ON} category,
-	 * or {@code null} if not found.
+	 * Returns the value for the specified key and the default {@code ON} category, or
+	 * {@code null} if not found.
 	 *
 	 * @param key the dot attribute key
 	 * @return the associated value, or {@code null} if not found
@@ -61,7 +63,7 @@ public class DotStyle {
 	 * Returns the value for the specified key and given {@code ON} category, or
 	 * {@code null} if not found.
 	 *
-	 * @param key the dot attribute key
+	 * @param key      the dot attribute key
 	 * @param category the dot defining category
 	 * @return the associated value, or {@code null} if not found
 	 */
@@ -70,10 +72,10 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the default {@code ON} category. If
-	 * the value is {@code null}, all mappings are removed.
+	 * Adds a dot attribute/value mapping for the default {@code ON} category. If the
+	 * value is {@code null}, all mappings are removed.
 	 *
-	 * @param key the dot attribute key
+	 * @param key   the dot attribute key
 	 * @param value the new value
 	 */
 	public final void put(DotAttr key, Object value) {
@@ -87,12 +89,12 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the given {@code ON} category. If the
-	 * value is {@code null}, the mapping will be removed.
+	 * Adds a dot attribute/value mapping for the given {@code ON} category. If the value
+	 * is {@code null}, the mapping will be removed.
 	 *
-	 * @param key the dot attribute key
+	 * @param key      the dot attribute key
 	 * @param category the dot defining category
-	 * @param value the new value
+	 * @param value    the new value
 	 */
 	public final void put(DotAttr key, ON category, Object value) {
 		if (Dictionary.valid(key)) {
@@ -105,10 +107,10 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping to the default {@code ON} category iff the
-	 * given key is not already defined for that category.
+	 * Adds a dot attribute/value mapping to the default {@code ON} category iff the given
+	 * key is not already defined for that category.
 	 *
-	 * @param key the dot attribute key
+	 * @param key   the dot attribute key
 	 * @param value the new value
 	 * @return {@code true} if the given attribute/value mapping was added
 	 */
@@ -119,12 +121,12 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the given category iff the given key
-	 * is not already defined for that category.
+	 * Adds a dot attribute/value mapping for the given category iff the given key is not
+	 * already defined for that category.
 	 *
-	 * @param key the dot attribute key
+	 * @param key      the dot attribute key
 	 * @param category the dot defining category
-	 * @param value the new value
+	 * @param value    the new value
 	 * @return {@code true} if the given attribute/value mapping was added
 	 */
 	public final boolean putIfAbsent(DotAttr key, ON category, Object value) {
@@ -165,8 +167,13 @@ public class DotStyle {
 		return sb.toString().trim();
 	}
 
+	private static final Pattern LIST = Pattern.compile(".*?[\\h,].*");
+
 	private String fmt(DotAttr key, Object value) {
-		String fmt = Dictionary.isStringType(key) ? "%s=\"%s\"" : "%s=%s";
+		String fmt = "%s=%s";
+		if (Dictionary.isCompoundType(key) && LIST.matcher(value.toString()).matches()) {
+			fmt = "%s=\"%s\"";
+		}
 		return String.format(fmt, key, value);
 	}
 }

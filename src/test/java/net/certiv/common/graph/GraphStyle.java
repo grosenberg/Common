@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
-import net.certiv.common.graph.demo.DemoGraph;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.graph.demo.DiffUtil;
 import net.certiv.common.util.FsUtil;
 
-class GraphStyle {
+class GraphStyle extends TestBase {
 
 	@Test
 	void testStyles() {
-		DemoGraph graph = new DemoGraph("Test Dot Styles");
+
+		graph.put(Graph.GRAPH_NAME, "Dot Styles");
 		graph.defineStyle();
 
 		DotStyle ds = graph.getDotStyle();
@@ -34,7 +34,7 @@ class GraphStyle {
 		ds = b.getDotStyle();
 		ds.put(LABEL, "Node " + b.name());
 		ds.put(COLOR, "red");
-		ds.put(FILLCOLOR, "teal");
+		ds.put(FILLCOLOR, "orange");
 		ds.put(SHAPE, "rectangle");
 		ds.put(STYLE, "filled, rounded");
 
@@ -58,8 +58,9 @@ class GraphStyle {
 		ds.put(STYLE, "dashed");
 
 		String dot = graph.dot();
-		String dottxt = FsUtil.loadResourceStringChecked(getClass(), "dotStyle.txt");
-		System.out.println(DiffUtil.diff(dot, dottxt));
-		assertEquals(dot, dottxt);
+		String txt = FsUtil.loadResourceStringChecked(getClass(), "dotStyle.txt");
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+
+		assertEquals(dot, txt);
 	}
 }
