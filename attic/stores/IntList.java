@@ -11,6 +11,7 @@
  *******************************************************************************/
 package net.certiv.common.stores;
 
+@Deprecated
 public class IntList {
 
 	public static final IntList EMPTY_LIST = new IntList(0) {
@@ -44,8 +45,7 @@ public class IntList {
 
 	public void add(int value) {
 		if (values.length == length) {
-			System.arraycopy(values, 0, values = new int[this.length * 2], 0,
-					length);
+			System.arraycopy(values, 0, values = new int[this.length * 2], 0, length);
 		}
 		values[length++] = value;
 	}

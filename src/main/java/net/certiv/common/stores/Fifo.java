@@ -3,12 +3,12 @@ package net.certiv.common.stores;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import net.certiv.common.util.Assert;
+import net.certiv.common.check.Assert;
 
 /**
- * Fixed capacity list-queue. All operations are relative to the newest added
- * element.
+ * Fixed capacity list-queue. All operations are relative to the newest added element.
  */
+@Deprecated
 public class Fifo<E> implements Iterable<E> {
 
 	private final LinkedList<E> buf = new LinkedList<>();

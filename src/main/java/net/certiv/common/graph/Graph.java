@@ -1,13 +1,14 @@
 package net.certiv.common.graph;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
@@ -15,11 +16,10 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueDeque;
-import net.certiv.common.util.Assert;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
-	private static final String ERR_NODE_BY_NAME = "Node lookup-by-name requires unique node names: %s %s";
+	private static final String ERR_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
 	public static final String GRAPH_NAME = "GraphName";
 
@@ -55,6 +55,155 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return String.format("%s(%s)", name, _gid);
 	}
 
+	// ======================================================
+	// Convenience methods for string-named nodes
+	// ------------------------------------------------------
+
+	/**
+	 * Creates a new node instance with the given name.
+	 * <p>
+	 * Use {@code #findOrCreateNode(String)} to protect against creating multiple nodes
+	 * with the same name. The {@code #getNode} method relies on unique node names.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param name the node name
+	 * @return a new node otherwise unassociated with the graph
+	 */
+	protected abstract N createNode(String name);
+
+	/**
+	 * Finds the named terminal node in the graph or, if not pre-existing, creates a new
+	 * named node.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param name the node name
+	 * @return the named node
+	 */
+	public N findOrCreateNode(String name) {
+		Assert.notEmpty(name);
+		N node = getNode(name);
+		if (node != null) return node;
+		return createNode(name);
+	}
+
+	/**
+	 * Creates a new edge instance with terminal nodes having the given names. The named
+	 * terminal nodes will be created if they do not pre-exist in the graph.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param beg the begin terminal node name
+	 * @param end the end terminal node name
+	 * @return a new edge otherwise unassociated with the graph
+	 */
+	public E createEdge(String beg, String end) {
+		Assert.notEmpty(beg, end);
+		return createEdge(findOrCreateNode(beg), findOrCreateNode(end));
+	}
+
+	/**
+	 * Creates a new edge instance with terminal nodes having the given names. The named
+	 * terminal nodes will be created if they do not pre-exist in the graph. Adds the
+	 * edge, including the terminal nodes, to the graph.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param beg the begin terminal node name
+	 * @param end the end terminal node name
+	 * @return a new edge newly associated with the graph
+	 */
+	public E createAndAddEdge(String beg, String end) {
+		Assert.notEmpty(beg, end);
+		E edge = createEdge(beg, end);
+		addEdge(edge); // add edge, including nodes, to graph
+		return edge;
+	}
+
+	/**
+	 * Returns the existing nodes having the given name. Requires given name be unique.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param name a node node
+	 * @return the existing node uniquely having the given name, or {@code null}
+	 * @throws UnsupportedOperationException if the given name is not unique
+	 */
+	public N getNode(String name) {
+		Assert.notEmpty(name);
+		UniqueDeque<N> res = nodes.stream() //
+				.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
+				.collect(Collectors.toCollection(UniqueDeque::new));
+
+		Assert.isTrue(GraphEx.of(ERR_LOOKUP, name, res), res.size() <= 1);
+		return res.peek();
+	}
+
+	/**
+	 * Verifies that the given name references a unique (or non-existant) node.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param name a node name
+	 * @return {@code true} if the given name references a unique (or non-existant) node
+	 */
+	public boolean verifyUnique(String name) {
+		Assert.notEmpty(name);
+		Set<N> res = nodes.stream().filter(n -> n.get(Node.NODE_NAME).equals(name))
+				.collect(Collectors.toSet());
+		return res.size() < 2;
+	}
+
+	/**
+	 * Returns the set of edges existing between the given named nodes.
+	 * <p>
+	 * Convenience operation for and only intended to work with string-named nodes.
+	 *
+	 * @param beg a source node name
+	 * @param end a destination node name
+	 * @return the edges existing between the given nodes
+	 */
+	public UniqueDeque<E> getEdges(String beg, String end) {
+		Assert.notEmpty(beg, end);
+		N src = getNode(beg);
+		N dst = getNode(end);
+		if (src == null || dst == null) return UniqueDeque.empty();
+		return getEdges(src, dst);
+	}
+
+	// ======================================================
+
+	/**
+	 * Creates a new edge instance with the given terminal nodes.
+	 *
+	 * @param beg the begin terminal node
+	 * @param end the end terminal node
+	 * @return a new edge otherwise unassociated with the graph
+	 */
+	protected abstract E createEdge(N beg, N end);
+
+	/**
+	 * Creates a new edge instance with the given terminal nodes. Adds the edge, including
+	 * the terminal nodes, to the graph.
+	 *
+	 * @param beg the begin terminal node
+	 * @param end the end terminal node
+	 * @return a new edge newly associated with the graph
+	 */
+	public E createAndAddEdge(N beg, N end) {
+		Assert.notNull(beg, end);
+		E edge = createEdge(beg, end);
+		addEdge(edge); // add edge, including nodes, to graph
+		return edge;
+	}
+
+	/** Returns an immutable list of the current graph root nodes. */
+	public UniqueDeque<N> getRoots() {
+		return nodes.stream().filter(n -> n.isRoot()) //
+				.collect(Collectors.toCollection(UniqueDeque::new)).unmodifiable();
+	}
+
 	/** Returns {@code true} if the graph contains the given node. */
 	public boolean hasNode(N node) {
 		return nodes.contains(node);
@@ -65,14 +214,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return new UniqueDeque<>(nodes).unmodifiable();
 	}
 
-	/** Returns an immutable list of the current graph root nodes. */
-	public UniqueDeque<N> getRoots() {
-		return nodes.stream().filter(n -> n.isRoot()) //
-				.collect(Collectors.toCollection(UniqueDeque::new)).unmodifiable();
-	}
-
 	/** Returns {@code true} if any edge exists between the given nodes. */
 	public boolean hasEdge(N src, N dst) {
+		Assert.notNull(src, dst);
 		return src.isAdjacent(dst);
 	}
 
@@ -90,58 +234,15 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Returns the set of edges existing between the given nodes.
+	 * Returns the unique set of edges existing between the given nodes.
 	 *
 	 * @param src a source node
 	 * @param dst a destination node
 	 * @return the edges existing between the given nodes
 	 */
 	public UniqueDeque<E> getEdges(N src, N dst) {
-		return src.edges(Sense.BOTH, e -> e.connectsTo(dst));
-	}
-
-	/**
-	 * Returns the set of edges existing between the given named nodes.
-	 *
-	 * @param srcName a source node
-	 * @param dstName a destination node
-	 * @return the edges existing between the given nodes
-	 */
-	public UniqueDeque<E> getEdges(String srcName, String dstName) {
-		N srcNode = getNode(srcName);
-		N dstNode = getNode(dstName);
-		if (srcNode == null || dstNode == null) return UniqueDeque.empty();
-		return getEdges(srcNode, dstNode);
-	}
-
-	/**
-	 * Returns the existing nodes having the given name. Only works if the given name is
-	 * unique.
-	 *
-	 * @param name a node node
-	 * @return the existing node uniquely having the given name, or {@code null}
-	 * @throws UnsupportedOperationException if the given name is not unique
-	 */
-	public N getNode(String name) {
-		UniqueDeque<N> res = nodes.stream() //
-				.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
-				.collect(Collectors.toCollection(UniqueDeque::new));
-		if (res.size() > 1) {
-			String msg = String.format(ERR_NODE_BY_NAME, name, res);
-			throw new UnsupportedOperationException(msg);
-		}
-		return res.peek();
-	}
-
-	/**
-	 * Returns the existing nodes having the given name.
-	 *
-	 * @param name a node node
-	 * @return the existing nodes having the given name
-	 */
-	public UniqueDeque<N> getNodes(String name) {
-		return nodes.stream().filter(n -> n.get(Node.NODE_NAME).equals(name))
-				.collect(Collectors.toCollection(UniqueDeque::new)).unmodifiable();
+		Assert.notNull(src, dst);
+		return src.edges(Sense.BOTH, e -> e.between(src, dst));
 	}
 
 	/**
@@ -182,8 +283,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		Assert.notNull(GraphEx.of("Invalid edge"), edge, edge.beg(), edge.end());
 		edge.beg().add(edge, Sense.OUT);
 		edge.end().add(edge, Sense.IN);
-		boolean ok = add(edge.beg());
-		ok |= add(edge.end());
+		boolean ok = _add(edge.beg());
+		ok |= _add(edge.end());
 		return ok;
 	}
 
@@ -194,7 +295,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if not already present
 	 * @see Graph#addEdge(Edge)
 	 */
-	private boolean add(N node) {
+	private boolean _add(N node) {
 		return nodes.add(node);
 	}
 
@@ -205,7 +306,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if removed
 	 * @see Graph#addEdge(Edge)
 	 */
-	private boolean remove(N node) {
+	private boolean _remove(N node) {
 		return nodes.remove(node);
 	}
 
@@ -218,8 +319,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public boolean removeNode(N node) {
 		Assert.notNull(node);
-		boolean ok = remove(node);
+		boolean ok = _remove(node);
 		node.edges().forEach(e -> removeEdge(e, true));
+		node.clear();
 		return ok;
 	}
 
@@ -238,8 +340,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		N end = edge.end();
 
 		boolean ok = edge.remove(clear);
-		if (beg.adjacent().isEmpty()) remove(beg);
-		if (end.adjacent().isEmpty()) remove(end);
+		if (beg.adjacent().isEmpty()) _remove(beg);
+		if (end.adjacent().isEmpty()) _remove(end);
 		return ok;
 	}
 
@@ -251,17 +353,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param clear {@code true} to clear the edge terminal nodes and properties
 	 * @return {@code true} if all of the edges were removed
 	 */
-	public boolean removeEdges(Collection<E> edges, boolean clear) {
+	public boolean removeEdges(Collection<? extends E> edges, boolean clear) {
 		Assert.notNull(edges);
-		boolean ok = true;
-		for (E edge : edges) {
-			ok &= removeEdge(edge, clear);
-		}
-		return ok;
+		return edges.stream().allMatch(e -> removeEdge(e, clear));
 	}
 
 	/**
-	 * Removes the given edge if the edge satisfies the given filter predicate.
+	 * Removes the given edge if the edge satisfies the given filter predicate or if the
+	 * filter is {@code null}.
 	 *
 	 * @param edge   a graph edge
 	 * @param clear  {@code true} to clear the edge terminal nodes and properties
@@ -269,8 +368,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if the edge was removed
 	 */
 	public boolean removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter) {
-		Assert.notNull(edge, filter);
-		return filter.test(edge) ? removeEdge(edge, clear) : false;
+		Assert.notNull(edge);
+		if (filter != null && !filter.test(edge)) return false;
+		return removeEdge(edge, clear);
 	}
 
 	/**
@@ -282,15 +382,15 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if an edge was removed
 	 */
 	public boolean removeEdges(N src, N dst, boolean clear) {
+		Assert.notNull(src, dst);
 		UniqueDeque<E> edges = src.to(dst);
 		if (edges.isEmpty()) return false;
-		edges.forEach(e -> removeEdge(e, clear));
-		return true;
+		return edges.stream().allMatch(e -> removeEdge(e, clear));
 	}
 
 	/**
 	 * Removes all edges directly connecting the given nodes and that satisfy the given
-	 * filter predicate. Handles root node adjustment.
+	 * filter predicate or if the filter is {@code null}.
 	 *
 	 * @param src    a source node
 	 * @param dst    a destination node
@@ -299,13 +399,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if any element was removed
 	 */
 	public boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter) {
-		Assert.notNull(src, dst, filter);
-
-		boolean removed = false;
-		for (Iterator<E> itr = src.to(dst).iterator(); itr.hasNext();) {
-			removed |= removeEdgeIf(itr.next(), clear, filter);
-		}
-		return removed;
+		Assert.notNull(src, dst);
+		UniqueDeque<E> edges = src.to(dst);
+		if (edges.isEmpty()) return false;
+		if (filter == null) return edges.stream().allMatch(e -> removeEdge(e, clear));
+		return edges.stream().filter(filter).allMatch(e -> removeEdge(e, clear));
 	}
 
 	/**
@@ -478,6 +576,116 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
+	 * Consolidate the edges connecting to the source nodes to the target node. Excludes
+	 * the target node from the source nodes. Removes the finally unconnected source nodes
+	 * from the graph.
+	 *
+	 * <pre>
+	 * A => B => C
+	 * D => E => F
+	 * G => H => I
+	 * consolidateEdges([B,E,H], B);	// implicitly removes [E,H]
+	 * consolidateEdges([E,H], B);		// equivalent
+	 * [A,D,G] => B => [C,F,I]
+	 * </pre>
+	 *
+	 * @param edges  the source nodes
+	 * @param target a target node
+	 * @return the newly created edges
+	 */
+	public void consolidateEdges(Collection<? extends N> edges, N target) {
+		Assert.notNull(edges, target);
+		Set<N> nodes = new LinkedHashSet<>(edges);
+		nodes.remove(target);
+		for (N node : nodes) {
+			// convert [D,G] => [E,H] to [D,G] => B
+			UniqueDeque<E> in = node.edges(Sense.IN);
+			reterminate(in, target);
+
+			// convert [E,H] => [F,I] to B => [F,I]
+			UniqueDeque<E> out = node.edges(Sense.OUT);
+			transfer(out, target);
+		}
+	}
+
+	/**
+	 * Replicates the given edge. Override, if needed, to adjust edge decorations. The
+	 * returned replica edge is unassociated with the graph.
+	 *
+	 * @param edge the exemplar edge
+	 * @return a replica of the given edge otherwise unassociated with the graph
+	 */
+	public E replicateEdge(E edge) {
+		E repl = createEdge(edge.beg(), edge.end());
+		repl.putAllIfAbsent(edge.properties());
+		return repl;
+	}
+
+	/**
+	 * Replicates the given edge and changes the edge terminals to the given nodes.
+	 * Override, if needed, to adjust edge decorations that are dependent on the changed
+	 * terminals. The returned replica edge is unassociated with the graph.
+	 *
+	 * @param edge the exemplar edge
+	 * @param beg  the begin terminal node name
+	 * @param end  the end terminal node name
+	 * @return a replica of the given edge otherwise unassociated with the graph
+	 */
+	public E replicateEdge(E edge, N beg, N end) {
+		E repl = replicateEdge(edge);
+		repl.setBeg(beg);
+		repl.setEnd(end);
+		return repl;
+	}
+
+	/**
+	 * Replicates the existing edge connections with given source node to the given target
+	 * nodes. Creates new edge connections to each target node equivalent to the source
+	 * node edge connections. Conditionally removes the source node.
+	 * <p>
+	 * All replica edges are added to the graph.
+	 *
+	 * <pre>
+	 * A => B => C
+	 * replicateEdges(B, [B,X,Y,Z], false);
+	 * A => [B,X,Y,Z] => C
+	 * </pre>
+	 *
+	 * <pre>
+	 * A => B => C
+	 * replicateEdges(B, [B,X,Y,Z], true); // removes B
+	 * A => [X,Y,Z] => C
+	 * </pre>
+	 *
+	 * @param node    a source node
+	 * @param targets the target nodes
+	 * @param reduce  {@code true} to remove the source node
+	 */
+	public void replicateEdges(N node, Collection<? extends N> targets, boolean reduce) {
+		Set<? extends N> tgts = new LinkedHashSet<>(targets);
+		tgts.remove(node);
+
+		UniqueDeque<E> in = node.edges(Sense.IN);
+		UniqueDeque<E> out = node.edges(Sense.OUT);
+
+		for (N tgt : tgts) {
+
+			// for edges ? => node, create ? => targets
+			for (E edge : in) {
+				E repl = replicateEdge(edge, edge.beg(), tgt);
+				addEdge(repl);
+			}
+
+			// for edges node => ?, create targets => ?
+			for (E edge : out) {
+				E repl = replicateEdge(edge, tgt, edge.end());
+				addEdge(repl);
+			}
+		}
+		if (reduce) reduce(node);
+	}
+
+	/**
 	 * Reduce the graph by removing the given node while retaining the connectivity
 	 * between the inbound and outbound nodes.
 	 *
@@ -532,7 +740,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		if (src.end().equals(dst.beg())) {
 			removeEdge(src, false);
 			src.setEnd(dst.end());
-			src.putAllIfAbsent(dst.getAll());
+			src.putAllIfAbsent(dst.properties());
 			addEdge(src);
 			removeEdge(dst, true);
 

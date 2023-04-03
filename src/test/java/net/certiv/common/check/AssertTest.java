@@ -1,4 +1,4 @@
-package net.certiv.common.util;
+package net.certiv.common.check;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.check.ex.AssertException;
+import net.certiv.common.check.ex.IAssertException;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.util.ex.AssertException;
-import net.certiv.common.util.ex.IAssertException;
 
 class AssertTest extends CheckBase {
 

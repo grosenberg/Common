@@ -112,7 +112,7 @@ public class Props {
 	}
 
 	/** Returns the properties map. */
-	public final Map<Object, Object> getAll() {
+	public final Map<Object, Object> properties() {
 		return Collections.unmodifiableMap(propMap);
 	}
 

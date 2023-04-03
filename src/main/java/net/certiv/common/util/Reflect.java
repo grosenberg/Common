@@ -7,9 +7,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
+import net.certiv.common.check.ex.AssertEx;
+import net.certiv.common.check.ex.IAssertException.Test;
 import net.certiv.common.stores.Result;
-import net.certiv.common.util.ex.AssertEx;
-import net.certiv.common.util.ex.IAssertException.Test;
 
 public class Reflect {
 

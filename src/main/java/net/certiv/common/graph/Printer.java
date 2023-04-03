@@ -142,7 +142,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				break;
 
 			case 1: {
-				N root = roots.iterator().next();
+				N root = roots.getFirst();
 				sb.append(nodeProperties(graph, root, dent(1)));
 				sb.append(edgeProperties(graph, root, dent(1)));
 				sb.appendNewLine();

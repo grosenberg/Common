@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import net.certiv.common.check.Assert;
+
 /**
  * A concrete multi-status implementation, suitable either for instantiating or
  * subclassing.

@@ -1,4 +1,4 @@
-package net.certiv.common.util;
+package net.certiv.common.check;
 
 import java.util.ArrayList;
 import java.util.List;

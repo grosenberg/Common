@@ -2,10 +2,10 @@ package net.certiv.common.tool;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.stores.Result;
 import net.certiv.common.tool.Options.Flag;
 import net.certiv.common.util.FsUtil;
 
@@ -40,20 +40,17 @@ class OptionsTest {
 	@Test
 	void testHelpString() {
 
-		try {
-			Options opts = new Options("Test");
-			Flag.str(opts, "d", "dir", "Root directory");
-			Flag.num(opts, "t", "tabWidth", "Tab width");
-			Flag.bool(opts, "h", "help", "Help");
-			opts.parse(new String[] { "-h" });
-			String help = opts.help();
+		Options opts = new Options("Test");
+		Flag.str(opts, "d", "dir", "Root directory");
+		Flag.num(opts, "t", "tabWidth", "Tab width");
+		Flag.bool(opts, "h", "help", "Help");
+		opts.parse(new String[] { "-h" });
+		String help = opts.help();
 
-			String res = FsUtil.loadResourceString(getClass(), "help.txt");
-			assertEquals(res, help);
+		Result<String> res = FsUtil.loadCheckedResource(getClass(), "help.txt");
+		assertTrue(res.valid());
+		assertEquals(res.result, help);
 
-		} catch (Exception e) {
-			fail("Failed", e);
-		}
 	}
 
 	@Test

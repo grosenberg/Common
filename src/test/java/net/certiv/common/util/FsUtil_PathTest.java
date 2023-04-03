@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
-class FsUtilExtTest {
+class FsUtil_PathTest {
 
 	static Path path() {
 		String pathname = "net.certiv.common.util";

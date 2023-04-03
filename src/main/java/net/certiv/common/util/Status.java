@@ -2,6 +2,8 @@ package net.certiv.common.util;
 
 import java.util.Objects;
 
+import net.certiv.common.check.Assert;
+
 /**
  * A status object represents the outcome of an operation. All {@code CoreException}s
  * carry a status object to indicate what went wrong. Status objects are also returned by

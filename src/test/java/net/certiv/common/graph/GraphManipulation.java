@@ -17,8 +17,8 @@ class GraphManipulation extends TestBase {
 	void testReduceNode() {
 		graph.put(Graph.GRAPH_NAME, "Reduce");
 
-		graph.createEdge("A", "B");
-		graph.createEdge("B", "C");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
 
 		DemoNode b = graph.getNode("B");
 		graph.reduce(b);
@@ -27,7 +27,7 @@ class GraphManipulation extends TestBase {
 		assertNull(b);
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "reduce1.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "reduce1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
@@ -36,10 +36,10 @@ class GraphManipulation extends TestBase {
 	void testReduceEdge() {
 		graph.put(Graph.GRAPH_NAME, "ReduceEdge");
 
-		graph.createEdge("R", "A");
-		graph.createEdge("A", "B");
-		graph.createEdge("R", "C");
-		graph.createEdge("C", "D");
+		graph.createAndAddEdge("R", "A");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("R", "C");
+		graph.createAndAddEdge("C", "D");
 
 		UniqueDeque<DemoEdge> ab = graph.getEdges("A", "B");
 		UniqueDeque<DemoEdge> cd = graph.getEdges("C", "D");
@@ -50,7 +50,7 @@ class GraphManipulation extends TestBase {
 		assertNull(b);
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "reduceEdge1.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "reduceEdge1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
@@ -59,13 +59,13 @@ class GraphManipulation extends TestBase {
 	void testTransfer() {
 		graph.put(Graph.GRAPH_NAME, "Transfer");
 
-		graph.createEdge("A", "B");
-		graph.createEdge("B", "C");
-		graph.createEdge("C", "D");
-		graph.createEdge("D", "E");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("C", "D");
+		graph.createAndAddEdge("D", "E");
 
-		graph.createEdge("C", "F");
-		graph.createEdge("F", "G");
+		graph.createAndAddEdge("C", "F");
+		graph.createAndAddEdge("F", "G");
 
 		DemoNode b = graph.getNode("B");
 		UniqueDeque<DemoEdge> cf = graph.getEdges("C", "F");
@@ -73,7 +73,7 @@ class GraphManipulation extends TestBase {
 		graph.transfer(cf, b);
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "transfer1.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "transfer1.txt").result;
 
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);

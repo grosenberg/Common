@@ -1,4 +1,4 @@
-package net.certiv.common.util.ex;
+package net.certiv.common.check.ex;
 
 public interface IAssertException {
 

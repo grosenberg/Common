@@ -1,6 +1,6 @@
 package net.certiv.common.graph.ex;
 
-import net.certiv.common.util.ex.IAssertException.Test;
+import net.certiv.common.check.ex.IAssertException.Test;
 
 public class GraphEx {
 

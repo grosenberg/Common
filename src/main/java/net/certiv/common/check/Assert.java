@@ -1,14 +1,16 @@
-package net.certiv.common.util;
+package net.certiv.common.check;
 
-import static net.certiv.common.util.ex.IAssertException.ASSERT_FAILED;
-import static net.certiv.common.util.ex.IAssertException.EMPTY_ARG;
-import static net.certiv.common.util.ex.IAssertException.NULL_ARG;
+import static net.certiv.common.check.ex.IAssertException.ASSERT_FAILED;
+import static net.certiv.common.check.ex.IAssertException.EMPTY_ARG;
+import static net.certiv.common.check.ex.IAssertException.NULL_ARG;
 
+import net.certiv.common.check.ex.AssertEx;
+import net.certiv.common.check.ex.AssertException;
+import net.certiv.common.check.ex.IAssertException;
+import net.certiv.common.check.ex.IAssertException.Test;
 import net.certiv.common.stores.Result;
-import net.certiv.common.util.ex.AssertEx;
-import net.certiv.common.util.ex.AssertException;
-import net.certiv.common.util.ex.IAssertException;
-import net.certiv.common.util.ex.IAssertException.Test;
+import net.certiv.common.util.Reflect;
+import net.certiv.common.util.Strings;
 
 /**
  * {@code Assert} is useful for for embedding runtime sanity checks in code. The predicate

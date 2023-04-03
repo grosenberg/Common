@@ -1,6 +1,6 @@
 package net.certiv.common.symtab;
 
-import net.certiv.common.util.Assert;
+import net.certiv.common.check.Assert;
 
 public class Symbol<V> {
 

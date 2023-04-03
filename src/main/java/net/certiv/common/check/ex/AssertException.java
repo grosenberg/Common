@@ -1,8 +1,8 @@
-package net.certiv.common.util.ex;
+package net.certiv.common.check.ex;
 
 import java.util.Arrays;
 
-import net.certiv.common.util.Assert;
+import net.certiv.common.check.Assert;
 import net.certiv.common.util.MsgBuilder;
 
 /**

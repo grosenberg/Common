@@ -13,31 +13,31 @@ class GraphBasic extends TestBase {
 	void testGraphMinimal() {
 		graph.put(Graph.GRAPH_NAME, "Minimal");
 
-		graph.createEdge("A", "B");
+		graph.createAndAddEdge("A", "B");
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot0.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotMinimal1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
 
 	@Test
-	void testGraph() {
-		graph.put(Graph.GRAPH_NAME, "Test");
+	void testGraphSimple() {
+		graph.put(Graph.GRAPH_NAME, "Simple");
 
-		graph.createEdge("A", "B");
-		graph.createEdge("B", "C");
-		graph.createEdge("B", "D");
-		graph.createEdge("D", "E");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("B", "D");
+		graph.createAndAddEdge("D", "E");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot1.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotSimple1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump1.txt");
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpSimple1.txt").result;
 		assertEquals(dump, dtxt);
 	}
 
@@ -45,41 +45,74 @@ class GraphBasic extends TestBase {
 	void testMultiRoots() {
 		graph.put(Graph.GRAPH_NAME, "Two-root Test");
 
-		graph.createEdge("A", "B");
-		graph.createEdge("B", "C");
-		graph.createEdge("D", "E");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("D", "E");
 
 		String dot = graph.dot();
 		String dump = graph.dump();
 
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot2.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotMultiRoot1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump2.txt");
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpMultiRoot1.txt").result;
 		assertEquals(dump, dtxt);
 	}
 
 	@Test
-	void testCycles() {
-		graph.put(Graph.GRAPH_NAME, "Cycle Test");
+	void testCyclesSelf() {
+		graph.put(Graph.GRAPH_NAME, "Cyclic");
 
-		graph.createEdge("A", "B");
-		graph.createEdge("B", "C");
-		graph.createEdge("C", "D");
-		graph.createEdge("D", "E");
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "B");
+		graph.createAndAddEdge("B", "C");
 
-		graph.createEdge("D", "F");
-		graph.createEdge("F", "B");
+		String dot = graph.dot();
+
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotCyclic1.txt").result;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
+	}
+
+	@Test
+	void testLoops() {
+		graph.put(Graph.GRAPH_NAME, "Loop Test");
+
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("C", "D");
+		graph.createAndAddEdge("D", "E");
+
+		graph.createAndAddEdge("D", "F");
+		graph.createAndAddEdge("F", "B");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadResourceStringChecked(getClass(), "dot3.txt");
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotLoop1.txt").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadResourceStringChecked(getClass(), "dump3.txt");
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpLoop1.txt").result;
 		assertEquals(dump, dtxt);
+	}
+
+	@Test
+	void testMultiEdges() {
+		graph.put(Graph.GRAPH_NAME, "Multiple Edges Test");
+
+		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("B", "C");
+		graph.createAndAddEdge("C", "D");
+
+		String dot = graph.dot();
+
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotMultiEdges1.txt").result;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
 	}
 }

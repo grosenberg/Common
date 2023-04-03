@@ -35,7 +35,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.log.Log;
+import net.certiv.common.stores.Result;
 
 public final class FsUtil {
 
@@ -407,27 +409,35 @@ public final class FsUtil {
 	 * @return the resource content as a {@code String} or {@code null} on any IO
 	 *         exception
 	 */
-	public static String loadResourceStringChecked(Class<?> cls, String name) {
+	public static Result<String> loadCheckedResource(Class<?> cls, String name) {
 		try {
-			return loadResourceString(cls, name);
+			return Result.of(new String(loadByteResource(cls, name)));
 		} catch (IOException e) {
-			return "";
+			return Result.of(e);
 		}
 	}
 
+	// /**
+	// * Returns the content of the given named resource as a {@code String}.
+	// *
+	// * @param cls a resource classloader relative class
+	// * @param name the resource name
+	// * @return the resource content as a {@code String}
+	// * @throws IOException on load IO exception
+	// */
+	// public static String loadResource(Class<?> cls, String name) throws IOException {
+	// return new String(_loadResource(cls, name));
+	// }
+
 	/**
-	 * Returns the content of the given named resource as a {@code String}.
+	 * Returns the content of the given named resource as a {@code byte[]}.
 	 *
 	 * @param cls  a resource classloader relative class
 	 * @param name the resource name
 	 * @return the resource content as a {@code String}
 	 * @throws IOException on load IO exception
 	 */
-	public static String loadResourceString(Class<?> cls, String name) throws IOException {
-		return new String(loadResource(cls, name));
-	}
-
-	public static byte[] loadResource(Class<?> cls, String name) throws IOException {
+	public static byte[] loadByteResource(Class<?> cls, String name) throws IOException {
 		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
 			return rs.readAllBytes();
 

@@ -15,6 +15,9 @@ import com.github.difflib.text.DiffRowGenerator.Builder;
 
 import net.certiv.common.util.Strings;
 
+/**
+ * @see org.eclipse.jdt.internal.junit.ui.CompareResultDialog
+ */
 public class Differ {
 
 	private static final String HDR = "===== %s - %s =====";
@@ -81,7 +84,7 @@ public class Differ {
 				sb.appendln(rd);
 			}
 			if (header) sb.appendln(Strings.padr(String.format(HDR, name, DONE), width, "="));
-			System.out.print(sb.toString());
+			System.out.println(sb.toString());
 		}
 	}
 
@@ -104,6 +107,7 @@ public class Differ {
 	}
 
 	private List<String> split(String content) {
+		if (content == null) return List.of(Strings.EMPTY);
 		return Arrays.asList(content.split(Strings.EOL));
 	}
 

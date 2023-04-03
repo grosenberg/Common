@@ -14,6 +14,7 @@ package net.certiv.common.stores;
 /**
  * {@link CharSequence} implementation backing by the char[]
  */
+@Deprecated
 public class CharArraySequence implements CharSequence {
 
 	private final char[] buff;
@@ -49,6 +50,7 @@ public class CharArraySequence implements CharSequence {
 	/*
 	 * @see java.lang.CharSequence#charAt(int)
 	 */
+	@Override
 	public char charAt(int index) {
 		if (index < 0 || index >= count) {
 			throw new StringIndexOutOfBoundsException(index);
@@ -59,6 +61,7 @@ public class CharArraySequence implements CharSequence {
 	/*
 	 * @see java.lang.CharSequence#length()
 	 */
+	@Override
 	public int length() {
 		return count;
 	}
@@ -66,6 +69,7 @@ public class CharArraySequence implements CharSequence {
 	/*
 	 * @see java.lang.CharSequence#subSequence(int, int)
 	 */
+	@Override
 	public CharSequence subSequence(int beginIndex, int endIndex) {
 		if (beginIndex < 0) {
 			throw new StringIndexOutOfBoundsException(beginIndex);
@@ -76,10 +80,11 @@ public class CharArraySequence implements CharSequence {
 		if (beginIndex > endIndex) {
 			throw new StringIndexOutOfBoundsException(endIndex - beginIndex);
 		}
-		return ((beginIndex == 0) && (endIndex == count)) ? this 
+		return ((beginIndex == 0) && (endIndex == count)) ? this
 				: new CharArraySequence(buff, offset + beginIndex, endIndex - beginIndex);
 	}
 
+	@Override
 	public String toString() {
 		return new String(this.buff, this.offset, this.count);
 	}

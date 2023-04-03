@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+@Deprecated
 public class BiHashList<K, V> {
 
 	private final LinkedHashList<K, V> forward = new LinkedHashList<>();

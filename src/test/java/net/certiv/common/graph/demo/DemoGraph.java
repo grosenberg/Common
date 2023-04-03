@@ -13,22 +13,14 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 		super(name);
 	}
 
-	public DemoEdge createEdge(String parent, String child) {
-		return createEdge(createNode(parent), createNode(child));
+	@Override
+	protected DemoNode createNode(String name) {
+		return new DemoNode(this, name);
 	}
 
-	public DemoEdge createEdge(DemoNode parent, DemoNode child) {
-		DemoEdge edge = new DemoEdge(parent, child);
-		addEdge(edge); // add edge, including nodes, to graph
-		return edge;
-	}
-
-	public DemoNode createNode(String name) {
-		DemoNode node = getNode(name);
-		if (node != null) return node;
-
-		node = new DemoNode(this, name);
-		return node;
+	@Override
+	protected DemoEdge createEdge(DemoNode beg, DemoNode end) {
+		return new DemoEdge(beg, end);
 	}
 
 	public String dump() {

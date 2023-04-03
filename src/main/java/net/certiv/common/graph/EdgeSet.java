@@ -43,6 +43,9 @@ public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> {
 		return reverse.containsKey(node);
 	}
 
+	/**
+	 * Returns all adjacent nodes, including self in the presence of a cyclic edge.
+	 */
 	public UniqueDeque<N> adjacent() {
 		return new UniqueDeque<>(reverse.keys()).unmodifiable();
 	}

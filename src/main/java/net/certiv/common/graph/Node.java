@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
@@ -12,7 +13,6 @@ import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueDeque;
-import net.certiv.common.util.Assert;
 import net.certiv.common.util.Strings;
 
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
@@ -128,6 +128,11 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @return set of adjacent nodes in the given direction, excluding {@code this} node
 	 */
 	public UniqueDeque<N> adjacent(Sense dir) {
+		return adjacent(dir, false);
+	}
+
+	public UniqueDeque<N> adjacent(Sense dir, boolean cyclic) {
+		if (cyclic) return adjacent(dir, null);
 		return adjacent(dir, n -> n._nid != _nid);
 	}
 

@@ -39,7 +39,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		if (ok) {
-			for (N child : node.adjacent(dir)) {
+			// walk including cycles, relying on visit check to terminate branch
+			for (N child : node.adjacent(dir, true)) {
 				walk(dir, visited, visitor, node, child);
 			}
 		}
@@ -57,7 +58,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param node    the current node
 	 * @return {@code true} to walk the children of the current node
 	 */
-	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
+	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent,
+			N node) {
 		if (parent == null && node == null) return false;
 		if (visited.containsEntry(parent, node)) return false;
 
@@ -66,7 +68,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		return ok;
 	}
 
-	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
+	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent,
+			N node) {
 		return node.exit(dir, visited, visitor, parent);
 	}
 

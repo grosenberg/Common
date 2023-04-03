@@ -2,8 +2,8 @@ package net.certiv.common.graph.ex;
 
 import java.util.Arrays;
 
+import net.certiv.common.check.ex.IAssertException;
 import net.certiv.common.util.MsgBuilder;
-import net.certiv.common.util.ex.IAssertException;
 
 /**
  * {@code GraphException} is a runtime exception thrown by some of the methods in

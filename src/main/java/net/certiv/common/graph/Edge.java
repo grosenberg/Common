@@ -3,10 +3,10 @@ package net.certiv.common.graph;
 import java.util.Map;
 import java.util.Objects;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.stores.Counter;
-import net.certiv.common.util.Assert;
 
 /**
  * An edge connects two nodes. Single edge cycles -- where both nodes are the same -- are
@@ -112,9 +112,17 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return end;
 	}
 
-	/** Returns {@code true} if this edge directly connects to the given node. */
+	/** Returns {@code true} if this edge is directly connected to the given node. */
 	public boolean connectsTo(N node) {
 		return node.equals(beg) || node.equals(end);
+	}
+
+	/**
+	 * Returns {@code true} if this edge directly connects between the given nodes in
+	 * either orientation.
+	 */
+	public boolean between(N src, N dst) {
+		return (beg.equals(src) && end.equals(dst)) || (beg.equals(dst) && end.equals(src));
 	}
 
 	/**
@@ -175,7 +183,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(beg, end);
+		return Objects.hash(beg, end, _eid);
 	}
 
 	@Override
@@ -183,7 +191,8 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		if (this == obj) return true;
 		if (!(obj instanceof Edge)) return false;
 		Edge<?, ?> other = (Edge<?, ?>) obj;
-		return Objects.equals(beg, other.beg) && Objects.equals(end, other.end);
+		return Objects.equals(beg, other.beg) && Objects.equals(end, other.end)
+				&& Objects.equals(_eid, other._eid);
 	}
 
 	@Override
