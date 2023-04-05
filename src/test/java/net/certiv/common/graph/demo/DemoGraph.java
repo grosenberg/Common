@@ -9,13 +9,16 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 	public static final Walker<DemoNode, DemoEdge> WALKER = new Walker<>();
 	public static final Printer<DemoNode, DemoEdge> PRINTER = new Printer<>();
 
+	private final DemoNodeFactory nodeFactory;
+
 	public DemoGraph(String name) {
 		super(name);
+		nodeFactory = new DemoNodeFactory(this);
 	}
 
 	@Override
 	protected DemoNode createNode(String name) {
-		return new DemoNode(this, name);
+		return nodeFactory.createNode(name);
 	}
 
 	@Override

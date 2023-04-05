@@ -22,8 +22,8 @@ public class Maths {
 	public static double SMALL = 1e-6;
 
 	/**
-	 * Returns the next positive pseudorandom, uniformly distributed {@code long} value from the
-	 * {@code RANDOM} number generator.
+	 * Returns the next positive pseudorandom, uniformly distributed {@code long} value
+	 * from the {@code RANDOM} number generator.
 	 *
 	 * @return a next positive pseudorandom {@code long} value
 	 */
@@ -32,9 +32,9 @@ public class Maths {
 	}
 
 	/**
-	 * Returns the next positive pseudorandom, uniformly distributed {@code int} value, between 0
-	 * (inclusive) and the given positive upper bound (exclusive), from the {@code RANDOM} number
-	 * generator.
+	 * Returns the next positive pseudorandom, uniformly distributed {@code int} value,
+	 * between 0 (inclusive) and the given positive upper bound (exclusive), from the
+	 * {@code RANDOM} number generator.
 	 *
 	 * @param bound the positive upper bound
 	 * @return a next positive pseudorandom {@code int} value
@@ -55,7 +55,13 @@ public class Maths {
 	}
 
 	/** Restrict the range of the given val to between -1 and 1. */
+	@Deprecated
 	public static int limit(int val) {
+		return (val > 1) ? 1 : (val < -1 ? -1 : val);
+	}
+
+	/** Restrict the range of the given val to between -1 and 1. */
+	public static int retrict(int val) {
 		return (val > 1) ? 1 : (val < -1 ? -1 : val);
 	}
 
@@ -235,7 +241,8 @@ public class Maths {
 	 * Computes entropy for an array of integers.
 	 *
 	 * @param counts array of counts
-	 * @return - a log2 a - b log2 b - c log2 c + (a+b+c) log2 (a+b+c) when given array [a b c]
+	 * @return - a log2 a - b log2 b - c log2 c + (a+b+c) log2 (a+b+c) when given array [a
+	 *         b c]
 	 */
 	public static double entropy(int counts[]) {
 		int total = 0;
@@ -269,7 +276,8 @@ public class Maths {
 	}
 
 	/**
-	 * Returns the given value constrained to the range defined by the given min and max values.
+	 * Returns the given value constrained to the range defined by the given min and max
+	 * values.
 	 */
 	public static int constrain(int value, int min, int max) {
 		value = Math.max(min, value);
@@ -278,7 +286,8 @@ public class Maths {
 	}
 
 	/**
-	 * Returns the given value constrained to the range defined by the given min and max values.
+	 * Returns the given value constrained to the range defined by the given min and max
+	 * values.
 	 */
 	public static double constrain(double value, double min, double max) {
 		value = Math.max(value, min);
@@ -323,8 +332,8 @@ public class Maths {
 	}
 
 	/**
-	 * Rounds a double to the next nearest integer value. The JDK version of it doesn't work
-	 * properly.
+	 * Rounds a double to the next nearest integer value. The JDK version of it doesn't
+	 * work properly.
 	 *
 	 * @param value the double value
 	 * @return the resulting integer value

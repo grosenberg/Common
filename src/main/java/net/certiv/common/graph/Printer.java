@@ -14,7 +14,7 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.Pair;
-import net.certiv.common.stores.UniqueDeque;
+import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
 public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
@@ -38,7 +38,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/** Pretty print out a graph beginning with the given nodes. */
-	public String dump(final Graph<N, E> graph, UniqueDeque<N> nodes) {
+	public String dump(final Graph<N, E> graph, UniqueList<N> nodes) {
 		TextStringBuilder sb = new TextStringBuilder();
 		for (N node : nodes) {
 			sb.appendln(String.format("// ---- %s:%s ----", graph.name(), node.name()));
@@ -78,7 +78,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 			} else if (parent == last) {
 				// continuing a subflow
-				UniqueDeque<E> edges = parent.to(node);
+				UniqueList<E> edges = parent.to(node);
 				int edgeCnt = edges.size();
 				String str = String.format("-%s-> %s ", edgeCnt, node.name());
 				sb.append(str);
@@ -136,7 +136,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		sb.appendln(GRAPH_BEG, fix(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
-		UniqueDeque<N> roots = graph.getRoots();
+		Walker<N, E> walker = new Walker<>();
+		UniqueList<N> roots = graph.getRoots();
 		switch (roots.size()) {
 			case 0:
 				break;
@@ -146,7 +147,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				sb.append(nodeProperties(graph, root, dent(1)));
 				sb.append(edgeProperties(graph, root, dent(1)));
 				sb.appendNewLine();
-				sb.append(render(visitor, root, dent(2)));
+				sb.append(render(walker, visitor, root, dent(2)));
 			}
 				break;
 
@@ -156,7 +157,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 						sb.appendNewLine();
 						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.name())));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
-						sb.append(render(visitor, root, dent(3)));
+						sb.append(render(walker, visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
 					}
 				}
@@ -166,8 +167,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		return sb.toString();
 	}
 
-	private String render(DotVisitor<N, E> visitor, N beg, String dent) {
-		Walker<N, E> walker = new Walker<>();
+	private String render(Walker<N, E> walker, DotVisitor<N, E> visitor, N beg, String dent) {
 		visitor.setup(dent);
 		walker.descend(visitor, beg);
 

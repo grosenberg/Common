@@ -8,6 +8,7 @@ import java.util.function.Predicate;
  * An ArrayDeque constrained to only allowing unique values. Also permits the data
  * structure to be made immutable.
  */
+@Deprecated
 public class UniqueDeque<E> extends ArrayDeque<E> {
 
 	@SuppressWarnings("rawtypes")
@@ -45,14 +46,14 @@ public class UniqueDeque<E> extends ArrayDeque<E> {
 	@Override
 	public void addFirst(E e) {
 		if (nomod) throw new UnsupportedOperationException();
-		if (contains(e)) return;
+		if (contains(e)) remove(e);
 		super.addFirst(e);
 	}
 
 	@Override
 	public void addLast(E e) {
 		if (nomod) throw new UnsupportedOperationException();
-		if (contains(e)) return;
+		if (contains(e)) remove(e);
 		super.addLast(e);
 	}
 

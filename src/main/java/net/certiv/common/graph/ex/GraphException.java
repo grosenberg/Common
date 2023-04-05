@@ -2,7 +2,7 @@ package net.certiv.common.graph.ex;
 
 import java.util.Arrays;
 
-import net.certiv.common.check.ex.IAssertException;
+import net.certiv.common.ex.IAssertException;
 import net.certiv.common.util.MsgBuilder;
 
 /**

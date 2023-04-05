@@ -4,8 +4,20 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 
+/**
+ * Walker supporting both ascending and descending path traversals.
+ * <p>
+ * Allows walking of most any graph connectivity, including multi-graphs with single node
+ * cycles. Internally records each adjacent node path interval and precluding repeat
+ * traversal of visited intervals. This also allows repeat use of the walker, typically
+ * starting in different direction or from a different start node, to walk the graph
+ * without repeat traversal of any previously visited path internval.
+ * <p>
+ * Reseting the walker clears the record or internal visited path intervals.
+ */
 public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	private final LinkedHashList<N, N> visited = new LinkedHashList<>();
 	private boolean debug;
 
 	public Walker() {
@@ -16,19 +28,39 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		this.debug = debug;
 	}
 
-	public void ascend(NodeVisitor<N> visitor, N node) {
-		LinkedHashList<N, N> visited = new LinkedHashList<>();
-		walk(Sense.IN, visited, visitor, null, node);
+	/**
+	 * Initiate a graph walk ascending from the given node. Applies the given visitor to
+	 * each visited node, including the start node.
+	 *
+	 * @param visitor the node visitor action
+	 * @param start   the node to start ascending from
+	 */
+	public void ascend(NodeVisitor<N> visitor, N start) {
+		walk(Sense.IN, visited, visitor, null, start);
 	}
 
-	public void descend(NodeVisitor<N> visitor, N node) {
-		LinkedHashList<N, N> visited = new LinkedHashList<>();
-		walk(Sense.OUT, visited, visitor, null, node);
+	/**
+	 * Initiate a graph walk descending from the given node. Applies the given visitor to
+	 * each visited node, including the start node.
+	 *
+	 * @param visitor the node visitor action
+	 * @param start   the node to start descending from
+	 */
+	public void descend(NodeVisitor<N> visitor, N from) {
+		walk(Sense.OUT, visited, visitor, null, from);
 	}
 
 	public Walker<N, E> debug(boolean enable) {
 		this.debug = enable;
 		return this;
+	}
+
+	/**
+	 * Clears the internal record of visited paths (represented as a collection of node
+	 * pairings).
+	 */
+	public void reset() {
+		visited.clear();
 	}
 
 	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {

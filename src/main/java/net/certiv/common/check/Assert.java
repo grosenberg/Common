@@ -1,13 +1,13 @@
 package net.certiv.common.check;
 
-import static net.certiv.common.check.ex.IAssertException.ASSERT_FAILED;
-import static net.certiv.common.check.ex.IAssertException.EMPTY_ARG;
-import static net.certiv.common.check.ex.IAssertException.NULL_ARG;
+import static net.certiv.common.ex.IAssertException.ASSERT_FAILED;
+import static net.certiv.common.ex.IAssertException.EMPTY_ARG;
+import static net.certiv.common.ex.IAssertException.NULL_ARG;
 
-import net.certiv.common.check.ex.AssertEx;
-import net.certiv.common.check.ex.AssertException;
-import net.certiv.common.check.ex.IAssertException;
-import net.certiv.common.check.ex.IAssertException.Test;
+import net.certiv.common.ex.AssertEx;
+import net.certiv.common.ex.AssertException;
+import net.certiv.common.ex.IAssertException;
+import net.certiv.common.ex.IAssertException.Test;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Reflect;
 import net.certiv.common.util.Strings;

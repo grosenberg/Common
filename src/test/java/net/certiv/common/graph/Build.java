@@ -1,22 +1,33 @@
 package net.certiv.common.graph;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
+import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphBasic extends TestBase {
+class Build extends TestBase {
 
 	@Test
-	void testGraphMinimal() {
-		graph.put(Graph.GRAPH_NAME, "Minimal");
+	void testGraph() {
+		graph.put(Graph.GRAPH_NAME, "Build Minimal");
 
 		graph.createAndAddEdge("A", "B");
+		graph.createAndAddEdge("B", "C");
+
+		DemoNode a = graph.getNode("A");
+		DemoNode b = graph.getNode("B");
+		DemoNode c = graph.getNode("C");
+
+		assertNotNull(a);
+		assertNotNull(b);
+		assertNotNull(c);
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotMinimal1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build0.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
@@ -33,11 +44,11 @@ class GraphBasic extends TestBase {
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotSimple1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build1.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpSimple1.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build1dump.txt").result;
 		assertEquals(dump, dtxt);
 	}
 
@@ -52,11 +63,11 @@ class GraphBasic extends TestBase {
 		String dot = graph.dot();
 		String dump = graph.dump();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotMultiRoot1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build2.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpMultiRoot1.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build2dump.txt").result;
 		assertEquals(dump, dtxt);
 	}
 
@@ -70,7 +81,7 @@ class GraphBasic extends TestBase {
 
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotCyclic1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build3.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}
@@ -90,11 +101,11 @@ class GraphBasic extends TestBase {
 		String dump = graph.dump();
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotLoop1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build4.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "dumpLoop1.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build4dump.txt").result;
 		assertEquals(dump, dtxt);
 	}
 
@@ -111,7 +122,34 @@ class GraphBasic extends TestBase {
 
 		String dot = graph.dot();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotMultiEdges1.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "build5.md").result;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
+	}
+
+	@Test
+	void testBuilder() {
+		graph.put(Graph.GRAPH_NAME, "Builder");
+
+		builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
+
+		String dot = graph.dot();
+		String txt = FsUtil.loadCheckedResource(getClass(), "build6.md").result;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		assertEquals(dot, txt);
+	}
+
+	@Test
+	void testBuilderMulti() {
+		graph.put(Graph.GRAPH_NAME, "Builder Multi");
+
+		builder.createAndAddEdges("Root -> [A,B]");
+		builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
+		builder.createAndAddEdges("C => [B,Z]");
+		builder.createAndAddEdges("C => [B,C]");
+
+		String dot = graph.dot();
+		String txt = FsUtil.loadCheckedResource(getClass(), "build7.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 		assertEquals(dot, txt);
 	}

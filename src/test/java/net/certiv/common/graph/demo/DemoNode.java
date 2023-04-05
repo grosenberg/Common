@@ -1,5 +1,7 @@
 package net.certiv.common.graph.demo;
 
+import java.util.Map;
+
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
@@ -9,10 +11,19 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 
 	public final DemoGraph graph;
 
-	public DemoNode(DemoGraph graph, String name) {
-		super();
+	public DemoNode(DemoGraph graph, DemoEdgeSet in, DemoEdgeSet out) {
+		super(in, out);
 		this.graph = graph;
+	}
+
+	public DemoNode(DemoGraph graph, DemoEdgeSet in, DemoEdgeSet out, String name) {
+		this(graph, in, out);
 		if (!name.isBlank()) put(NODE_NAME, name);
+	}
+
+	public DemoNode(DemoGraph graph, DemoEdgeSet in, DemoEdgeSet out, Map<Object, Object> props) {
+		this(graph, in, out);
+		putAll(props);
 	}
 
 	public Long id() {
@@ -25,8 +36,8 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 	}
 
 	@Override
-	public boolean enter(Sense dir, LinkedHashList<DemoNode, DemoNode> visited, NodeVisitor<DemoNode> listener,
-			DemoNode parent) {
+	public boolean enter(Sense dir, LinkedHashList<DemoNode, DemoNode> visited,
+			NodeVisitor<DemoNode> listener, DemoNode parent) {
 		return listener.enter(dir, visited, parent, this);
 	}
 

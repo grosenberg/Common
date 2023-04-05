@@ -1,4 +1,4 @@
-package net.certiv.common.check.ex;
+package net.certiv.common.ex;
 
 import java.util.Arrays;
 

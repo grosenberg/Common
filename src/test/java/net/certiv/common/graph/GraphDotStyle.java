@@ -11,7 +11,7 @@ import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphStyle extends TestBase {
+class GraphDotStyle extends TestBase {
 
 	@Test
 	void testStyles() {
@@ -58,7 +58,7 @@ class GraphStyle extends TestBase {
 		ds.put(STYLE, "dashed");
 
 		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "dotStyle.txt").result;
+		String txt = FsUtil.loadCheckedResource(getClass(), "dotStyle.md").result;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
 
 		assertEquals(dot, txt);

@@ -7,9 +7,12 @@ import java.util.stream.Collectors;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.stores.LinkedHashList;
-import net.certiv.common.stores.UniqueDeque;
+import net.certiv.common.stores.UniqueList;
 
-public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> {
+/**
+ * Default embedded EdgeSet.
+ */
+public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdgeSet<N, E> {
 
 	/** 1:1 map: key=edge; value=distal node */
 	private final LinkedHashMap<E, N> forward = new LinkedHashMap<>();
@@ -23,70 +26,70 @@ public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> {
 		reverse.setUniqueValued(true);
 	}
 
+	@Override
 	public void add(E edge) {
 		N distal = edge.other(dir);
 		forward.put(edge, distal);
 		reverse.put(distal, edge);
 	}
 
+	@Override
 	public boolean remove(E edge) {
 		N n = forward.remove(edge);
 		if (n != null) reverse.remove(n, edge);
 		return n != null;
 	}
 
-	/**
-	 * Returns {@code true} if any edge in this set contains the given node as its distal
-	 * node.
-	 */
+	@Override
 	public boolean isAdjacent(N node) {
 		return reverse.containsKey(node);
 	}
 
-	/**
-	 * Returns all adjacent nodes, including self in the presence of a cyclic edge.
-	 */
-	public UniqueDeque<N> adjacent() {
-		return new UniqueDeque<>(reverse.keys()).unmodifiable();
+	@Override
+	public UniqueList<N> adjacent() {
+		return new UniqueList<>(reverse.keys()).unmodifiable();
 	}
 
-	/**
-	 * Returns the set of adjacent nodes qualified by the given filter, or all adjacent
-	 * nodes if the filter is {@code null}.
-	 */
-	public UniqueDeque<N> adjacent(Predicate<? super N> filter) {
+	@Override
+	public UniqueList<N> adjacent(Predicate<? super N> filter) {
 		if (filter == null) return adjacent();
 		return reverse.keys().stream() //
 				.filter(filter) //
-				.collect(Collectors.toCollection(UniqueDeque::new)) //
+				.collect(Collectors.toCollection(UniqueList::new)) //
 				.unmodifiable();
 	}
 
+	@Override
 	public boolean hasEdge(E edge) {
 		return forward.containsKey(edge);
 	}
 
-	public UniqueDeque<E> edges() {
-		return new UniqueDeque<>(forward.keySet()).unmodifiable();
+	@Override
+	public UniqueList<E> edges() {
+		return new UniqueList<>(forward.keySet()).unmodifiable();
 	}
 
-	public LinkedList<E> edges(N node) {
+	@Override
+	public UniqueList<E> edges(N node) {
 		LinkedList<E> edges = reverse.get(node);
-		return edges != null ? edges : new LinkedList<>();
+		return edges != null ? new UniqueList<>(edges) : new UniqueList<>();
 	}
 
-	/**
-	 * Returns the set of edges qualified by the given filter on the set of edges, or all
-	 * edges if the filter is {@code null}.
-	 */
-	public UniqueDeque<E> edges(Predicate<? super E> filter) {
+	@Override
+	public UniqueList<E> edges(Predicate<? super E> filter) {
 		if (filter == null) return edges();
 		return edges().stream() //
 				.filter(filter) //
-				.collect(Collectors.toCollection(UniqueDeque::new)) //
+				.collect(Collectors.toCollection(UniqueList::new)) //
 				.unmodifiable();
 	}
 
+	@Override
+	public int size() {
+		return forward.size();
+	}
+
+	@Override
 	public void clear() {
 		forward.clear();
 		reverse.clear();

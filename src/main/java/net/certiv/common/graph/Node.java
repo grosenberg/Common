@@ -12,7 +12,7 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
-import net.certiv.common.stores.UniqueDeque;
+import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
@@ -25,18 +25,21 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public final long _nid;
 
 	/** Set of inbound edges */
-	private final EdgeSet<N, E> in = new EdgeSet<>(Sense.IN);
+	private final IEdgeSet<N, E> in;
 	/** Set of outbound edges */
-	private final EdgeSet<N, E> out = new EdgeSet<>(Sense.OUT);
+	private final IEdgeSet<N, E> out;
 
-	protected Node() {
-		super();
-		_nid = CTR.getAndIncrement();
-		put(NODE_NAME, String.valueOf(_nid));
+	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out) {
+		this(in, out, null);
 	}
 
-	protected Node(Map<Object, Object> props) {
-		this();
+	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out, Map<Object, Object> props) {
+		super();
+		Assert.notNull(in, out);
+		this.in = in;
+		this.out = out;
+		_nid = CTR.getAndIncrement();
+		put(NODE_NAME, String.valueOf(_nid));
 		putAll(props);
 	}
 
@@ -90,18 +93,6 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
-	 * Clears the edge sets and property store.
-	 * <p>
-	 * Internal use only.
-	 */
-	@Override
-	void clear() {
-		in.clear();
-		out.clear();
-		super.clear();
-	}
-
-	/**
 	 * Return {@code true} if this node is adjacent the given node.
 	 * <p>
 	 * Adjacency between nodes is defined as being directly connected by a single
@@ -115,8 +106,11 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return in.isAdjacent(node) || out.isAdjacent(node);
 	}
 
-	/** Returns the full set of inbound and outbound adjacent nodes. */
-	public UniqueDeque<N> adjacent() {
+	/**
+	 * Returns the full set of inbound and outbound adjacent nodes. Excludes {@code this}
+	 * node.
+	 */
+	public UniqueList<N> adjacent() {
 		return adjacent(Sense.BOTH);
 	}
 
@@ -127,11 +121,11 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param dir the adjacency direction criteria
 	 * @return set of adjacent nodes in the given direction, excluding {@code this} node
 	 */
-	public UniqueDeque<N> adjacent(Sense dir) {
+	public UniqueList<N> adjacent(Sense dir) {
 		return adjacent(dir, false);
 	}
 
-	public UniqueDeque<N> adjacent(Sense dir, boolean cyclic) {
+	public UniqueList<N> adjacent(Sense dir, boolean cyclic) {
 		if (cyclic) return adjacent(dir, null);
 		return adjacent(dir, n -> n._nid != _nid);
 	}
@@ -144,7 +138,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param filter the distal node qualification criteria
 	 * @return set of adjacent nodes meeting the given criteria
 	 */
-	public UniqueDeque<N> adjacent(Sense dir, Predicate<? super N> filter) {
+	public UniqueList<N> adjacent(Sense dir, Predicate<? super N> filter) {
 		switch (dir) {
 			case IN:
 				return in.adjacent(filter);
@@ -152,7 +146,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 				return out.adjacent(filter);
 			case BOTH:
 			default:
-				UniqueDeque<N> results = new UniqueDeque<>();
+				UniqueList<N> results = new UniqueList<>();
 				results.addAll(in.adjacent(filter));
 				results.addAll(out.adjacent(filter));
 				return results.unmodifiable();
@@ -161,7 +155,9 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/**
 	 * Return {@code true} if this node is an ancestor of the given node. Performs a depth
-	 * first search.
+	 * first search starting at this node.
+	 *
+	 * @param node the search target descendent node
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean ancestorOf(N node) {
@@ -189,7 +185,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param node a distal node
 	 * @return set of connecting edges
 	 */
-	public UniqueDeque<E> to(N end) {
+	public UniqueList<E> to(N end) {
 		return edges(Sense.OUT, e -> e.end()._nid == end._nid);
 	}
 
@@ -199,7 +195,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param node a distal node
 	 * @return set of connecting edges
 	 */
-	public UniqueDeque<E> from(N beg) {
+	public UniqueList<E> from(N beg) {
 		return edges(Sense.IN, e -> e.beg()._nid == beg._nid);
 	}
 
@@ -264,9 +260,11 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return edges(dir, filter).size();
 	}
 
-	/** Returns the set of connected edges. */
-	public UniqueDeque<E> edges() {
-		return edges(Sense.BOTH, null);
+	/**
+	 * Returns the set of edges connected to this node. Excludes single-edge cycles.
+	 */
+	public UniqueList<E> edges() {
+		return edges(Sense.BOTH, false);
 	}
 
 	/**
@@ -277,7 +275,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @return set of connected edges of the given direction and excluding single-edge
 	 *         cycles
 	 */
-	public UniqueDeque<E> edges(Sense dir) {
+	public UniqueList<E> edges(Sense dir) {
 		return edges(dir, false);
 	}
 
@@ -289,7 +287,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param cyclic {@code true} to include single-edge cycles, otherwise exclude
 	 * @return set of connected edges meeting the given criteria
 	 */
-	public UniqueDeque<E> edges(Sense dir, boolean cyclic) {
+	public UniqueList<E> edges(Sense dir, boolean cyclic) {
 		return edges(dir, !cyclic ? e -> !e.cyclic() : null);
 	}
 
@@ -302,7 +300,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param filter the connected edge qualification criteria
 	 * @return set of connected edges meeting the given criteria
 	 */
-	public UniqueDeque<E> edges(Sense dir, Predicate<? super E> filter) {
+	public UniqueList<E> edges(Sense dir, Predicate<? super E> filter) {
 		switch (dir) {
 			case IN:
 				return in.edges(filter);
@@ -310,7 +308,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 				return out.edges(filter);
 			case BOTH:
 			default:
-				UniqueDeque<E> results = new UniqueDeque<>();
+				UniqueList<E> results = new UniqueList<>();
 				results.addAll(in.edges(filter));
 				results.addAll(out.edges(filter));
 				return results;
@@ -347,6 +345,18 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return getDotStyle();
 	}
 
+	/**
+	 * Clears the edge sets and property store.
+	 * <p>
+	 * Internal use only.
+	 */
+	@Override
+	void clear() {
+		in.clear();
+		out.clear();
+		super.clear();
+	}
+
 	@Override
 	public int hashCode() {
 		return Long.hashCode(_nid);
@@ -362,7 +372,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		String root = isRoot() ? "root:" : Strings.EMPTY;
-		return String.format("%s<%s%s>", name(), root, _nid);
+		String root = isRoot() ? ":root" : Strings.EMPTY;
+		return String.format("%s%s", name(), root);
 	}
 }

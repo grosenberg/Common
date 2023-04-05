@@ -51,6 +51,11 @@
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.certiv</groupId>
+			<artifactId>net.certiv.nflow.core</artifactId>
+			<version>0.2.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -89,7 +94,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>javadoc</goal>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>

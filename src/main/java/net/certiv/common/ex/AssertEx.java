@@ -1,6 +1,6 @@
-package net.certiv.common.check.ex;
+package net.certiv.common.ex;
 
-import net.certiv.common.check.ex.IAssertException.Test;
+import net.certiv.common.ex.IAssertException.Test;
 
 public class AssertEx {
 

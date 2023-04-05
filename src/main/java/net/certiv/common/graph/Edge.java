@@ -17,9 +17,6 @@ import net.certiv.common.stores.Counter;
  */
 public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
-	// private static final GraphException ERR_REMOVE = GraphException.of(Test.NOT_NULL,
-	// "Redundant remove");
-
 	/** Sense of direction. */
 	public enum Sense {
 		/** Edge in direction; in through begin node. */
@@ -135,7 +132,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/**
 	 * Removes this edge from the graph by disconnecting from the internal edge sets of
-	 * the edge begin and end node connections. Specify {@code delete==true} to clear the
+	 * the edge begin and end node connections. Specify {@code delete=true} to clear the
 	 * edge. Otherwise the edge remains intact and potentially available for reuse.
 	 * <p>
 	 * Internal use only. Callthrough from {@code Graph#remove(edge)}.
@@ -150,10 +147,13 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @param delete {@code true} to clear the edge
 	 * @return {@code true} if this edge is fully removed.
 	 */
-	@SuppressWarnings("unchecked")
 	boolean remove(boolean delete) {
-		boolean rmvd = beg != null && beg.remove((E) this, Sense.OUT);
-		rmvd |= end != null && end.remove((E) this, Sense.IN);
+		Assert.isTrue(valid());
+
+		@SuppressWarnings("unchecked")
+		E edge = (E) this;
+		boolean rmvd = beg.remove(edge, Sense.OUT);
+		rmvd |= end.remove(edge, Sense.IN);
 		if (delete) {
 			beg = end = null;
 			clear();
@@ -197,6 +197,6 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		return String.format("%s -{%s}-> %s", beg, _eid, end);
+		return String.format("%s -> %s", beg, end);
 	}
 }

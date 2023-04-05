@@ -15,7 +15,7 @@ import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.stores.Counter;
-import net.certiv.common.stores.UniqueDeque;
+import net.certiv.common.stores.UniqueList;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
@@ -47,8 +47,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Descriptive name of this {@code Graph}. Defaults to the simple class name of the
-	 * implementing class.
+	 * Descriptive name assigned to this {@code Graph}. Defaults to the simple class name
+	 * of the implementing class.
 	 */
 	public String name() {
 		String name = (String) get(GRAPH_NAME, getClass().getSimpleName());
@@ -56,7 +56,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	// ======================================================
-	// Convenience methods for string-named nodes
+	// Convenience methods for string named nodes
 	// ------------------------------------------------------
 
 	/**
@@ -132,9 +132,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public N getNode(String name) {
 		Assert.notEmpty(name);
-		UniqueDeque<N> res = nodes.stream() //
+		UniqueList<N> res = nodes.stream() //
 				.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
-				.collect(Collectors.toCollection(UniqueDeque::new));
+				.collect(Collectors.toCollection(UniqueList::new));
 
 		Assert.isTrue(GraphEx.of(ERR_LOOKUP, name, res), res.size() <= 1);
 		return res.peek();
@@ -164,11 +164,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param end a destination node name
 	 * @return the edges existing between the given nodes
 	 */
-	public UniqueDeque<E> getEdges(String beg, String end) {
+	public UniqueList<E> getEdges(String beg, String end) {
 		Assert.notEmpty(beg, end);
 		N src = getNode(beg);
 		N dst = getNode(end);
-		if (src == null || dst == null) return UniqueDeque.empty();
+		if (src == null || dst == null) return UniqueList.empty();
 		return getEdges(src, dst);
 	}
 
@@ -198,20 +198,40 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return edge;
 	}
 
-	/** Returns an immutable list of the current graph root nodes. */
-	public UniqueDeque<N> getRoots() {
+	/**
+	 * Returns an immutable list of the current graph root nodes. Dynamically collected by
+	 * examining all nodes currently in the graph.
+	 */
+	public UniqueList<N> getRoots() {
 		return nodes.stream().filter(n -> n.isRoot()) //
-				.collect(Collectors.toCollection(UniqueDeque::new)).unmodifiable();
+				.collect(Collectors.toCollection(UniqueList::new)).unmodifiable();
 	}
 
 	/** Returns {@code true} if the graph contains the given node. */
+	@Deprecated
 	public boolean hasNode(N node) {
 		return nodes.contains(node);
 	}
 
+	/** Returns {@code true} if the graph contains the given node. */
+	public boolean contains(N node) {
+		return nodes.contains(node);
+	}
+
+	/** Returns the size of the graph. Equivalent to the node count. */
+	public int size() {
+		return nodes.size();
+	}
+
+	/** Returns {@code true} if the graph contains the given edge. */
+	public boolean contains(E edge) {
+		if (!edge.valid()) return false;
+		return getEdges(edge.beg(), edge.end()).stream().anyMatch(e -> e.equals(edge));
+	}
+
 	/** Returns a copy of the current graph node set. */
-	public UniqueDeque<N> getNodes() {
-		return new UniqueDeque<>(nodes).unmodifiable();
+	public UniqueList<N> getNodes() {
+		return new UniqueList<>(nodes).unmodifiable();
 	}
 
 	/** Returns {@code true} if any edge exists between the given nodes. */
@@ -225,8 +245,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 *
 	 * @return the unique set of existing edges
 	 */
-	public UniqueDeque<E> getEdges() {
-		UniqueDeque<E> edges = new UniqueDeque<>();
+	public UniqueList<E> getEdges() {
+		UniqueList<E> edges = new UniqueList<>();
 		for (N node : nodes) {
 			edges.addAll(node.edges());
 		}
@@ -240,7 +260,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param dst a destination node
 	 * @return the edges existing between the given nodes
 	 */
-	public UniqueDeque<E> getEdges(N src, N dst) {
+	public UniqueList<E> getEdges(N src, N dst) {
 		Assert.notNull(src, dst);
 		return src.edges(Sense.BOTH, e -> e.between(src, dst));
 	}
@@ -307,6 +327,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @see Graph#addEdge(Edge)
 	 */
 	private boolean _remove(N node) {
+		// Log2.debug("Remove node internal [%s]", node);
 		return nodes.remove(node);
 	}
 
@@ -319,8 +340,10 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public boolean removeNode(N node) {
 		Assert.notNull(node);
-		boolean ok = _remove(node);
-		node.edges().forEach(e -> removeEdge(e, true));
+		// Log2.debug("Remove node [%s]", node);
+		if (!nodes.contains(node)) return false;
+
+		boolean ok = node.edges().stream().allMatch(e -> removeEdge(e, true));
 		node.clear();
 		return ok;
 	}
@@ -335,6 +358,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public boolean removeEdge(E edge, boolean clear) {
 		Assert.notNull(edge);
+		// Log2.debug("Remove edge [%s] clear=%s", edge, clear);
 
 		N beg = edge.beg();
 		N end = edge.end();
@@ -374,33 +398,37 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Removes all edges directly connecting the given nodes.
+	 * Removes all edges directly connecting from the given source node to the given
+	 * destination node.
 	 *
 	 * @param src   a source node
 	 * @param dst   a destination node
-	 * @param clear {@code true} to clear the edge terminal nodes and properties
-	 * @return {@code true} if an edge was removed
+	 * @param clear {@code true} to clear the edge terminal nodes and properties of the
+	 *              removed edges
+	 * @return {@code true} if the selected edges were removed
 	 */
 	public boolean removeEdges(N src, N dst, boolean clear) {
 		Assert.notNull(src, dst);
-		UniqueDeque<E> edges = src.to(dst);
+		UniqueList<E> edges = src.to(dst);
+		// Log2.debug("Remove edges %s", edges);
 		if (edges.isEmpty()) return false;
 		return edges.stream().allMatch(e -> removeEdge(e, clear));
 	}
 
 	/**
-	 * Removes all edges directly connecting the given nodes and that satisfy the given
-	 * filter predicate or if the filter is {@code null}.
+	 * Removes all edges directly connecting from the given source node to the given
+	 * destination node and that satisfy the given filter predicate. All selected edges
+	 * are removed if the filter is {@code null}.
 	 *
 	 * @param src    a source node
 	 * @param dst    a destination node
 	 * @param clear  {@code true} to clear the edge terminal nodes and properties
 	 * @param filter a predicate returning {@code true} to select for removal
-	 * @return {@code true} if any element was removed
+	 * @return {@code true} if the selected edges were removed
 	 */
 	public boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter) {
 		Assert.notNull(src, dst);
-		UniqueDeque<E> edges = src.to(dst);
+		UniqueList<E> edges = src.to(dst);
 		if (edges.isEmpty()) return false;
 		if (filter == null) return edges.stream().allMatch(e -> removeEdge(e, clear));
 		return edges.stream().filter(filter).allMatch(e -> removeEdge(e, clear));
@@ -415,7 +443,15 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * the same as the given node -- the edge is removed from the graph.
 	 * <p>
 	 * If the given edge begin node becomes unconnected in the graph, except by
-	 * self-cyclic edges, that terminal node is removed from the graph.
+	 * self-cyclic edges, that terminal node is removed from the graph. *
+	 *
+	 * <pre>
+	 * A -> B -> C -> D -> E
+	 * C -> F -> G
+	 * transfer(CF, B);	// CF becomes BF
+	 * A -> B -> C -> D -> E
+	 * B -> F -> G
+	 * </pre>
 	 *
 	 * @param edge an edge defining a subgraph
 	 * @param beg  the target beg node for the subgraph
@@ -446,6 +482,25 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	public void transfer(Collection<? extends E> edges, N beg) {
 		Assert.notNull(edges, beg);
 		edges.forEach(e -> transfer(e, beg));
+	}
+
+	/**
+	 * Moves the given edge to connect between the given nodes.
+	 * <p>
+	 * Removes the edge from the graph if the result of the move would create a single
+	 * edge cycle.
+	 * <p>
+	 * If either of the initial terminal nodes of the given edge become unconnected in the
+	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
+	 * graph.
+	 *
+	 * @param edge an existing graph edge
+	 * @param beg  the new begin node
+	 * @param end  the new end node
+	 * @return {@code true} if the edge was moved
+	 */
+	public boolean move(E edge, N beg, N end) {
+		return move(edge, beg, end, false);
 	}
 
 	/**
@@ -599,11 +654,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		nodes.remove(target);
 		for (N node : nodes) {
 			// convert [D,G] => [E,H] to [D,G] => B
-			UniqueDeque<E> in = node.edges(Sense.IN);
+			UniqueList<E> in = node.edges(Sense.IN);
 			reterminate(in, target);
 
 			// convert [E,H] => [F,I] to B => [F,I]
-			UniqueDeque<E> out = node.edges(Sense.OUT);
+			UniqueList<E> out = node.edges(Sense.OUT);
 			transfer(out, target);
 		}
 	}
@@ -641,6 +696,26 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Replicates the existing edge connections with given source node to the given target
 	 * nodes. Creates new edge connections to each target node equivalent to the source
+	 * node edge connections.
+	 * <p>
+	 * All replica edges are added to the graph.
+	 *
+	 * <pre>
+	 * A => B => C
+	 * replicateEdges(B, [B,X,Y,Z]);
+	 * A => [B,X,Y,Z] => C
+	 * </pre>
+	 *
+	 * @param node    a source node
+	 * @param targets the target nodes
+	 */
+	public void replicateEdges(N node, Collection<? extends N> targets) {
+		replicateEdges(node, targets, false);
+	}
+
+	/**
+	 * Replicates the existing edge connections with given source node to the given target
+	 * nodes. Creates new edge connections to each target node equivalent to the source
 	 * node edge connections. Conditionally removes the source node.
 	 * <p>
 	 * All replica edges are added to the graph.
@@ -659,14 +734,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 *
 	 * @param node    a source node
 	 * @param targets the target nodes
-	 * @param reduce  {@code true} to remove the source node
+	 * @param remove  {@code true} to remove the source node
 	 */
-	public void replicateEdges(N node, Collection<? extends N> targets, boolean reduce) {
+	public void replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
 		Set<? extends N> tgts = new LinkedHashSet<>(targets);
 		tgts.remove(node);
 
-		UniqueDeque<E> in = node.edges(Sense.IN);
-		UniqueDeque<E> out = node.edges(Sense.OUT);
+		UniqueList<E> in = node.edges(Sense.IN);
+		UniqueList<E> out = node.edges(Sense.OUT);
 
 		for (N tgt : tgts) {
 
@@ -682,7 +757,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 				addEdge(repl);
 			}
 		}
-		if (reduce) reduce(node);
+		if (remove) removeNode(node);
 	}
 
 	/**
@@ -699,8 +774,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param node the term to remove from the graph
 	 */
 	public void reduce(N node) {
-		UniqueDeque<E> srcs = node.edges(Sense.IN, false);	// A =>
-		UniqueDeque<E> dsts = node.edges(Sense.OUT, false);	// => C
+		UniqueList<E> srcs = node.edges(Sense.IN, false);	// A =>
+		UniqueList<E> dsts = node.edges(Sense.OUT, false);	// => C
 
 		for (E src : srcs) {
 			for (E dst : dsts) {
