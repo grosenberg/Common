@@ -55,22 +55,36 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return String.format("%s(%s)", name, _gid);
 	}
 
-	// ======================================================
-	// Convenience methods for string named nodes
-	// ------------------------------------------------------
+	/**
+	 * Creates a new node instance.
+	 *
+	 * @return a new node otherwise unassociated with the graph
+	 */
+	protected abstract N createNode();
 
 	/**
 	 * Creates a new node instance with the given name.
 	 * <p>
-	 * Use {@code #findOrCreateNode(String)} to protect against creating multiple nodes
-	 * with the same name. The {@code #getNode} method relies on unique node names.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
+	 * Convenience operation primarily intended to work with string-named nodes. Use
+	 * {@code #findOrCreateNode(String)} to protect against creating multiple nodes with
+	 * the same name. The {@code #getNode(String)} method relies on unique node names.
 	 *
 	 * @param name the node name
 	 * @return a new node otherwise unassociated with the graph
 	 */
 	protected abstract N createNode(String name);
+
+	/**
+	 * Creates a new node instance with the given properties.
+	 *
+	 * @param props the node properties
+	 * @return a new node otherwise unassociated with the graph
+	 */
+	protected abstract N createNode(Map<Object, Object> props);
+
+	// ======================================================
+	// Convenience methods for string named nodes
+	// ------------------------------------------------------
 
 	/**
 	 * Finds the named terminal node in the graph or, if not pre-existing, creates a new
