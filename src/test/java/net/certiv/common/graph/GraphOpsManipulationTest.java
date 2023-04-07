@@ -14,7 +14,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class GraphOpsManipulation extends TestBase {
+class GraphOpsManipulationTest extends TestBase {
 
 	@Test
 	void testReduceNode() {

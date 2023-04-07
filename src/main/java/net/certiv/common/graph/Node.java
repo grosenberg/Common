@@ -350,7 +350,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * Internal use only.
 	 */
 	@Override
-	void clear() {
+	protected void clear() {
 		in.clear();
 		out.clear();
 		super.clear();

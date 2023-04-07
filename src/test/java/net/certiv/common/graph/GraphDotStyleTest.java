@@ -11,7 +11,7 @@ import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphDotStyle extends TestBase {
+class GraphDotStyleTest extends TestBase {
 
 	@Test
 	void testStyles() {

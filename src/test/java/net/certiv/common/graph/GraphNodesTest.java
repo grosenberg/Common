@@ -15,7 +15,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class GraphNodes extends TestBase {
+class GraphNodesTest extends TestBase {
 
 	DemoNode a;
 	DemoNode b;

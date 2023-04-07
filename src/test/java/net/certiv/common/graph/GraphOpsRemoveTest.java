@@ -13,7 +13,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class GraphOpsRemove extends TestBase {
+class GraphOpsRemoveTest extends TestBase {
 
 	@BeforeEach
 	void testRemoveOps() {
