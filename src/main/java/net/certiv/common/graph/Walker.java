@@ -67,7 +67,7 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		boolean ok = enter(dir, visited, visitor, parent, node);
 		if (debug) {
 			Integer cnt = node != null ? node.size(dir, e -> !e.cyclic()) : null;
-			Log.debug(this, "[enter=%s] %s -> %s (%s)", ok, parent, node, cnt);
+			Log.debug("[enter=%s] %s -> %s (%s)", ok, parent, node, cnt);
 		}
 
 		if (ok) {

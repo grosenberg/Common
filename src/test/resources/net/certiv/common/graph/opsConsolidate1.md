@@ -1,22 +1,22 @@
-digraph "Consolidate(0)" {
+digraph Consolidate {
 
-    "Root(0)"
-    "A(1)"
-    "B(4)"
-    "C(5)"
-    "F(7)"
-    "I(9)"
-    "D(2)"
-    "G(3)"
+    Root
+    A
+    B
+    C
+    F
+    I
+    D
+    G
 
-    "Root(0)" -> "A(1)"
-    "A(1)" -> "B(4)"
-    "B(4)" -> "C(5)"
-    "B(4)" -> "F(7)"
-    "B(4)" -> "I(9)"
-    "Root(0)" -> "D(2)"
-    "D(2)" -> "B(4)"
-    "Root(0)" -> "G(3)"
-    "G(3)" -> "B(4)"
+    Root -> A
+    A -> B
+    B -> C
+    B -> F
+    B -> I
+    Root -> D
+    D -> B
+    Root -> G
+    G -> B
 
 }

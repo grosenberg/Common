@@ -24,10 +24,10 @@ public class Cmd {
 	/**
 	 * Execute a command in a subprocess. Sanitizes the I/O to UTF-8.
 	 *
-	 * @param cmd command line argument array defining the command and options. The
-	 *            command must execute as a standard filter: stdIn to stdOut.
-	 * @param base the base directory for the command or {@code null} if the command
-	 *            is absolute
+	 * @param cmd  command line argument array defining the command and options. The
+	 *             command must execute as a standard filter: stdIn to stdOut.
+	 * @param base the base directory for the command or {@code null} if the command is
+	 *             absolute
 	 * @param data an input data string
 	 * @return output data
 	 */
@@ -59,7 +59,7 @@ public class Cmd {
 			}
 
 		} catch (IOException e) {
-			Log.error(Cmd.class, "Cmd execution error: %s", e.getMessage());
+			Log.error("Cmd execution error: %s", e.getMessage());
 			return Strings.EMPTY;
 		}
 	}

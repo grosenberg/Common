@@ -23,14 +23,14 @@ class GraphDotStyle extends TestBase {
 		ds.put(FONTCOLOR, "teal");
 		ds.put(FONTSIZE, 32);
 
-		DemoNode a = graph.findOrCreateNode("A");
+		DemoNode a = builder.findOrCreateNode("A");
 		ds = a.getDotStyle();
 		ds.put(LABEL, "Node " + a.name());
 		ds.put(COLOR, "blue");
 		ds.put(FILLCOLOR, "lightblue");
 		ds.put(STYLE, "filled");
 
-		DemoNode b = graph.findOrCreateNode("B");
+		DemoNode b = builder.findOrCreateNode("B");
 		ds = b.getDotStyle();
 		ds.put(LABEL, "Node " + b.name());
 		ds.put(COLOR, "red");
@@ -38,7 +38,7 @@ class GraphDotStyle extends TestBase {
 		ds.put(SHAPE, "rectangle");
 		ds.put(STYLE, "filled, rounded");
 
-		DemoNode c = graph.findOrCreateNode("C");
+		DemoNode c = builder.findOrCreateNode("C");
 
 		DemoEdge ab = graph.createAndAddEdge(a, b);
 		ds = ab.getDotStyle();

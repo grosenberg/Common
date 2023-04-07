@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import net.certiv.common.ex.NotImplementedException;
-import net.certiv.common.util.Maths;
 
 /**
  * An ArrayDeque constrained to only allowing unique values. Also permits the data
@@ -14,7 +13,7 @@ import net.certiv.common.util.Maths;
  */
 public class UniqueList<E> extends LinkedList<E> {
 
-	private static final UniqueList<?> EMPTY = new UniqueList<>();
+	private static final UniqueList<?> EMPTY = new UniqueList<>().unmodifiable();
 
 	private boolean nomod;
 
@@ -31,6 +30,10 @@ public class UniqueList<E> extends LinkedList<E> {
 		super(c);
 	}
 
+	public boolean isUnmodifiable() {
+		return nomod;
+	}
+
 	/**
 	 * Set the queue irreversibly to an unmodifiable condition.
 	 *
@@ -41,10 +44,22 @@ public class UniqueList<E> extends LinkedList<E> {
 		return this;
 	}
 
+	/**
+	 * If unique, appends the given element to the end of this list. Otherwise, replaces
+	 * the prior equivalent instance with the given element.
+	 * <p>
+	 * This method is equivalent to {@link #addLast}.
+	 *
+	 * @param e the element to be appended to this list
+	 * @return {@code true} if unique appended
+	 */
 	@Override
 	public boolean add(E e) {
 		if (nomod) throw new UnsupportedOperationException();
-		if (contains(e)) super.set(indexOf(e), e);
+		if (contains(e)) {
+			super.set(indexOf(e), e);
+			return false;
+		}
 		return super.add(e);
 	}
 
@@ -52,20 +67,11 @@ public class UniqueList<E> extends LinkedList<E> {
 	public void add(int idx, E e) {
 		if (nomod) throw new UnsupportedOperationException();
 		if (!contains(e)) super.add(idx, e);
-
-		int dot = indexOf(e);
-		switch (Maths.retrict(dot - idx)) {
-			case -1: // before
-				remove(e);
-				super.add(idx - 1, e);
-				break;
-			case 1: // after
-				remove(e);
-				super.add(idx, e);
-				break;
-			case 0:
-			default:
-				super.add(idx, e);
+		if (idx == indexOf(e)) {
+			super.set(idx, e);
+		} else {
+			remove(e);
+			super.add(idx, e);
 		}
 	}
 
@@ -93,9 +99,8 @@ public class UniqueList<E> extends LinkedList<E> {
 	@Override
 	public boolean addAll(int idx, Collection<? extends E> c) {
 		if (nomod) throw new UnsupportedOperationException();
-		int cnt = (int) stream().filter(e -> contains(e) && indexOf(e) < idx).count();
 		removeAll(c);
-		return super.addAll(idx - cnt, c);
+		return super.addAll(Math.min(idx, size()), c);
 	}
 
 	@Override
@@ -109,19 +114,9 @@ public class UniqueList<E> extends LinkedList<E> {
 	public E set(int idx, E e) {
 		if (nomod) throw new UnsupportedOperationException();
 		if (!contains(e)) return super.set(idx, e);
-
-		int dot = indexOf(e);
-		switch (Maths.retrict(dot - idx)) {
-			case -1: // before
-				remove(e);
-				return super.set(idx - 1, e);
-			case 1: // after
-				remove(e);
-				return super.set(idx, e);
-			case 0:
-			default:
-				return super.set(idx, e);
-		}
+		E x = get(idx);
+		remove(e);
+		return super.set(indexOf(x), e);
 	}
 
 	@Override

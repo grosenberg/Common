@@ -1,10 +1,10 @@
-digraph "Build Minimal(0)" {
+digraph "Build Minimal" {
 
-    "A(0)"
-    "B(1)"
-    "C(2)"
+    A
+    B
+    C
 
-    "A(0)" -> "B(1)"
-    "B(1)" -> "C(2)"
+    A -> B
+    B -> C
 
 }

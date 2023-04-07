@@ -1,7 +1,10 @@
 package net.certiv.common.log;
 
-import java.time.Instant;
+import java.lang.StackWalker.Option;
+import java.lang.StackWalker.StackFrame;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -11,112 +14,245 @@ import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
 import org.apache.logging.log4j.core.config.AbstractConfiguration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.apache.logging.log4j.spi.AbstractLogger;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.apache.logging.log4j.spi.ExtendedLogger;
-
-import net.certiv.common.util.Chars;
 
 public class Log {
 
-	public static void trace(Object source, String message) {
-		log(source, Level.TRACE, message, null);
+	// @Deprecated
+	// public static void trace(Object source, String message) {
+	// log(Level.TRACE, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void trace(Object source, String format, Object... args) {
+	// log(Level.TRACE, String.format(format, args), null);
+	// }
+	//
+	// @Deprecated
+	// public static void trace(Object source, String message, Throwable e) {
+	// log(Level.TRACE, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void debug(Object source, String message) {
+	// log(Level.DEBUG, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void debug(Object source, String format, Object... args) {
+	// log(Level.DEBUG, String.format(format, args), null);
+	// }
+	//
+	// @Deprecated
+	// public static void debug(Object source, String message, Throwable e) {
+	// log(Level.DEBUG, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void info(Object source, String message) {
+	// log(Level.INFO, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void info(Object source, String format, Object... args) {
+	// log(Level.INFO, String.format(format, args), null);
+	// }
+	//
+	// @Deprecated
+	// public static void info(Object source, String message, Throwable e) {
+	// log(Level.INFO, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void warn(Object source, String message) {
+	// log(Level.WARN, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void warn(Object source, String format, Object... args) {
+	// log(Level.WARN, String.format(format, args), null);
+	// }
+	//
+	// @Deprecated
+	// public static void warn(Object source, String message, Throwable e) {
+	// log(Level.WARN, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void error(Object source, String message) {
+	// log(Level.ERROR, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void error(Object source, String format, Object... args) {
+	// log(Level.ERROR, String.format(format, args), null);
+	// }
+	//
+	// @Deprecated
+	// public static void error(Object source, Throwable e, String format, Object... args)
+	// {
+	// log(Level.ERROR, String.format(format, args), e);
+	// }
+	//
+	// @Deprecated
+	// public static void error(Object source, String message, Throwable e) {
+	// log(Level.ERROR, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void fatal(Object source, String message) {
+	// log(Level.FATAL, message, null);
+	// }
+	//
+	// @Deprecated
+	// public static void fatal(Object source, String message, Throwable e) {
+	// log(Level.FATAL, message, e);
+	// }
+	//
+	// @Deprecated
+	// public static void printf(Object source, Level level, String format, Instant time,
+	// String logger,
+	// String message) {
+	// printf(level, message);
+	// }
+	//
+	// @Deprecated
+	// public static void log(Object source, Level level, String msg, Throwable e) {
+	// log(level, msg, e);
+	// }
+
+	// --------------------------------------------------------------
+
+	public static void trace(String message) {
+		log(Level.TRACE, message, null);
 	}
 
-	public static void trace(Object source, String format, Object... args) {
-		log(source, Level.TRACE, String.format(format, args), null);
+	public static void trace(String format, Object... args) {
+		log(Level.TRACE, String.format(format, args), null);
 	}
 
-	public static void trace(Object source, String message, Throwable e) {
-		log(source, Level.TRACE, message, e);
+	public static void trace(String message, Throwable e) {
+		log(Level.TRACE, message, e);
 	}
 
-	public static void debug(Object source, String message) {
-		log(source, Level.DEBUG, message, null);
+	public static void debug(String message) {
+		log(Level.DEBUG, message, null);
 	}
 
-	public static void debug(Object source, String format, Object... args) {
-		log(source, Level.DEBUG, String.format(format, args), null);
+	public static void debug(String format, Object... args) {
+		log(Level.DEBUG, String.format(format, args), null);
 	}
 
-	public static void debug(Object source, String message, Throwable e) {
-		log(source, Level.DEBUG, message, e);
+	public static void debug(String message, Throwable e) {
+		log(Level.DEBUG, message, e);
 	}
 
-	public static void info(Object source, String message) {
-		log(source, Level.INFO, message, null);
+	public static void info(String message) {
+		log(Level.INFO, message, null);
 	}
 
-	public static void info(Object source, String format, Object... args) {
-		log(source, Level.INFO, String.format(format, args), null);
+	public static void info(String format, Object... args) {
+		log(Level.INFO, String.format(format, args), null);
 	}
 
-	public static void info(Object source, String message, Throwable e) {
-		log(source, Level.INFO, message, e);
+	public static void info(String message, Throwable e) {
+		log(Level.INFO, message, e);
 	}
 
-	public static void warn(Object source, String message) {
-		log(source, Level.WARN, message, null);
+	public static void warn(String message) {
+		log(Level.WARN, message, null);
 	}
 
-	public static void warn(Object source, String format, Object... args) {
-		log(source, Level.WARN, String.format(format, args), null);
+	public static void warn(String format, Object... args) {
+		log(Level.WARN, String.format(format, args), null);
 	}
 
-	public static void warn(Object source, String message, Throwable e) {
-		log(source, Level.WARN, message, e);
+	public static void warn(String message, Throwable e) {
+		log(Level.WARN, message, e);
 	}
 
-	public static void error(Object source, String message) {
-		log(source, Level.ERROR, message, null);
+	public static void error(String message) {
+		log(Level.ERROR, message, null);
 	}
 
-	public static void error(Object source, String format, Object... args) {
-		log(source, Level.ERROR, String.format(format, args), null);
+	public static void error(String format, Object... args) {
+		log(Level.ERROR, String.format(format, args), null);
 	}
 
-	public static void error(Object source, Throwable e, String format, Object... args) {
-		log(source, Level.ERROR, String.format(format, args), e);
+	public static void error(Throwable e, String format, Object... args) {
+		log(Level.ERROR, String.format(format, args), e);
 	}
 
-	public static void error(Object source, String message, Throwable e) {
-		log(source, Level.ERROR, message, e);
+	public static void error(String message, Throwable e) {
+		log(Level.ERROR, message, e);
 	}
 
-	public static void fatal(Object source, String message) {
-		log(source, Level.FATAL, message, null);
+	public static void fatal(String message) {
+		log(Level.FATAL, message, null);
 	}
 
-	public static void fatal(Object source, String message, Throwable e) {
-		log(source, Level.FATAL, message, e);
+	public static void fatal(String message, Throwable e) {
+		log(Level.FATAL, message, e);
 	}
 
-	public static void printf(Object source, Level level, String format, Instant time, String logger,
-			String message) {
-		Class<?> origin = source != null ? source.getClass() : Log.class;
-		if (loggable(source, level)) {
-			AbstractLogger log = (AbstractLogger) LogManager.getLogger(origin);
-			log.printf(level, format, time, logger, message);
+	public static void printf(Level level, String msg) {
+		_printf(level, new StringFormattedMessage(msg));
+	}
+
+	public static void printf(Level level, String fmt, Object... args) {
+		_printf(level, new StringFormattedMessage(fmt, args));
+	}
+
+	public static void _printf(Level level, StringFormattedMessage msg) {
+		Class<?> origin = caller();
+		if (loggable(origin, level)) {
+			ExtendedLogger logger = LogManager.getLogger(origin, ctx_);
+			logger.logMessage(FQCN, level, null, msg, null);
 		}
 	}
 
-	public static void log(Object source, Level level, String msg, Throwable e) {
-		Class<?> origin = source != null ? source.getClass() : Log.class;
+	public static void log(Level level, String msg, Throwable e) {
+		Class<?> origin = caller();
 		if (loggable(origin, level)) {
 			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
 			log.logIfEnabled(FQCN, level, null, msg, e);
 		}
 	}
 
+	// ==========================================
+
+	/** @return the the class that called Log2, or {@code Log2.class} */
+	private static Class<?> caller() {
+		StackFrame frame = StackWalker.getInstance(OPTIONS).walk(Log::caller);
+		return frame != null ? frame.getDeclaringClass() : Log.class;
+	}
+
+	// find the stack frame for the class that called Log
+	private static StackFrame caller(Stream<StackFrame> frames) {
+		return frames //
+				.filter(f -> !f.getClassName().equals(FQCN)) //
+				.findFirst() //
+				.orElse(null);
+	}
+
 	// /////////////////////////////////////////////////////////////////////////
 
+	private static final String DEF_LVLSET = "Default logging level set to [%s]";
+	private static final String ERR_LVLSET = "Logging level set for %s[%s]";
+	private static final String ERR_CONFIG = "Configuration failed @%s[%s:%s]";
+
 	private static final String FQCN = Log.class.getName();
+	private static final int LogId = Log.class.hashCode();
+
 	private static final String CONSOLE = "Console";
+	private static final EnumSet<Option> OPTIONS = EnumSet.of(StackWalker.Option.SHOW_HIDDEN_FRAMES,
+			StackWalker.Option.RETAIN_CLASS_REFERENCE);
 	private static final Target OUTPUT = Target.SYSTEM_OUT;
 
-	private static final int LogId = Log.class.hashCode();
-	private static final HashMap<Integer, Level> Levels = new HashMap<>();
-
 	private static Class<?> refCls_ = Log.class;
+
+	private static final HashMap<Integer, Level> Levels = new HashMap<>();
 
 	private static boolean initd_;
 	private static boolean testMode_;
@@ -208,45 +344,39 @@ public class Log {
 	 * level must be GTE the log level set for the source class.
 	 */
 	public static void defLevel(Level level) {
-		setLevel(null, level);
+		setLevel(Log.class, level != null ? level : defaultLevel());
 	}
 
 	public static void defLevel(String level) {
-		setLevel(null, level);
+		defLevel(level != null ? Level.valueOf(level) : defaultLevel());
 	}
 
-	public static void setLevel(Object source, String level) {
-		if (level == null) return;
-		setLevel(source, Level.valueOf(level));
+	public static void setLevel(Level level) {
+		setLevel(caller(), level != null ? level : defaultLevel());
 	}
 
-	public static void setLevel(Object source, Level level) {
-		if (source == null && level == null) return;
-		if (source == null) source = LogId;
-		if (level == null) level = defaultLevel();
+	public static void setLevel(String level) {
+		setLevel(level != null ? Level.valueOf(level) : defaultLevel());
+	}
 
-		int id = source.hashCode();
-		String name = objNameOf(source);
-
-		Levels.put(id, level);
-		if (id == LogId) {
-			trace(Log.class, "Default logging level set [level=" + level.toString() + "]");
+	private static void setLevel(Class<?> cls, Level level) {
+		Levels.put(cls.hashCode(), level);
+		if (cls == Log.class) {
+			log(Level.TRACE, String.format(DEF_LVLSET, level), null);
 		} else {
-			trace(Log.class, "Class Logging level set [class=" + name + ", level=" + level.toString() + "]");
+			log(Level.TRACE, String.format(ERR_LVLSET, cls.getName(), level), null);
 		}
 	}
 
-	private static boolean loggable(Object source, Level level) {
+	private static boolean loggable(Class<?> source, Level level) {
 		chkInit();
 		Level srcLevel = levelOf(source);
 		return level.isMoreSpecificThan(srcLevel);
 	}
 
-	private static Level levelOf(Object source) {
-		if (source == null) return defaultLevel();
+	private static Level levelOf(Class<?> source) {
 		Level level = Levels.get(source.hashCode());
-		if (level == null) return defaultLevel();
-		return level;
+		return level != null ? level : defaultLevel();
 	}
 
 	private static Level defaultLevel() {
@@ -259,20 +389,13 @@ public class Log {
 			initd_ = true;
 			ctx_ = Configurator.initialize(LogConfig.getConfiguration(refCls_, logname_, location_, layout_));
 			if (ctx_ != null) {
-				Level level = ctx_.getConfiguration().getRootLogger().getLevel();
-				setLevel(LogId, level);
+				defLevel(ctx_.getConfiguration().getRootLogger().getLevel());
 
 			} else {
-				setLevel(LogId, Level.TRACE);
-				error(LogId, "Configuration failed @%s[%s:%s]", logname_, location_, layout_);
+				defLevel(Level.TRACE);
+				log(Level.ERROR, String.format(ERR_CONFIG, logname_, location_, layout_), null);
 			}
 		}
-	}
-
-	private static String objNameOf(Object source) {
-		String fqn = source.getClass().getName();
-		int dot = fqn.lastIndexOf(Chars.DOT);
-		return dot > -1 ? fqn.substring(dot + 1) : fqn;
 	}
 
 	public static void setTestMode(boolean testMode) {

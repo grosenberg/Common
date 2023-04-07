@@ -39,7 +39,7 @@ class GraphOpsRemove extends TestBase {
 		int cntNodes = graph.size();
 		int cntEdges = graph.getEdges().size();
 
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 
 		assertTrue(graph.removeNode(b));
 		assertEquals(graph.size(), cntNodes - 2);
@@ -51,7 +51,7 @@ class GraphOpsRemove extends TestBase {
 		int nodes = graph.size();
 		int edges = graph.getEdges().size();
 
-		DemoEdge ab = graph.getEdges("A", "B").getFirst();
+		DemoEdge ab = builder.getEdges("A", "B").getFirst();
 		assertTrue(graph.removeEdge(ab, false));
 		assertEquals(graph.size(), nodes - 1);
 		assertEquals(graph.getEdges().size(), edges - 1);
@@ -66,7 +66,7 @@ class GraphOpsRemove extends TestBase {
 		int nodes = graph.size();
 		int edges = graph.getEdges().size();
 
-		UniqueList<DemoEdge> bc = graph.getEdges("B", "C");
+		UniqueList<DemoEdge> bc = builder.getEdges("B", "C");
 		assertTrue(graph.removeEdges(bc, false));
 		assertEquals(graph.size(), nodes);
 		assertEquals(graph.getEdges().size(), edges - 2);
@@ -74,7 +74,7 @@ class GraphOpsRemove extends TestBase {
 
 	@Test
 	void testRemoveEdgeIf() {
-		DemoEdge cc = graph.getEdges("C", "C").getFirst();
+		DemoEdge cc = builder.getEdges("C", "C").getFirst();
 		assertFalse(graph.removeEdgeIf(cc, false, e -> !e.cyclic()));
 		assertTrue(graph.removeEdgeIf(cc, false, e -> e.cyclic()));
 	}
@@ -83,8 +83,8 @@ class GraphOpsRemove extends TestBase {
 	void testRemoveEdgesNNBoolean() {
 		int nodes = graph.size();
 		int edges = graph.getEdges().size();
-		DemoNode b = graph.getNode("B");
-		DemoNode c = graph.getNode("C");
+		DemoNode b = builder.getNode("B");
+		DemoNode c = builder.getNode("C");
 
 		assertTrue(graph.removeEdges(b, c, false));
 		assertEquals(graph.size(), nodes);
@@ -93,10 +93,10 @@ class GraphOpsRemove extends TestBase {
 
 	@Test
 	void testRemoveEdgesIf() {
-		DemoNode c = graph.getNode("C");
-		int edges = graph.getEdges("C", "C").size();
+		DemoNode c = builder.getNode("C");
+		int edges = builder.getEdges("C", "C").size();
 
 		graph.removeEdgesIf(c, c, false, e -> e.cyclic());
-		assertEquals(graph.getEdges("C", "C").size(), edges - 1);
+		assertEquals(builder.getEdges("C", "C").size(), edges - 1);
 	}
 }

@@ -15,7 +15,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class Nodes extends TestBase {
+class GraphNodes extends TestBase {
 
 	DemoNode a;
 	DemoNode b;
@@ -33,13 +33,13 @@ class Nodes extends TestBase {
 		builder.createAndAddEdges("C->F->G");
 		builder.createAndAddEdges("C->[B,C,E]");
 
-		a = graph.getNode("A");
-		b = graph.getNode("B");
-		c = graph.getNode("C");
-		d = graph.getNode("D");
-		e = graph.getNode("E");
-		f = graph.getNode("F");
-		g = graph.getNode("G");
+		a = builder.getNode("A");
+		b = builder.getNode("B");
+		c = builder.getNode("C");
+		d = builder.getNode("D");
+		e = builder.getNode("E");
+		f = builder.getNode("F");
+		g = builder.getNode("G");
 	}
 
 	@Test

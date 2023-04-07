@@ -1,8 +1,8 @@
-digraph "Reduce(0)" {
+digraph Reduce {
 
-    "A(0)"
-    "C(2)"
+    A
+    C
 
-    "A(0)" -> "C(2)"
+    A -> C
 
 }

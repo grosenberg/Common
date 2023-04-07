@@ -94,7 +94,7 @@ public final class FsUtil {
 				}
 
 			} catch (Exception e) {
-				Log.error(ClassUtil.class, "Error identifying base URI for %s.", cls.getName());
+				Log.error("Error identifying base URI for %s.", cls.getName());
 			}
 		}
 		return null;

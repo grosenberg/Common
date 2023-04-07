@@ -20,13 +20,13 @@ class GraphOpsManipulation extends TestBase {
 	void testReduceNode() {
 		graph.put(Graph.GRAPH_NAME, "Reduce");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
 
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 		graph.reduce(b);
 
-		b = graph.getNode("B");
+		b = builder.getNode("B");
 		assertNull(b);
 
 		String dot = graph.dot();
@@ -39,17 +39,17 @@ class GraphOpsManipulation extends TestBase {
 	void testReduceEdge() {
 		graph.put(Graph.GRAPH_NAME, "ReduceEdge");
 
-		graph.createAndAddEdge("R", "A");
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("R", "C");
-		graph.createAndAddEdge("C", "D");
+		builder.createAndAddEdge("R", "A");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("R", "C");
+		builder.createAndAddEdge("C", "D");
 
-		UniqueList<DemoEdge> ab = graph.getEdges("A", "B");
-		UniqueList<DemoEdge> cd = graph.getEdges("C", "D");
+		UniqueList<DemoEdge> ab = builder.getEdges("A", "B");
+		UniqueList<DemoEdge> cd = builder.getEdges("C", "D");
 
 		graph.reduce(ab.getFirst(), cd.getFirst());
 
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 		assertNull(b);
 
 		String dot = graph.dot();
@@ -62,16 +62,16 @@ class GraphOpsManipulation extends TestBase {
 	void testTransfer() {
 		graph.put(Graph.GRAPH_NAME, "Transfer");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("C", "D");
-		graph.createAndAddEdge("D", "E");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("C", "D");
+		builder.createAndAddEdge("D", "E");
 
-		graph.createAndAddEdge("C", "F");
-		graph.createAndAddEdge("F", "G");
+		builder.createAndAddEdge("C", "F");
+		builder.createAndAddEdge("F", "G");
 
-		DemoNode b = graph.getNode("B");
-		UniqueList<DemoEdge> cf = graph.getEdges("C", "F");
+		DemoNode b = builder.getNode("B");
+		UniqueList<DemoEdge> cf = builder.getEdges("C", "F");
 
 		graph.transfer(cf, b); // cf becomes bf
 
@@ -88,13 +88,13 @@ class GraphOpsManipulation extends TestBase {
 
 		builder.createAndAddEdges("A->B->C->D->E");
 
-		DemoEdge ce = graph.createAndAddEdge("C", "E");
+		DemoEdge ce = builder.createAndAddEdge("C", "E");
 		DotStyle ds = ce.getDotStyle();
 		ds.put(LABEL, "Edge " + ce.name());
 		ds.put(COLOR, "blue");
 
-		DemoNode b = graph.getNode("B");
-		DemoNode d = graph.getNode("D");
+		DemoNode b = builder.getNode("B");
+		DemoNode d = builder.getNode("D");
 
 		graph.move(ce, b, d);
 
@@ -115,7 +115,7 @@ class GraphOpsManipulation extends TestBase {
 		builder.createAndAddEdges("G => H => I");
 
 		UniqueList<DemoNode> nodes = builder.findNodes("[B,E,H]");
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 
 		graph.consolidateEdges(nodes, b);
 
@@ -133,7 +133,7 @@ class GraphOpsManipulation extends TestBase {
 		builder.createAndAddEdges("A => B => C");
 		UniqueList<DemoNode> targets = builder.findOrCreateNodes("[B,X,Y,Z]");
 
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 
 		graph.replicateEdges(b, targets);
 
@@ -151,7 +151,7 @@ class GraphOpsManipulation extends TestBase {
 		builder.createAndAddEdges("A => B => C");
 		UniqueList<DemoNode> targets = builder.findOrCreateNodes("[X,Y,Z]");
 
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 
 		graph.replicateEdges(b, targets, true);
 

@@ -34,11 +34,6 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 	}
 
 	@Override
-	public String name() {
-		return String.format("%s(%d)", get(NODE_NAME), id());
-	}
-
-	@Override
 	public boolean enter(Sense dir, LinkedHashList<DemoNode, DemoNode> visited,
 			NodeVisitor<DemoNode> listener, DemoNode parent) {
 		return listener.enter(dir, visited, parent, this);

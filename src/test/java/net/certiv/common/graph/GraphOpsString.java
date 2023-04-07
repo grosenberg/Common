@@ -35,18 +35,18 @@ class GraphOpsString extends TestBase {
 
 	@Test
 	void testFindOrCreateNode() {
-		DemoNode a = graph.findOrCreateNode("A");
+		DemoNode a = builder.findOrCreateNode("A");
 		assertNotNull(a);
 		assertTrue(graph.contains(a));
 
-		DemoNode z = graph.findOrCreateNode("Z");
+		DemoNode z = builder.findOrCreateNode("Z");
 		assertNotNull(z);
 		assertFalse(graph.contains(z));
 	}
 
 	@Test
 	void testCreateEdgeStringString() {
-		DemoEdge ab = graph.createEdge("A", "B");
+		DemoEdge ab = builder.createEdge("A", "B");
 		assertNotNull(ab);
 		assertFalse(graph.contains(ab));
 
@@ -57,10 +57,10 @@ class GraphOpsString extends TestBase {
 
 	@Test
 	void testCreateAndAddEdgeStringString() {
-		DemoEdge abOld = graph.getEdges("A", "B").getFirst();
+		DemoEdge abOld = builder.getEdges("A", "B").getFirst();
 		assertNotNull(abOld);
 
-		DemoEdge abNew = graph.createAndAddEdge("A", "B");
+		DemoEdge abNew = builder.createAndAddEdge("A", "B");
 		assertNotNull(abNew);
 		assertTrue(graph.contains(abNew));
 		assertEquals(graph.getEdges(abNew.beg(), abNew.end()).size(), 2);
@@ -73,30 +73,30 @@ class GraphOpsString extends TestBase {
 
 	@Test
 	void testGetNode() {
-		DemoNode b = graph.getNode("B");
+		DemoNode b = builder.getNode("B");
 		assertNotNull(b);
 
-		DemoNode c = graph.getNode("C");
+		DemoNode c = builder.getNode("C");
 		assertNotNull(c);
 
-		DemoNode e = graph.getNode("E");
+		DemoNode e = builder.getNode("E");
 		assertNotNull(e);
 	}
 
 	@Test
 	void testVerifyUnique() {
-		assertTrue(graph.verifyUnique("Z"));
+		assertTrue(builder.verifyUnique("Z"));
 	}
 
 	@Test
 	void testGetEdgesStringString() {
-		UniqueList<DemoEdge> bc = graph.getEdges("B", "C");
+		UniqueList<DemoEdge> bc = builder.getEdges("B", "C");
 		assertEquals(bc.size(), 2);
 
-		UniqueList<DemoEdge> ce = graph.getEdges("C", "E");
+		UniqueList<DemoEdge> ce = builder.getEdges("C", "E");
 		assertEquals(ce.size(), 1);
 
-		UniqueList<DemoEdge> cc = graph.getEdges("C", "C");
+		UniqueList<DemoEdge> cc = builder.getEdges("C", "C");
 		assertEquals(cc.size(), 1);
 	}
 }

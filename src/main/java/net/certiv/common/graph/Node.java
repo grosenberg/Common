@@ -13,7 +13,6 @@ import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.util.Strings;
 
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
@@ -50,7 +49,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public String uniqueName() {
 		String nid = String.valueOf(_nid);
 		if (name().equals(nid)) return nid;
-		return String.format("%s (%s)", name(), nid);
+		return String.format("%s(%s)", name(), nid);
 	}
 
 	/**
@@ -372,7 +371,8 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		String root = isRoot() ? ":root" : Strings.EMPTY;
-		return String.format("%s%s", name(), root);
+		// String root = isRoot() ? ":root" : Strings.EMPTY;
+		// return String.format("%s%s", uniqueName(), root);
+		return uniqueName();
 	}
 }

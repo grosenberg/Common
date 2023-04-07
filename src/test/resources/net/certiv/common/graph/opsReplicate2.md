@@ -1,16 +1,16 @@
-digraph "Replicate Remove(0)" {
+digraph "Replicate Remove" {
 
-    "A(0)"
-    "X(3)"
-    "C(2)"
-    "Y(4)"
-    "Z(5)"
+    A
+    X
+    C
+    Y
+    Z
 
-    "A(0)" -> "X(3)"
-    "X(3)" -> "C(2)"
-    "A(0)" -> "Y(4)"
-    "Y(4)" -> "C(2)"
-    "A(0)" -> "Z(5)"
-    "Z(5)" -> "C(2)"
+    A -> X
+    X -> C
+    A -> Y
+    Y -> C
+    A -> Z
+    Z -> C
 
 }

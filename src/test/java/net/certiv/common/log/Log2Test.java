@@ -13,19 +13,19 @@ class Log2Test {
 
 	@BeforeEach
 	void setup() {
-		Log2.setName("Test", "../../src/test/resources/logs");
+		Log.setName("Test", "../../src/test/resources/logs");
 	}
 
 	@Test
 	void testDebug() {
-		Log2.setName("Debugs");
-		Log2.debug("Debug");
+		Log.setName("Debugs");
+		Log.debug("Debug");
 	}
 
 	@Test
 	void testPrintf() {
-		Log2.setName("Printf");
-		Log2.printf(Level.WARN, "Print %s", "now.");
+		Log.setName("Printf");
+		Log.printf(Level.WARN, "Print %s", "now.");
 	}
 
 	@Test

@@ -19,9 +19,8 @@ import net.certiv.common.stores.UniqueList;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
-	private static final String ERR_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
-
 	public static final String GRAPH_NAME = "GraphName";
+	public static final String ERR_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
 	static final Counter CTR = new Counter();
 
@@ -46,147 +45,25 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		putAll(props);
 	}
 
-	/**
-	 * Descriptive name assigned to this {@code Graph}. Defaults to the simple class name
-	 * of the implementing class.
-	 */
+	// /**
+	// * Descriptive name assigned to this {@code Graph}. Defaults to the simple class
+	// name
+	// * of the implementing class.
+	// */
+	// public String name() {
+	// String name = (String) get(GRAPH_NAME, getClass().getSimpleName());
+	// return String.format("%s(%s)", name, _gid);
+	// }
+
 	public String name() {
-		String name = (String) get(GRAPH_NAME, getClass().getSimpleName());
-		return String.format("%s(%s)", name, _gid);
+		return (String) get(GRAPH_NAME, String.valueOf(_gid));
 	}
 
-	/**
-	 * Creates a new node instance.
-	 *
-	 * @return a new node otherwise unassociated with the graph
-	 */
-	protected abstract N createNode();
-
-	/**
-	 * Creates a new node instance with the given name.
-	 * <p>
-	 * Convenience operation primarily intended to work with string-named nodes. Use
-	 * {@code #findOrCreateNode(String)} to protect against creating multiple nodes with
-	 * the same name. The {@code #getNode(String)} method relies on unique node names.
-	 *
-	 * @param name the node name
-	 * @return a new node otherwise unassociated with the graph
-	 */
-	protected abstract N createNode(String name);
-
-	/**
-	 * Creates a new node instance with the given properties.
-	 *
-	 * @param props the node properties
-	 * @return a new node otherwise unassociated with the graph
-	 */
-	protected abstract N createNode(Map<Object, Object> props);
-
-	// ======================================================
-	// Convenience methods for string named nodes
-	// ------------------------------------------------------
-
-	/**
-	 * Finds the named terminal node in the graph or, if not pre-existing, creates a new
-	 * named node.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param name the node name
-	 * @return the named node
-	 */
-	public N findOrCreateNode(String name) {
-		Assert.notEmpty(name);
-		N node = getNode(name);
-		if (node != null) return node;
-		return createNode(name);
+	public String uniqueName() {
+		String gid = String.valueOf(_gid);
+		if (name().equals(gid)) return gid;
+		return String.format("%s(%s)", name(), gid);
 	}
-
-	/**
-	 * Creates a new edge instance with terminal nodes having the given names. The named
-	 * terminal nodes will be created if they do not pre-exist in the graph.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param beg the begin terminal node name
-	 * @param end the end terminal node name
-	 * @return a new edge otherwise unassociated with the graph
-	 */
-	public E createEdge(String beg, String end) {
-		Assert.notEmpty(beg, end);
-		return createEdge(findOrCreateNode(beg), findOrCreateNode(end));
-	}
-
-	/**
-	 * Creates a new edge instance with terminal nodes having the given names. The named
-	 * terminal nodes will be created if they do not pre-exist in the graph. Adds the
-	 * edge, including the terminal nodes, to the graph.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param beg the begin terminal node name
-	 * @param end the end terminal node name
-	 * @return a new edge newly associated with the graph
-	 */
-	public E createAndAddEdge(String beg, String end) {
-		Assert.notEmpty(beg, end);
-		E edge = createEdge(beg, end);
-		addEdge(edge); // add edge, including nodes, to graph
-		return edge;
-	}
-
-	/**
-	 * Returns the existing nodes having the given name. Requires given name be unique.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param name a node node
-	 * @return the existing node uniquely having the given name, or {@code null}
-	 * @throws UnsupportedOperationException if the given name is not unique
-	 */
-	public N getNode(String name) {
-		Assert.notEmpty(name);
-		UniqueList<N> res = nodes.stream() //
-				.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
-				.collect(Collectors.toCollection(UniqueList::new));
-
-		Assert.isTrue(GraphEx.of(ERR_LOOKUP, name, res), res.size() <= 1);
-		return res.peek();
-	}
-
-	/**
-	 * Verifies that the given name references a unique (or non-existant) node.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param name a node name
-	 * @return {@code true} if the given name references a unique (or non-existant) node
-	 */
-	public boolean verifyUnique(String name) {
-		Assert.notEmpty(name);
-		Set<N> res = nodes.stream().filter(n -> n.get(Node.NODE_NAME).equals(name))
-				.collect(Collectors.toSet());
-		return res.size() < 2;
-	}
-
-	/**
-	 * Returns the set of edges existing between the given named nodes.
-	 * <p>
-	 * Convenience operation for and only intended to work with string-named nodes.
-	 *
-	 * @param beg a source node name
-	 * @param end a destination node name
-	 * @return the edges existing between the given nodes
-	 */
-	public UniqueList<E> getEdges(String beg, String end) {
-		Assert.notEmpty(beg, end);
-		N src = getNode(beg);
-		N dst = getNode(end);
-		if (src == null || dst == null) return UniqueList.empty();
-		return getEdges(src, dst);
-	}
-
-	// ======================================================
 
 	/**
 	 * Creates a new edge instance with the given terminal nodes.
@@ -218,13 +95,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public UniqueList<N> getRoots() {
 		return nodes.stream().filter(n -> n.isRoot()) //
-				.collect(Collectors.toCollection(UniqueList::new)).unmodifiable();
-	}
-
-	/** Returns {@code true} if the graph contains the given node. */
-	@Deprecated
-	public boolean hasNode(N node) {
-		return nodes.contains(node);
+				.collect(Collectors.toCollection(UniqueList::new)) //
+				.unmodifiable();
 	}
 
 	/** Returns {@code true} if the graph contains the given node. */
@@ -906,6 +778,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public String toString() {
-		return name();
+		return uniqueName();
 	}
 }

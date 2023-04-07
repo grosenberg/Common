@@ -54,10 +54,10 @@ public class Version {
 	}
 
 	/**
-	 * Returns the value of the {@code version} key contained within a properties
-	 * file of the given name located as a resource of the given class.
+	 * Returns the value of the {@code version} key contained within a properties file of
+	 * the given name located as a resource of the given class.
 	 *
-	 * @param cls class used to locate the properties file
+	 * @param cls      class used to locate the properties file
 	 * @param filename name of the properties file
 	 * @return property value for the {@code version} key
 	 */
@@ -69,7 +69,7 @@ public class Version {
 			return (String) prop.get("version");
 
 		} catch (IOException e) {
-			Log.error(Version.class, "Failed reading version from '%s': %s", filename, e.getMessage());
+			Log.error("Failed reading version from '%s': %s", filename, e.getMessage());
 			return Strings.UNKNOWN;
 		}
 	}
@@ -80,9 +80,9 @@ public class Version {
 	 * Returns a {@code Pair} reporting the manifest "version" string and the last
 	 * modified {@code Instant} of the manifest file.
 	 * <p>
-	 * If the reference class is not within a jar file, an attempt is made to read
-	 * the "version" string from the {@code pom.xml} located in the Maven output
-	 * directory root.
+	 * If the reference class is not within a jar file, an attempt is made to read the
+	 * "version" string from the {@code pom.xml} located in the Maven output directory
+	 * root.
 	 *
 	 * @param cls a reference class file
 	 * @return the verision info
@@ -118,14 +118,14 @@ public class Version {
 			}
 
 		} catch (Exception e) {
-			Log.error(Version.class, "Failed reading manifest version: %s", e.getMessage());
+			Log.error("Failed reading manifest version: %s", e.getMessage());
 		}
 		return Pair.of(Strings.UNKNOWN, Instant.now());
 	}
 
 	/**
-	 * Returns the given instant as a {@code LocalDateTime} in the system default
-	 * time zone.
+	 * Returns the given instant as a {@code LocalDateTime} in the system default time
+	 * zone.
 	 *
 	 * @param instant the intant to convert
 	 * @return a local date/time
@@ -152,7 +152,7 @@ public class Version {
 			return df.format(date.toMillis());
 
 		} catch (IOException e) {
-			Log.error(Version.class, "Failed reading file creation date: %s", e.getMessage());
+			Log.error("Failed reading file creation date: %s", e.getMessage());
 			return Strings.UNKNOWN;
 		}
 	}
@@ -165,7 +165,7 @@ public class Version {
 			return df.format(date.toMillis());
 
 		} catch (IOException e) {
-			Log.error(Version.class, "Failed reading file last modification date: %s", e.getMessage());
+			Log.error("Failed reading file last modification date: %s", e.getMessage());
 			return Strings.UNKNOWN;
 		}
 	}

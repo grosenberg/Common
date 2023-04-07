@@ -9,18 +9,18 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class Build extends TestBase {
+class GraphBuild extends TestBase {
 
 	@Test
 	void testGraph() {
 		graph.put(Graph.GRAPH_NAME, "Build Minimal");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
 
-		DemoNode a = graph.getNode("A");
-		DemoNode b = graph.getNode("B");
-		DemoNode c = graph.getNode("C");
+		DemoNode a = builder.getNode("A");
+		DemoNode b = builder.getNode("B");
+		DemoNode c = builder.getNode("C");
 
 		assertNotNull(a);
 		assertNotNull(b);
@@ -36,10 +36,10 @@ class Build extends TestBase {
 	void testGraphSimple() {
 		graph.put(Graph.GRAPH_NAME, "Simple");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("B", "D");
-		graph.createAndAddEdge("D", "E");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("B", "D");
+		builder.createAndAddEdge("D", "E");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
@@ -56,9 +56,9 @@ class Build extends TestBase {
 	void testMultiRoots() {
 		graph.put(Graph.GRAPH_NAME, "Two-root Test");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("D", "E");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("D", "E");
 
 		String dot = graph.dot();
 		String dump = graph.dump();
@@ -75,9 +75,9 @@ class Build extends TestBase {
 	void testCyclesSelf() {
 		graph.put(Graph.GRAPH_NAME, "Cyclic");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "B");
-		graph.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "B");
+		builder.createAndAddEdge("B", "C");
 
 		String dot = graph.dot();
 
@@ -90,13 +90,13 @@ class Build extends TestBase {
 	void testLoops() {
 		graph.put(Graph.GRAPH_NAME, "Loop Test");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("C", "D");
-		graph.createAndAddEdge("D", "E");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("C", "D");
+		builder.createAndAddEdge("D", "E");
 
-		graph.createAndAddEdge("D", "F");
-		graph.createAndAddEdge("F", "B");
+		builder.createAndAddEdge("D", "F");
+		builder.createAndAddEdge("F", "B");
 
 		String dump = graph.dump();
 		String dot = graph.dot();
@@ -113,12 +113,12 @@ class Build extends TestBase {
 	void testMultiEdges() {
 		graph.put(Graph.GRAPH_NAME, "Multiple Edges Test");
 
-		graph.createAndAddEdge("A", "B");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("B", "C");
-		graph.createAndAddEdge("C", "D");
+		builder.createAndAddEdge("A", "B");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("B", "C");
+		builder.createAndAddEdge("C", "D");
 
 		String dot = graph.dot();
 
