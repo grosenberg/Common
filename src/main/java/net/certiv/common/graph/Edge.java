@@ -7,6 +7,7 @@ import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.stores.Counter;
+import net.certiv.common.stores.props.Props;
 
 /**
  * An edge connects two nodes. Single edge cycles -- where both nodes are the same -- are
@@ -169,7 +170,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @return the dot style store
 	 */
 	public DotStyle getDotStyle() {
-		return getDotStyle(ON.EDGES);
+		return Dot.getStyles(this, ON.EDGES);
 	}
 
 	/**

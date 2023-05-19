@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import net.certiv.common.annotations.VisibleForTesting;
 import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
@@ -13,43 +14,49 @@ import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.stores.props.Props;
 
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
 	public static final String NODE_NAME = "NodeName";
 
+	@VisibleForTesting
 	static final Counter CTR = new Counter();
-
-	/** Unique numerical node identifier */
-	public final long _nid;
 
 	/** Set of inbound edges */
 	private final IEdgeSet<N, E> in;
 	/** Set of outbound edges */
 	private final IEdgeSet<N, E> out;
 
-	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out) {
-		this(in, out, null);
-	}
+	/** Unique numerical node identifier */
+	public final long _nid;
 
-	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out, Map<Object, Object> props) {
-		super();
+	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out) {
 		Assert.notNull(in, out);
 		this.in = in;
 		this.out = out;
 		_nid = CTR.getAndIncrement();
 		put(NODE_NAME, String.valueOf(_nid));
+	}
+
+	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out, Map<Object, Object> props) {
+		this(in, out);
 		putAll(props);
 	}
 
+	/** Return a simple display name for this node instance. */
 	public String name() {
-		return (String) get(NODE_NAME, String.valueOf(_nid));
+		String name = get(NODE_NAME).toString();
+		if (name == null || name.isBlank()) return String.valueOf(_nid);
+		return name;
 	}
 
+	/** Return a unique display name for this node instance. */
 	public String uniqueName() {
+		String name = name();
 		String nid = String.valueOf(_nid);
-		if (name().equals(nid)) return nid;
-		return String.format("%s(%s)", name(), nid);
+		if (name.equals(nid)) return nid;
+		return String.format("%s(%s)", name, nid);
 	}
 
 	/**
@@ -328,11 +335,13 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
 	 * this properties store. Creates and adds an {@code ON#NODES} default category
 	 * {@code DotStyle} store, if a store does not exist.
+	 * <p>
+	 * Override {@code #defineStyle()} to define a custom configured style.
 	 *
 	 * @return the dot style store
 	 */
 	public DotStyle getDotStyle() {
-		return getDotStyle(ON.NODES);
+		return Dot.getStyles(this, ON.NODES);
 	}
 
 	/**
@@ -350,7 +359,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * Internal use only.
 	 */
 	@Override
-	protected void clear() {
+	public void clear() {
 		in.clear();
 		out.clear();
 		super.clear();
@@ -371,8 +380,6 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		// String root = isRoot() ? ":root" : Strings.EMPTY;
-		// return String.format("%s%s", uniqueName(), root);
 		return uniqueName();
 	}
 }

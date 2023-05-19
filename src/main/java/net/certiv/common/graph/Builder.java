@@ -1,8 +1,6 @@
 package net.certiv.common.graph;
 
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,8 +18,15 @@ import net.certiv.common.util.Strings;
  * <p>
  * This builder is suitable primarily where node uniqueness is based on or derived from a
  * string specification. Refer to the unit tests for examples.
+ *
+ * @param <I> type of unique name idenfier object
+ * @param <G> type of graph object
+ * @param <N> type of node object
+ * @param <E> type of edge object
  */
-public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E extends Edge<N, E>> {
+public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E extends Edge<N, E>> {
+
+	public static final String ERR_NODE_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
 	private static final Pattern NAME = Pattern.compile("\\w+");
 	private static final Pattern MARK = Pattern.compile("\\h*=>|->\\h*");
@@ -41,31 +46,24 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 	}
 
 	/**
-	 * Creates a new node instance.
-	 *
-	 * @return a new node otherwise unassociated with the graph
-	 */
-	protected abstract N createNode();
-
-	/**
-	 * Creates a new node instance with the given name.
+	 * Creates a new node instance uniquely identifiable by the given {@code id}. Builder
+	 * operation requires the {@code id} have a correspodingly unique string
+	 * representation.
 	 * <p>
-	 * Convenience operation primarily intended to work with string-named nodes. Use
-	 * {@code #findOrCreateNode(String)} to protect against creating multiple nodes with
-	 * the same name. The {@code #getNode(String)} method relies on unique node names.
+	 * Use {@code #findOrCreateNode(String)} to protect against creating multiple nodes
+	 * with the same name. The {@code #getNode(String)} method relies on unique node
+	 * names.
 	 *
-	 * @param name the node name
+	 * @param id an object representing the node name
 	 * @return a new node otherwise unassociated with the graph
 	 */
-	protected abstract N createNode(String name);
+	protected abstract N createNode(I id);
 
-	/**
-	 * Creates a new node instance with the given properties.
-	 *
-	 * @param props the node properties
-	 * @return a new node otherwise unassociated with the graph
-	 */
-	protected abstract N createNode(Map<Object, Object> props);
+	/** Convert the given unique node name to a correspondingly unique {@code id}. */
+	protected abstract I makeId(String name);
+
+	/** Convert the given unique {@code id} to a correspondingly unique node name. */
+	protected abstract String nameOf(I id);
 
 	/**
 	 * Returns the node existing in the graph having the given name. Requires given name
@@ -92,20 +90,21 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 	 */
 	public N getNode(String name, boolean built) {
 		Assert.isTrue(NAME.matcher(name).matches());
+		I id = makeId(name);
 		N node = null;
 		if (built) {
 			LinkedList<N> nodes = this.built.stream() //
-					.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
+					.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
 					.collect(Collectors.toCollection(LinkedList::new));
-			Assert.isTrue(GraphEx.of(Graph.ERR_LOOKUP, name, nodes), nodes.size() <= 1);
+			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
 			node = nodes.peek();
 		}
 
 		if (node == null) {
 			LinkedList<N> nodes = graph.getNodes().stream() //
-					.filter(n -> n.get(Node.NODE_NAME).equals(name)) //
+					.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
 					.collect(Collectors.toCollection(LinkedList::new));
-			Assert.isTrue(GraphEx.of(Graph.ERR_LOOKUP, name, nodes), nodes.size() <= 1);
+			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
 			node = nodes.peek();
 		}
 
@@ -124,7 +123,7 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 		N node = getNode(name, true);
 		if (node != null) return node;
 
-		node = createNode(name);
+		node = createNode(makeId(name));
 		built.add(node);
 		return node;
 	}
@@ -205,9 +204,10 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 	 */
 	public boolean verifyUnique(String name) {
 		Assert.notEmpty(name);
-		Set<N> res = graph.getNodes().stream().filter(n -> n.get(Node.NODE_NAME).equals(name))
-				.collect(Collectors.toSet());
-		return res.size() < 2;
+		I id = makeId(name);
+		return graph.getNodes().stream() //
+				.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
+				.count() < 2;
 	}
 
 	/**
@@ -241,7 +241,7 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 	 * @param edgeSpec specification of edges to be built and added
 	 * @return the {@code Builder}
 	 */
-	public Builder<G, N, E> createAndAddEdges(String edgeSpec) {
+	public Builder<I, G, N, E> createAndAddEdges(String edgeSpec) {
 		Assert.isTrue(MARK.matcher(edgeSpec).find());
 		return createEdges(edgeSpec).addEdges();
 	}
@@ -262,7 +262,7 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 	 * @param edgeSpec specification of edges to be built
 	 * @return the {@code Builder} holding the edges pending addition to the graph
 	 */
-	public Builder<G, N, E> createEdges(String edgeSpec) {
+	public Builder<I, G, N, E> createEdges(String edgeSpec) {
 		Assert.isTrue(MARK.matcher(edgeSpec).find());
 		parseEdgeSpec(edgeSpec);
 		return this;
@@ -276,7 +276,7 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 		this.edges.addAll(edges);
 	}
 
-	public Builder<G, N, E> addEdges() {
+	public Builder<I, G, N, E> addEdges() {
 		edges.forEach(e -> graph.addEdge(e));
 		return this;
 	}
@@ -310,7 +310,7 @@ public abstract class Builder<G extends Graph<N, E>, N extends Node<N, E>, E ext
 			String name = names[idx].trim();
 			N node = getNode(name, true);
 			if (node == null && create) {
-				node = createNode(name);
+				node = createNode(makeId(name));
 			}
 			if (node != null) {
 				nodes.add(node);

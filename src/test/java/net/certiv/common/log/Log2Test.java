@@ -1,6 +1,5 @@
 package net.certiv.common.log;
 
-import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

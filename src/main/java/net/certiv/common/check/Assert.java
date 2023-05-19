@@ -72,51 +72,6 @@ public final class Assert {
 		}
 	}
 
-	/**
-	 * Asserts that an argument is legal. If the given boolean is not {@code true}, an
-	 * {@code IllegalArgumentException} is thrown.
-	 *
-	 * @param expression the outcome of the check
-	 * @return {@code true} if the check passes (does not return if the check fails)
-	 * @exception IllegalArgumentException if the legality test failed
-	 */
-	@Deprecated
-	public static boolean isLegal(boolean expression) {
-		return isLegal(expression, null);
-	}
-
-	/**
-	 * Asserts that an argument is legal. If the given boolean is not {@code true}, an
-	 * {@code IllegalArgumentException} is thrown. The given message is included in that
-	 * exception, to aid debugging.
-	 *
-	 * @param expression a logical expression to check
-	 * @param msg        the failed check exception message
-	 * @return {@code true} if the check passes (does not return if the check fails)
-	 * @exception IllegalArgumentException if the legality test failed
-	 */
-	@Deprecated
-	public static boolean isLegal(boolean expression, String msg) {
-		if (!expression) throw new IllegalArgumentException(msg);
-		return expression;
-	}
-
-	/**
-	 * Asserts that an argument is legal. If the given boolean is not {@code true}, an
-	 * {@code IllegalArgumentException} is thrown. The given message is included in that
-	 * exception, to aid debugging.
-	 *
-	 * @param expression a logical expression to check
-	 * @param fmt        the failed check exception message format
-	 * @param args       the message arguments for formatting
-	 * @return {@code true} if the check passes (does not return if the check fails)
-	 * @exception IllegalArgumentException if the legality test failed
-	 */
-	@Deprecated
-	public static boolean isLegal(boolean expression, String fmt, Object... args) {
-		return isLegal(expression, String.format(fmt, args));
-	}
-
 	// -----------------------------
 
 	/**

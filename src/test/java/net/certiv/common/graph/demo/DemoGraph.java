@@ -10,7 +10,8 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 	public static final Printer<DemoNode, DemoEdge> PRINTER = new Printer<>();
 
 	public DemoGraph(String name) {
-		super(name);
+		super();
+		put(GRAPH_NAME, name);
 	}
 
 	@Override

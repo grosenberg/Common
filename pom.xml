@@ -6,57 +6,58 @@
 
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 
 	<name>net.certiv :: common</name>
 	<description>Common utilities</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jdk.version>11</jdk.version>
-		<maven.compiler.source>${jdk.version}</maven.compiler.source>
-		<maven.compiler.target>${jdk.version}</maven.compiler.target>
+		<jdk.ver>11</jdk.ver>
+		<maven.compiler.source>${jdk.ver}</maven.compiler.source>
+		<maven.compiler.target>${jdk.ver}</maven.compiler.target>
 
-		<comm-lang3.version>3.12.0</comm-lang3.version>
-		<comm-text.version>1.10.0</comm-text.version>
-		<diff.version>4.12</diff.version>
-		<log4j.version>2.19.0</log4j.version>
+		<comm-lang3.ver>3.12.0</comm-lang3.ver>
+		<comm-text.ver>1.10.0</comm-text.ver>
+		<gson.ver>2.10.1</gson.ver>
+		<jackson.ver>2.14.2</jackson.ver>
+		<diff.ver>4.12</diff.ver>
+		<log4j.ver>2.20.0</log4j.ver>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>${comm-lang3.version}</version>
+			<version>${comm-lang3.ver}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<version>${comm-text.version}</version>
+			<version>${comm-text.ver}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.ver}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.github.java-diff-utils</groupId>
 			<artifactId>java-diff-utils</artifactId>
-			<version>${diff.version}</version>
+			<version>${diff.ver}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>${log4j.version}</version>
+			<version>${log4j.ver}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.9.1</version>
-			<scope>test</scope>
+			<version>${log4j.ver}</version>
 		</dependency>
 
 	</dependencies>
@@ -67,6 +68,45 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.10.1</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+				<version>6.4.0</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>jar</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<bnd><![CDATA[
+								-noextraheaders: true
+								-noimportjava: true
+								-snapshot: SNAPSHOT
+                				-removeheaders: Private-Package
+                				-fixupmessages: The JAR is empty:
+								Export-Package: net.certiv.common.*
+								]]></bnd>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -98,27 +138,11 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>jar</goal>
+							<goal>javadoc</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-surefire-plugin</artifactId>
-			<version>3.0.0</version>
-				<configuration>
-			<skipTests>true</skipTests>
-					<includes>
-			<include>**/*Test.java</include>
-					</includes>
-					<excludes>
-			<exclude>**/*Base.java</exclude>
-						<exclude>**/Demo*.java</exclude>
-			</excludes>
-				</configuration>
-			</plugin> -->
 
 		</plugins>
 	</build>

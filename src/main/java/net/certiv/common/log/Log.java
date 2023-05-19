@@ -6,123 +6,18 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
 import org.apache.logging.log4j.core.config.AbstractConfiguration;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
 public class Log {
-
-	// @Deprecated
-	// public static void trace(Object source, String message) {
-	// log(Level.TRACE, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void trace(Object source, String format, Object... args) {
-	// log(Level.TRACE, String.format(format, args), null);
-	// }
-	//
-	// @Deprecated
-	// public static void trace(Object source, String message, Throwable e) {
-	// log(Level.TRACE, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void debug(Object source, String message) {
-	// log(Level.DEBUG, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void debug(Object source, String format, Object... args) {
-	// log(Level.DEBUG, String.format(format, args), null);
-	// }
-	//
-	// @Deprecated
-	// public static void debug(Object source, String message, Throwable e) {
-	// log(Level.DEBUG, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void info(Object source, String message) {
-	// log(Level.INFO, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void info(Object source, String format, Object... args) {
-	// log(Level.INFO, String.format(format, args), null);
-	// }
-	//
-	// @Deprecated
-	// public static void info(Object source, String message, Throwable e) {
-	// log(Level.INFO, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void warn(Object source, String message) {
-	// log(Level.WARN, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void warn(Object source, String format, Object... args) {
-	// log(Level.WARN, String.format(format, args), null);
-	// }
-	//
-	// @Deprecated
-	// public static void warn(Object source, String message, Throwable e) {
-	// log(Level.WARN, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void error(Object source, String message) {
-	// log(Level.ERROR, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void error(Object source, String format, Object... args) {
-	// log(Level.ERROR, String.format(format, args), null);
-	// }
-	//
-	// @Deprecated
-	// public static void error(Object source, Throwable e, String format, Object... args)
-	// {
-	// log(Level.ERROR, String.format(format, args), e);
-	// }
-	//
-	// @Deprecated
-	// public static void error(Object source, String message, Throwable e) {
-	// log(Level.ERROR, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void fatal(Object source, String message) {
-	// log(Level.FATAL, message, null);
-	// }
-	//
-	// @Deprecated
-	// public static void fatal(Object source, String message, Throwable e) {
-	// log(Level.FATAL, message, e);
-	// }
-	//
-	// @Deprecated
-	// public static void printf(Object source, Level level, String format, Instant time,
-	// String logger,
-	// String message) {
-	// printf(level, message);
-	// }
-	//
-	// @Deprecated
-	// public static void log(Object source, Level level, String msg, Throwable e) {
-	// log(level, msg, e);
-	// }
-
-	// --------------------------------------------------------------
 
 	public static void trace(String message) {
 		log(Level.TRACE, message, null);
@@ -204,25 +99,41 @@ public class Log {
 		_printf(level, new StringFormattedMessage(fmt, args));
 	}
 
+	public static void printf(String level, String fmt, Object... args) {
+		_printf(Level.toLevel(level), new StringFormattedMessage(fmt, args));
+	}
+
 	public static void _printf(Level level, StringFormattedMessage msg) {
 		Class<?> origin = caller();
 		if (loggable(origin, level)) {
 			ExtendedLogger logger = LogManager.getLogger(origin, ctx_);
-			logger.logMessage(FQCN, level, null, msg, null);
+			logger.logMessage(FQCN, cvt(level), null, msg, null);
 		}
 	}
 
 	public static void log(Level level, String msg, Throwable e) {
-		Class<?> origin = caller();
+		log(null, level, msg, e);
+	}
+
+	public static void log(Class<?> caller, String level, String msg, Throwable e) {
+		log(caller, Level.toLevel(level), msg, e);
+	}
+
+	public static void log(Class<?> caller, Level level, String msg, Throwable e) {
+		Class<?> origin = caller != null ? caller : caller();
 		if (loggable(origin, level)) {
 			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
-			log.logIfEnabled(FQCN, level, null, msg, e);
+			log.logIfEnabled(FQCN, cvt(level), null, msg, e);
 		}
+	}
+
+	private static org.apache.logging.log4j.Level cvt(Level level) {
+		return org.apache.logging.log4j.Level.toLevel(level.name());
 	}
 
 	// ==========================================
 
-	/** @return the the class that called Log2, or {@code Log2.class} */
+	/** @return the the class that called Log, or {@code Log.class} */
 	private static Class<?> caller() {
 		StackFrame frame = StackWalker.getInstance(OPTIONS).walk(Log::caller);
 		return frame != null ? frame.getDeclaringClass() : Log.class;
@@ -387,9 +298,12 @@ public class Log {
 	private static void chkInit() {
 		if (!initd_) {
 			initd_ = true;
-			ctx_ = Configurator.initialize(LogConfig.getConfiguration(refCls_, logname_, location_, layout_));
+			Configuration config = LogConfig.getConfiguration(refCls_, logname_, location_, layout_);
+
+			ctx_ = Configurator.initialize(config);
+
 			if (ctx_ != null) {
-				defLevel(ctx_.getConfiguration().getRootLogger().getLevel());
+				defLevel(Level.toLevel(ctx_.getConfiguration().getRootLogger().getLevel().name()));
 
 			} else {
 				defLevel(Level.TRACE);

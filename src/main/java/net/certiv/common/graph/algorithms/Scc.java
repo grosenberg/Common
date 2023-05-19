@@ -20,14 +20,13 @@ import java.util.Map;
 import java.util.Stack;
 
 import net.certiv.common.graph.Edge;
+import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.Edge.Sense;
 
 /**
- * An implementation of Tarjan's algorithm to find the strongly connected
- * components of a graph. This is similar (but not 100% the same) to finding
- * cycles of a graph.
+ * An implementation of Tarjan's algorithm to find the strongly connected components of a
+ * graph. This is similar (but not 100% the same) to finding cycles of a graph.
  * {@link http://en.wikipedia.org/wiki/Strongly_connected_components}
  * {@link http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm}
  */
@@ -54,8 +53,8 @@ public class Scc<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Find the strongly connected components of a graph.
 	 *
 	 * @param contents An iterator over the graph's nodes.
-	 * @param advisor Provides informations about the graphs edges.
-	 * @param strict whether elementary (size 1) sccs should be added to the result
+	 * @param advisor  Provides informations about the graphs edges.
+	 * @param strict   whether elementary (size 1) sccs should be added to the result
 	 * @return A list of strongly connected components of the graph. Never null.
 	 */
 	public List<List<N>> find(Graph<N, E> graph, boolean strict) {

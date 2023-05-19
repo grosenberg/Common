@@ -2,8 +2,10 @@ package net.certiv.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ExceptUtil {
 
@@ -18,10 +20,9 @@ public class ExceptUtil {
 	}
 
 	/**
-	 * Returns a simple or full form exception message extracted from the given
-	 * throwable.
+	 * Returns a simple or full form exception message extracted from the given throwable.
 	 *
-	 * @param ex a throwable
+	 * @param ex   a throwable
 	 * @param full elects to return a possibly full form message if {@code true}
 	 * @return a simple or full form exception message
 	 */
@@ -47,19 +48,16 @@ public class ExceptUtil {
 		return Strings.EMPTY;
 	}
 
+	public static String rootCause(Throwable t, boolean full) {
+		Throwable cause = ExceptionUtils.getRootCause(t);
+		if (full) return stacktrace(cause);
+		return msg(cause);
+	}
+
 	public static List<String> causes(Throwable t) {
-		if (t == null) return List.of();
-
-		List<String> causes = new ArrayList<>();
-		causes.add(msg(t));
-
-		Throwable cause = t.getCause();
-		while (cause != null) {
-			causes.add(msg(t));
-			cause = cause.getCause();
-		}
-
-		return causes;
+		return ExceptionUtils.getThrowableList(t).stream() //
+				.map(e -> msg(e)) //
+				.collect(Collectors.toList());
 	}
 
 	private static String msg(Throwable t) {

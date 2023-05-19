@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
@@ -76,6 +77,7 @@ public class LogConfig {
 			String pathname, String layout) {
 
 		builder.setConfigurationName(logname);
+		builder.setLoggerContext(new LoggerContext("common.log"));
 		builder.setStatusLevel(Level.DEBUG);
 		builder.setVerbosity("disable");
 

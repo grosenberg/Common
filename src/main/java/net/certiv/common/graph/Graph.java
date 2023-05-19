@@ -2,7 +2,6 @@ package net.certiv.common.graph;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -16,11 +15,11 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.stores.props.Props;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
 	public static final String GRAPH_NAME = "GraphName";
-	public static final String ERR_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
 	static final Counter CTR = new Counter();
 
@@ -35,34 +34,19 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		_gid = CTR.getAndIncrement();
 	}
 
-	public Graph(String name) {
-		this();
-		put(GRAPH_NAME, name);
-	}
-
-	public Graph(Map<Object, Object> props) {
-		this();
-		putAll(props);
-	}
-
-	// /**
-	// * Descriptive name assigned to this {@code Graph}. Defaults to the simple class
-	// name
-	// * of the implementing class.
-	// */
-	// public String name() {
-	// String name = (String) get(GRAPH_NAME, getClass().getSimpleName());
-	// return String.format("%s(%s)", name, _gid);
-	// }
-
+	/** Return a simple display name for this graph instance. */
 	public String name() {
-		return (String) get(GRAPH_NAME, String.valueOf(_gid));
+		String name = get(GRAPH_NAME).toString();
+		if (name == null || name.isBlank()) return String.valueOf(_gid);
+		return name;
 	}
 
+	/** Return a unique display name for this graph instance. */
 	public String uniqueName() {
+		String name = name();
 		String gid = String.valueOf(_gid);
-		if (name().equals(gid)) return gid;
-		return String.format("%s(%s)", name(), gid);
+		if (name.equals(gid)) return gid;
+		return String.format("%s(%s)", name, gid);
 	}
 
 	/**
@@ -115,9 +99,41 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return getEdges(edge.beg(), edge.end()).stream().anyMatch(e -> e.equals(edge));
 	}
 
-	/** Returns a copy of the current graph node set. */
+	/**
+	 * Returns a copy of the current graph node set.
+	 * <p>
+	 * The result list is unmodifiable.
+	 */
 	public UniqueList<N> getNodes() {
 		return new UniqueList<>(nodes).unmodifiable();
+	}
+
+	/**
+	 * Removes all edges directly connecting from the given source node to the given
+	 * destination node and that satisfy the given filter predicate. All selected edges
+	 * are removed if the filter is {@code null}.
+	 *
+	 * @param src    a source node
+	 * @param dst    a destination node
+	 * @param clear  {@code true} to clear the edge terminal nodes and properties
+	 * @param filter a predicate returning {@code true} to select for removal
+	 * @return {@code true} if the selected edges were removed
+	 */
+	/**
+	 * Returns a copy of the current graph node set constrained by the given filter. If
+	 * the filter is {@code null}, all nodes are included.
+	 * <p>
+	 * The result list is unmodifiable.
+	 *
+	 * @param filter a predicate returning {@code true} to select for inclusion
+	 * @return node subset as defined by the filter
+	 */
+	public UniqueList<N> getNodes(Predicate<? super N> filter) {
+		if (filter == null) return getNodes();
+		return nodes.stream() //
+				.filter(filter) //
+				.collect(Collectors.toCollection(UniqueList::new)) //
+				.unmodifiable();
 	}
 
 	/** Returns {@code true} if any edge exists between the given nodes. */
@@ -720,7 +736,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return the dot style store
 	 */
 	public DotStyle getDotStyle() {
-		return getDotStyle(ON.GRAPHS);
+		return Dot.getStyles(this, ON.GRAPHS);
 	}
 
 	/**
