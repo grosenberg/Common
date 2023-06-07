@@ -152,8 +152,8 @@ public class Reflect {
 		Result<Field> field = findField(target, name);
 		if (!field.valid()) return Result.of(false);
 		try {
-			field.result.setAccessible(true);
-			field.result.set(target, value);
+			field.value.setAccessible(true);
+			field.value.set(target, value);
 			return Result.of(true);
 
 		} catch (Exception | Error e) {

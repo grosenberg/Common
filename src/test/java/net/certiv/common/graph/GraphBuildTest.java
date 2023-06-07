@@ -26,9 +26,9 @@ class GraphBuildTest extends TestBase {
 		assertNotNull(b);
 		assertNotNull(c);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "build0.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "build0.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -42,13 +42,13 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("D", "E");
 
 		String dump = graph.dump();
-		String dot = graph.dot();
+		String dot = graph.render();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "build1.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String txt = FsUtil.loadCheckedResource(getClass(), "build1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "build1dump.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build1dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
 
@@ -60,14 +60,14 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("B", "C");
 		builder.createAndAddEdge("D", "E");
 
-		String dot = graph.dot();
+		String dot = graph.render();
 		String dump = graph.dump();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "build2.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String txt = FsUtil.loadCheckedResource(getClass(), "build2.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "build2dump.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build2dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
 
@@ -79,10 +79,10 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("B", "B");
 		builder.createAndAddEdge("B", "C");
 
-		String dot = graph.dot();
+		String dot = graph.render();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "build3.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String txt = FsUtil.loadCheckedResource(getClass(), "build3.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -99,13 +99,13 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("F", "B");
 
 		String dump = graph.dump();
-		String dot = graph.dot();
+		String dot = graph.render();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "build4.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String txt = FsUtil.loadCheckedResource(getClass(), "build4.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
-		String dtxt = FsUtil.loadCheckedResource(getClass(), "build4dump.txt").result;
+		String dtxt = FsUtil.loadCheckedResource(getClass(), "build4dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
 
@@ -120,10 +120,10 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("B", "C");
 		builder.createAndAddEdge("C", "D");
 
-		String dot = graph.dot();
+		String dot = graph.render();
 
-		String txt = FsUtil.loadCheckedResource(getClass(), "build5.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String txt = FsUtil.loadCheckedResource(getClass(), "build5.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -133,9 +133,9 @@ class GraphBuildTest extends TestBase {
 
 		builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "build6.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "build6.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -148,9 +148,9 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdges("C => [B,Z]");
 		builder.createAndAddEdges("C => [B,C]");
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "build7.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "build7.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 }

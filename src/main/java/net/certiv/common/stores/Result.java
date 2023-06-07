@@ -4,10 +4,10 @@ import java.util.Objects;
 
 /**
  * A container object for potentially null objects. Includes a {@code Throwable} error
- * field. If a result is present ({@code non-null}) without an error being present,
+ * field. If a value is present ({@code non-null}) without an error being present,
  * {@code valid()} returns {@code true}.
  *
- * @apiNote This is an alternative to {@code Optional}.
+ * @apiNote This is a specialized alternative to {@code Optional}.
  * @param <T> the type of value
  */
 public class Result<T> {
@@ -15,7 +15,9 @@ public class Result<T> {
 	public static final Result<Boolean> OK = new Result<>(true, null);
 	public static final Result<Boolean> FAIL = new Result<>(false, null);
 
-	public final T result;
+	/** The result value. */
+	public final T value;
+	/** The result error. */
 	public final Throwable err;
 
 	public static <T> Result<T> of(T result) {
@@ -28,17 +30,17 @@ public class Result<T> {
 
 	// --------------------------------
 
-	private Result(T result, Throwable err) {
-		this.result = result;
+	private Result(T value, Throwable err) {
+		this.value = value;
 		this.err = err;
 	}
 
 	/**
-	 * Returns {@code true} if the result is {@code non-null} and the error is
+	 * Returns {@code true} if the value is {@code non-null} and the error is
 	 * {@code null}.
 	 */
 	public boolean valid() {
-		return result != null && err == null;
+		return value != null && err == null;
 	}
 
 	/**
@@ -49,22 +51,22 @@ public class Result<T> {
 	}
 
 	/**
-	 * Returns {@code true} if the result is {@code non-null}.
+	 * Returns {@code true} if the value is {@code non-null}.
 	 */
 	public boolean present() {
-		return result != null;
+		return value != null;
 	}
 
 	/**
-	 * Returns {@code true} if the result is {@code null}.
+	 * Returns {@code true} if the value is {@code null}.
 	 */
 	public boolean isNull() {
-		return result == null;
+		return value == null;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(err, result);
+		return Objects.hash(err, value);
 	}
 
 	@Override
@@ -72,12 +74,12 @@ public class Result<T> {
 		if (this == obj) return true;
 		if (!(obj instanceof Result)) return false;
 		Result<?> other = (Result<?>) obj;
-		return Objects.equals(err, other.err) && Objects.equals(result, other.result);
+		return Objects.equals(err, other.err) && Objects.equals(value, other.value);
 	}
 
 	@Override
 	public String toString() {
-		if (err == null) return String.valueOf(result);
-		return String.format("%s [%s]", String.valueOf(result), err.getMessage());
+		if (err == null) return String.valueOf(value);
+		return String.format("%s [%s]", String.valueOf(value), err.getMessage());
 	}
 }

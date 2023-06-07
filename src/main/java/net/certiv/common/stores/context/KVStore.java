@@ -179,9 +179,16 @@ public class KVStore implements IKVStore {
 	}
 
 	@Override
-	public UUID merge(IKVStore store) {
+	public UUID mergeFirst(IKVStore store) {
 		UUID mark = get(MARK);
 		store.forEach((k, v) -> this.store.put(k, v));
+		return mark;
+	}
+
+	@Override
+	public UUID mergeLast(IKVStore store) {
+		UUID mark = get(MARK);
+		store.forEach((k, v) -> this.store.putIfAbsent(k, v));
 		return mark;
 	}
 

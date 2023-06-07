@@ -97,7 +97,7 @@ public class LinkedHashList<K, V> {
 		LinkedList<V> list = map.get(key);
 		if (list == null) return put(key, values);
 		// return map.get(key);
-		return null; // TODO: return result or null signalling not absent?
+		return null; // TODO: return value or null signalling not absent?
 	}
 
 	public void forEach(BiConsumer<? super K, ? super List<V>> action) {

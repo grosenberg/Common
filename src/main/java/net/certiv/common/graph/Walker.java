@@ -21,7 +21,7 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	private boolean debug;
 
 	public Walker() {
-		this.debug = false;
+		this(false);
 	}
 
 	public Walker(boolean debug) {

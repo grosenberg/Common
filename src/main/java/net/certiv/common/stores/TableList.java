@@ -71,7 +71,7 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 	 * @param row   the table row
 	 * @param col   the table column
 	 * @param value a value to add to the value list if not present
-	 * @return {@code true} if this collection changed as a result of thecall
+	 * @return {@code true} if this collection changed as a value of thecall
 	 */
 	public boolean putIfAbsent(R row, C col, V value) {
 		LinkedHashMap<C, LinkedList<V>> colList = get(row);

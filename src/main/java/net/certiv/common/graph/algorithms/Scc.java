@@ -54,7 +54,7 @@ public class Scc<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param contents An iterator over the graph's nodes.
 	 * @param advisor  Provides informations about the graphs edges.
-	 * @param strict   whether elementary (size 1) sccs should be added to the result
+	 * @param strict   whether elementary (size 1) sccs should be added to the value
 	 * @return A list of strongly connected components of the graph. Never null.
 	 */
 	public List<List<N>> find(Graph<N, E> graph, boolean strict) {

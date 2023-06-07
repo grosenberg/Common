@@ -19,6 +19,9 @@ import net.certiv.common.util.Strings;
 
 public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	// simple DOT name
+	private static final Pattern SIMPLE = Pattern.compile("\\w+");
+
 	// literal indent spacing used for pretty-printing
 	private static final String DENT = "  ";
 
@@ -155,7 +158,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				for (N root : roots) {
 					if (root.hasEdges(Sense.OUT, true)) {
 						sb.appendNewLine();
-						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.name())));
+						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.uname())));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
 						sb.append(render(walker, visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
@@ -243,16 +246,16 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 			nodes.add(style(node));
 			if (parent != null) {
 				for (E edge : parent.to(node)) {
-					edges.appendln(EDGE, dent, fix(parent.name()), fix(node.name()), style(edge));
+					edges.appendln(EDGE, dent, fix(parent.uname()), fix(node.uname()), style(edge));
 				}
 			}
 			return true;
 		}
 
 		protected String style(N node) {
-			if (!node.has(DotStyle.PropName)) return fix(node.name());
+			if (!node.has(DotStyle.PropName)) return fix(node.uname());
 			DotStyle ds = (DotStyle) node.get(DotStyle.PropName);
-			return String.format(NODE, fix(node.name()), ds.inlineAttributes(ON.NODES));
+			return String.format(NODE, fix(node.uname()), ds.inlineAttributes(ON.NODES));
 		}
 
 		protected String style(E edge) {
@@ -262,24 +265,14 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 	}
 
-	// private static String NM = "[0-9]+(?:\\.[0-9]+)*";
-
-	// simple DOT name
-	private static String ID = "[a-zA-Z\\0200-\\0377_](?:[a-zA-Z\\0200-\\0377_0-9])*";
-	private static Pattern P = Pattern.compile(ID);
-
-	// Sanitize a name to be 'dot' compliant.
-	// name -> name
-	// name1 -> name1
-	// name_1 -> name_1
-	// name 1 -> "name 1"
-	// name.1 -> "name.1"
-	// name(1) -> "name(1)"
+	/**
+	 * Sanitize a name to be 'dot' compliant. Quote the given name if the name contains
+	 * anything other than {@code [a-zA-Z_0-9]}.
+	 */
 	private static String fix(String name) {
 		name = name.trim();
-
 		if (name.isEmpty()) return Strings.UNKNOWN;
-		if (P.matcher(name).matches()) return name;
+		if (SIMPLE.matcher(name).matches()) return name;
 		return Strings.QUOTE + name + Strings.QUOTE;
 	}
 

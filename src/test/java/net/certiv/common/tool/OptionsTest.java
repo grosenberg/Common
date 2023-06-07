@@ -49,7 +49,7 @@ class OptionsTest {
 
 		Result<String> res = FsUtil.loadCheckedResource(getClass(), "help.txt");
 		assertTrue(res.valid());
-		assertEquals(res.result, help);
+		assertEquals(res.value, help);
 
 	}
 

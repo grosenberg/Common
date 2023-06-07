@@ -18,6 +18,8 @@ import net.certiv.common.stores.props.Props;
  */
 public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
+	private static final String ERR_INVALID = "Invalid edge %s";
+
 	/** Sense of direction. */
 	public enum Sense {
 		/** Edge in direction; in through begin node. */
@@ -100,6 +102,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/** Returns the node at the 'other' end of this edge. */
 	public N other(N node) {
+		Assert.isTrue(valid(), ERR_INVALID, this);
 		return beg.equals(node) ? end : beg;
 	}
 
@@ -112,6 +115,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/** Returns {@code true} if this edge is directly connected to the given node. */
 	public boolean connectsTo(N node) {
+		if (node == null) return false;
 		return node.equals(beg) || node.equals(end);
 	}
 
@@ -120,6 +124,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * either orientation.
 	 */
 	public boolean between(N src, N dst) {
+		if (!valid()) return false;
 		return (beg.equals(src) && end.equals(dst)) || (beg.equals(dst) && end.equals(src));
 	}
 
@@ -128,7 +133,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * and end nodes are the same.
 	 */
 	public boolean cyclic() {
-		return beg.equals(end);
+		return valid() ? beg.equals(end) : false;
 	}
 
 	/**
@@ -149,7 +154,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * @return {@code true} if this edge is fully removed.
 	 */
 	boolean remove(boolean delete) {
-		Assert.isTrue(valid());
+		Assert.isTrue(valid(), ERR_INVALID, this);
 
 		@SuppressWarnings("unchecked")
 		E edge = (E) this;

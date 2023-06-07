@@ -299,9 +299,7 @@ public class Log {
 		if (!initd_) {
 			initd_ = true;
 			Configuration config = LogConfig.getConfiguration(refCls_, logname_, location_, layout_);
-
-			ctx_ = Configurator.initialize(config);
-
+			ctx_ = Configurator.initialize(refCls_.getClassLoader(), config);
 			if (ctx_ != null) {
 				defLevel(Level.toLevel(ctx_.getConfiguration().getRootLogger().getLevel().name()));
 

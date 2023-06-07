@@ -41,7 +41,8 @@ public class LogConfig {
 			final String layout) {
 
 		ConfigurationBuilder<BuiltConfiguration> builder = new DefaultConfigurationBuilder<>();
-		return create(name, builder, getLocation(cls, name, location), layout);
+		String loc = getLocation(cls, name, location);
+		return create(name, builder, loc, layout);
 	}
 
 	public static String getLocation(Class<?> cls, String name, String location) {

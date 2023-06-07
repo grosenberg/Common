@@ -18,6 +18,6 @@ class ReflectTest {
 		Result<Class<String>> res = Reflect.typeOf(this, "list");
 
 		assertTrue(res.valid());
-		assertEquals(res.result, String.class);
+		assertEquals(res.value, String.class);
 	}
 }

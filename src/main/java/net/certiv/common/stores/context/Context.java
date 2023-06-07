@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Certiv Analytics. All rights reserved.
+ * Copyright (c) 2017 - 2023 Certiv Analytics. All rights reserved.
  * Use of this file is governed by the Eclipse Public License v1.0
  * that can be found in the LICENSE.txt file in the project root,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -20,14 +20,14 @@ import java.util.stream.Stream;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.ex.NotImplementedException;
+import net.certiv.common.stores.LimitList;
+import net.certiv.common.util.Maths;
 
 /** Context implements a scoped key/value store. */
 public class Context implements IContext {
 
-	/** Scoping stack of instance key/value stores. */
-	private final LinkedList<KVStore> scopes = new LinkedList<>();
-	/** Maximum depth of the scope stack. Default is 1. */
-	private int maxDepth = 1;
+	/** Scoping stack of instance key/value stores. Default depth is 1. */
+	private final LimitList<KVStore> scopes = new LimitList<>(1);
 
 	/**
 	 * Creates a new {@code Context} with read-through support to a list of up to maximum
@@ -51,18 +51,6 @@ public class Context implements IContext {
 	}
 
 	/**
-	 * Creates a new {@code Context} with read-through support to a list of up to maximum
-	 * of {@code depth} key/value stores.
-	 *
-	 * @param depth the defined maximum number of scoped key/value stores
-	 * @param init  {@code true} to initialize to contain an empty first scope
-	 * @return a new, conditionally initialized Context
-	 */
-	private static Context of(int depth, boolean init) {
-		return new Context(depth, init);
-	}
-
-	/**
 	 * Creates a new {@code Context} containing the given stores as the ordered scopes for
 	 * storing typed key/value pairs. The context maximum depth is set to the given stores
 	 * size.
@@ -72,8 +60,20 @@ public class Context implements IContext {
 	 */
 	public static Context of(List<KVStore> stores) {
 		Context ctx = new Context(stores.size(), false);
-		ctx.addAll(stores);
+		ctx.insertAll(stores);
 		return ctx;
+	}
+
+	/**
+	 * Creates a new {@code Context} with read-through support to a list of up to maximum
+	 * of {@code depth} key/value stores.
+	 *
+	 * @param depth the defined maximum number of scoped key/value stores
+	 * @param init  {@code true} to include an empty top-level scope
+	 * @return a new, conditionally initialized Context
+	 */
+	public static Context of(int depth, boolean init) {
+		return new Context(depth, init);
 	}
 
 	/**
@@ -84,50 +84,8 @@ public class Context implements IContext {
 	 * @param init  initialize to contain an empty first scope
 	 */
 	private Context(int depth, boolean init) {
-		this.maxDepth = depth;
+		scopes.adjustLimit(depth);
 		if (init) scopes.add(new KVStore());
-	}
-
-	private int add(KVStore store) {
-		return add(0, store);
-	}
-
-	private int add(int idx, KVStore store) {
-		Assert.notNull(store);
-		idx = fixIndex(idx);
-		scopes.add(idx, store);
-		fixDepth();
-		return idx;
-	}
-
-	private int addAll(Collection<KVStore> stores) {
-		return addAll(0, stores);
-	}
-
-	private int addAll(int idx, Collection<KVStore> stores) {
-		Assert.notNull(stores);
-		idx = fixIndex(idx);
-		scopes.addAll(idx, stores);
-		fixDepth();
-		return idx;
-	}
-
-	private int fixIndex(int idx) {
-		Assert.isTrue(idx >= 0 && idx < maxDepth);
-		return Math.min(idx, depth());
-	}
-
-	private void fixDepth() {
-		while (scopes.size() > maxDepth) {
-			scopes.removeLast();
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <V> KVStore flatten(Context ctx) {
-		KVStore store = new KVStore();
-		ctx.keyStream().forEach(k -> store.putValue((Key<V>) k, (Value<V>) ctx.getValue(k)));
-		return store;
 	}
 
 	@Override
@@ -249,28 +207,26 @@ public class Context implements IContext {
 
 	/** Returns the current maximum scope depth of this Context. */
 	public int maxDepth() {
-		return maxDepth;
+		return scopes.limit();
 	}
 
 	/**
-	 * Adjusts the maximum scope depth of this Context. If the adjustment reduces the
-	 * depth to less than the current actual depth, the excess scopes are either trimmed
-	 * (and lost) or flattened and merged into a single scope at max depth, depending on
-	 * the state of the {@code trim} parameter.
+	 * Adjusts the maximum scope depth of this Context.
+	 * <p>
+	 * If the adjustment reduces the depth to less than the current actual depth, the
+	 * excess scopes are either trimmed (and lost) or flattened and merged into a single
+	 * scope at max depth, depending on the state of the {@code trim} parameter.
 	 *
 	 * @param depth the defined maximum number of scoped key/value stores
 	 * @param trim  {@code true} to trim excess scopes; otherwise flatten
 	 */
 	public void adjustMaxDepth(int depth, boolean trim) {
-		Assert.isTrue(depth > 0);
-		if (!trim && depth < scopes.size()) {
-			KVStore last = flatten(Context.of(scopes.subList(depth - 1, scopes.size())));
-			scopes.set(depth - 1, last);
+		LinkedList<KVStore> res = scopes.adjustLimit(depth);
+		if (!res.isEmpty() && !trim) {
+			Context last = Context.of(res);
+			last.insert(scopes.removeLast());
+			scopes.addLast(flatten(last));
 		}
-		while (scopes.size() > depth) {
-			scopes.removeLast();
-		}
-		this.maxDepth = depth;
 	}
 
 	@Override
@@ -306,8 +262,8 @@ public class Context implements IContext {
 
 	@Override
 	public Context dup(int depth) {
-		Assert.isTrue(depth >= 1 && depth <= maxDepth);
-		depth = Math.min(depth, depth());
+		depth = Maths.constrain(depth, 1, depth());
+
 		Context copy = Context.of(depth, false);
 		for (int idx = 0; idx < depth; idx++) {
 			copy.scopes.addLast(scopes.get(idx).dup());
@@ -316,15 +272,31 @@ public class Context implements IContext {
 	}
 
 	@Override
-	public UUID merge(IKVStore store) {
+	public UUID mergeFirst(IKVStore store) {
+		return merge(0, store);
+	}
+
+	@Override
+	public UUID merge(int idx, IKVStore store) {
 		Assert.isTrue(store != null);
-		UUID mark = get(MARK);
+		idx = Maths.constrain(idx, 0, depth());
+		if (idx == depth()) return mergeLast(store);
+
+		UUID mark = scopes.get(idx).get(MARK);
+		int limit = scopes.limit();
 		if (store instanceof KVStore) {
-			add((KVStore) store.dup());
+			if (depth() == limit) scopes.adjustLimit(limit + 1);
+			insert(idx, (KVStore) store.dup());
+
 		} else if (store instanceof Context) {
-			for (int idx = store.size() - 1; idx >= 0; idx--) {
-				add(((Context) store).scopes.get(idx).dup());
+			Context ctx = (Context) store;
+			int max = depth() + ctx.depth();
+			if (max > limit) scopes.adjustLimit(max);
+
+			for (int jdx = store.depth() - 1; jdx >= 0; jdx--) {
+				insert(idx, ctx.scopes.get(jdx).dup());
 			}
+
 		} else {
 			throw new NotImplementedException();
 		}
@@ -332,16 +304,23 @@ public class Context implements IContext {
 	}
 
 	@Override
-	public UUID merge(int idx, IKVStore store) {
+	public UUID mergeLast(IKVStore store) {
 		Assert.isTrue(store != null);
-		Assert.isTrue(idx < depth());
-		UUID mark = scopes.get(idx).get(MARK);
+		UUID mark = scopes.getLast().get(MARK);
+		int limit = scopes.limit();
 		if (store instanceof KVStore) {
-			add(idx, (KVStore) store.dup());
+			if (depth() == limit) scopes.adjustLimit(limit + 1);
+			scopes.addLast((KVStore) store.dup());
+
 		} else if (store instanceof Context) {
-			for (int jdx = store.size() - 1; jdx >= 0; jdx--) {
-				add(idx, ((Context) store).scopes.get(jdx).dup());
+			Context ctx = (Context) store;
+			int max = depth() + ctx.depth();
+			if (max > limit) scopes.adjustLimit(max);
+
+			for (int idx = 0; idx < ctx.depth(); idx++) {
+				scopes.addLast(ctx.scopes.get(idx).dup());
 			}
+
 		} else {
 			throw new NotImplementedException();
 		}
@@ -373,6 +352,34 @@ public class Context implements IContext {
 			if (scopes.get(idx).contains(key)) return idx;
 		}
 		return -1;
+	}
+
+	private void insert(KVStore store) {
+		insert(0, store);
+	}
+
+	private void insert(int idx, KVStore store) {
+		if (store != null) {
+			scopes.add(idx, store);
+		}
+	}
+
+	private void insertAll(Collection<KVStore> stores) {
+		insertAll(0, stores);
+	}
+
+	private void insertAll(int idx, Collection<KVStore> stores) {
+		if (stores != null) {
+			idx = Maths.constrain(idx, 0, depth());
+			scopes.addAll(idx, stores);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <V> KVStore flatten(Context ctx) {
+		KVStore store = new KVStore();
+		ctx.keyStream().forEach(k -> store.putValue((Key<V>) k, (Value<V>) ctx.getValue(k)));
+		return store;
 	}
 
 	@Override

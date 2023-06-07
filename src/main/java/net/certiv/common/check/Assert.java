@@ -210,7 +210,7 @@ public final class Assert {
 		String msg = args != null && args.length > 0 ? String.format(fmt, args) : fmt;
 		msg = String.format(FMT1, type, msg);
 		Result<? extends RuntimeException> res = Reflect.make(cls, type, msg);
-		return res.valid() ? res.result : new RuntimeException(res.err);
+		return res.valid() ? res.value : new RuntimeException(res.err);
 	}
 
 	private static AssertException exception(Test type, String msg) {

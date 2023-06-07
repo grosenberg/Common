@@ -96,6 +96,12 @@ public class Version {
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 					String ver = attributes.getValue("Implementation-Version");
+					if (ver == null) {
+						ver = attributes.getValue("Bundle-Version");
+					}
+					if (ver == null) {
+						ver = Strings.UNKNOWN;
+					}
 					return Pair.of(ver, lastModified(file));
 				}
 

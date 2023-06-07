@@ -1,7 +1,5 @@
 package net.certiv.common.dot;
 
-import java.util.regex.Pattern;
-
 import org.apache.commons.text.TextStringBuilder;
 
 import net.certiv.common.dot.Dictionary.ON;
@@ -167,13 +165,21 @@ public class DotStyle {
 		return sb.toString().trim();
 	}
 
-	private static final Pattern LIST = Pattern.compile(".*?[\\h,].*");
+	private static final String Fmt = "%s=\"%s\"";
 
 	private String fmt(DotAttr key, Object value) {
-		String fmt = "%s=%s";
-		if (Dictionary.isCompoundType(key) && LIST.matcher(value.toString()).matches()) {
-			fmt = "%s=\"%s\"";
-		}
-		return String.format(fmt, key, value);
+		return String.format(Fmt, key, value);
 	}
+
+	// private static final Pattern LIST = Pattern.compile(".*?[\\h,].*");
+	//
+	// private String Fmt(DotAttr key, Object value) {
+	// String Fmt = "%s=%s";
+	// if (Dictionary.isCompoundType(key) && LIST.matcher(value.toString()).matches()) {
+	// Fmt = "%s=\"%s\"";
+	// }
+	// return String.format(Fmt, key, value);
+	// }
+	//
+
 }

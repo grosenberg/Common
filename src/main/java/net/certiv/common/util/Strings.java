@@ -331,12 +331,12 @@ public class Strings {
 		return Arrays.stream(texts).anyMatch(t -> blank(t));
 	}
 
-	/** Returns result of !null and !isEmpty test. */
+	/** Returns value of !null and !isEmpty test. */
 	public static boolean notEmpty(String arg) {
 		return arg != null && !arg.isEmpty();
 	}
 
-	/** Returns result of null or isEmpty test. */
+	/** Returns value of null or isEmpty test. */
 	public static boolean empty(String arg) {
 		return arg == null || arg.isEmpty();
 	}
@@ -650,7 +650,7 @@ public class Strings {
 		return dup(cnt, String.valueOf(c));
 	}
 
-	// row=dup cnt; col=dup value; value=dup'd result
+	// row=dup cnt; col=dup value; value=dup'd value
 	private static final Table<Integer, String, String> DUPS = new Table<>();
 
 	public static String dup(int cnt, String value) {
@@ -849,7 +849,7 @@ public class Strings {
 	 * <pre>
 	 *    first = null
 	 *    second = "a"
-	 *    => result = {"a"}
+	 *    => value = {"a"}
 	 * </pre>
 	 *
 	 * <li>
@@ -857,7 +857,7 @@ public class Strings {
 	 * <pre>
 	 *    first = {"a"}
 	 *    second = null
-	 *    => result = {"a"}
+	 *    => value = {"a"}
 	 * </pre>
 	 *
 	 * </li>
@@ -866,7 +866,7 @@ public class Strings {
 	 * <pre>
 	 *    first = {"a"}
 	 *    second = {"b"}
-	 *    => result = {"a", "b"}
+	 *    => value = {"a", "b"}
 	 * </pre>
 	 *
 	 * </li>

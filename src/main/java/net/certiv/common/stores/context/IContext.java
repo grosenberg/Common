@@ -11,24 +11,30 @@ import java.util.UUID;
 public interface IContext extends IKVStore {
 
 	/**
-	 * Merges all scopes the given {@code IKVStore} as as the scopes starting at the given
-	 * index of this store.
+	 * Merges all scopes contained within the given {@code IKVStore} as as the scope(s)
+	 * starting at the given index of this store.
 	 * <p>
-	 * Typical use is, within some transaction, multiple contexts are successively merged
-	 * into this context; each is merged at successive offsets.
+	 * Typical use: within a transaction, multiple contexts are successively merged into
+	 * this context; each is merged at successive offsets.
+	 * <p>
+	 * Returns a {@code UUID} identifying the merge-point to allow a
+	 * {@link #restore(UUID)} to potentially unwind the merge.
 	 * <p>
 	 * merge KVStore -> KVStore :: puts ({@code idx = 0}) or putsIfAbsent
 	 * ({@code idx > 0}) the given KVStore values into this store.
 	 * <p>
-	 * merge KVStore -> Context :: inserts the KVStore as a new scope {@code idx} in this
-	 * context.
+	 * merge KVStore -> Context :: inserts the KVStore as a new scope at {@code idx} in
+	 * this Context. The depth of this Context is increased as necessary to accommodate
+	 * the merger.
 	 * <p>
-	 * merge Context -> Context :: inserts all scopes of the given context at scope
-	 * {@code idx} in this context.
+	 * merge Context -> Context :: inserts the collection of scopes of the given Context
+	 * beginning at scope {@code idx} in this Context. The depth of this Context is
+	 * increased as necessary to accommodate the merger.
 	 *
 	 * @param idx   the target scope index (0-based)
 	 * @param store the store to merge into this store
-	 * @return the store identifier for the pre-merge scope at the given index
+	 * @return the store marker identifying the pre-merge scope at the given index
+	 * @see IContext#restore(UUID)
 	 */
 	UUID merge(int idx, IKVStore store);
 
@@ -38,6 +44,9 @@ public interface IContext extends IKVStore {
 	 * <p>
 	 * The {@code mark} is typically obtained the from the initial merge in some
 	 * transactional operation involving the context.
+	 * <p>
+	 * TODO: add varient {@code restore(UUID mark, int idx)} to restore from
+	 * {@code merge(idx, store)}.
 	 *
 	 * @param mark identifies the scope to retain as the top-level (scope 0) store
 	 * @return {@code true } if the restore is sucessful; {@code false} typically

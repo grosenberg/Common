@@ -29,9 +29,9 @@ class GraphOpsManipulationTest extends TestBase {
 		b = builder.getNode("B");
 		assertNull(b);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsReduce1.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsReduce1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -52,9 +52,9 @@ class GraphOpsManipulationTest extends TestBase {
 		DemoNode b = builder.getNode("B");
 		assertNull(b);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsReduceEdge1.md").result;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsReduceEdge1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -75,10 +75,10 @@ class GraphOpsManipulationTest extends TestBase {
 
 		graph.transfer(cf, b); // cf becomes bf
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsTransfer1.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsTransfer1.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -98,10 +98,10 @@ class GraphOpsManipulationTest extends TestBase {
 
 		graph.move(ce, b, d);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsMove1.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsMove1.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -119,10 +119,10 @@ class GraphOpsManipulationTest extends TestBase {
 
 		graph.consolidateEdges(nodes, b);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsConsolidate1.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsConsolidate1.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -137,10 +137,10 @@ class GraphOpsManipulationTest extends TestBase {
 
 		graph.replicateEdges(b, targets);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsReplicate1.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsReplicate1.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -155,10 +155,10 @@ class GraphOpsManipulationTest extends TestBase {
 
 		graph.replicateEdges(b, targets, true);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsReplicate2.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsReplicate2.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 
@@ -177,10 +177,10 @@ class GraphOpsManipulationTest extends TestBase {
 		// DemoNode c = graph.getNode("C");
 		// graph.transpose(b, c);
 
-		String dot = graph.dot();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsTranspose1.md").result;
+		String dot = graph.render();
+		String txt = FsUtil.loadCheckedResource(getClass(), "opsTranspose1.md").value;
 
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
 }

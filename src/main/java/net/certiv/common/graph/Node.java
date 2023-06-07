@@ -52,7 +52,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/** Return a unique display name for this node instance. */
-	public String uniqueName() {
+	public String uname() {
 		String name = name();
 		String nid = String.valueOf(_nid);
 		if (name.equals(nid)) return nid;
@@ -380,6 +380,6 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		return uniqueName();
+		return uname();
 	}
 }

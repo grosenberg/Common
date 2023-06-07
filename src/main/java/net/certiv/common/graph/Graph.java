@@ -29,16 +29,23 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/** All graph nodes. */
 	private final LinkedHashSet<N> nodes = new LinkedHashSet<>();
 
+	/** Construct a graph. */
 	public Graph() {
 		super();
 		_gid = CTR.getAndIncrement();
 	}
 
+	/** Construct a graph with the given display name. */
+	public Graph(String name) {
+		this();
+		put(GRAPH_NAME, name);
+	}
+
 	/** Return a simple display name for this graph instance. */
 	public String name() {
-		String name = get(GRAPH_NAME).toString();
-		if (name == null || name.isBlank()) return String.valueOf(_gid);
-		return name;
+		Object name = get(GRAPH_NAME);
+		if (name == null || name.toString().isBlank()) return String.valueOf(_gid);
+		return name.toString();
 	}
 
 	/** Return a unique display name for this graph instance. */
@@ -78,9 +85,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * examining all nodes currently in the graph.
 	 */
 	public UniqueList<N> getRoots() {
-		return nodes.stream().filter(n -> n.isRoot()) //
-				.collect(Collectors.toCollection(UniqueList::new)) //
-				.unmodifiable();
+		UniqueList<N> roots = new UniqueList<>();
+		for (N node : nodes) {
+			if (node.isRoot()) {
+				roots.add(node);
+			}
+		}
+		return roots.unmodifiable();
 	}
 
 	/** Returns {@code true} if the graph contains the given node. */
@@ -102,7 +113,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Returns a copy of the current graph node set.
 	 * <p>
-	 * The result list is unmodifiable.
+	 * The value list is unmodifiable.
 	 */
 	public UniqueList<N> getNodes() {
 		return new UniqueList<>(nodes).unmodifiable();
@@ -123,7 +134,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * Returns a copy of the current graph node set constrained by the given filter. If
 	 * the filter is {@code null}, all nodes are included.
 	 * <p>
-	 * The result list is unmodifiable.
+	 * The value list is unmodifiable.
 	 *
 	 * @param filter a predicate returning {@code true} to select for inclusion
 	 * @return node subset as defined by the filter
@@ -389,8 +400,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Moves the given edge to connect between the given nodes.
 	 * <p>
-	 * Removes the edge from the graph if the result of the move would create a single
-	 * edge cycle.
+	 * Removes the edge from the graph if the value of the move would create a single edge
+	 * cycle.
 	 * <p>
 	 * If either of the initial terminal nodes of the given edge become unconnected in the
 	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
@@ -408,8 +419,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Moves the given edge to connect between the given nodes.
 	 * <p>
-	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the result
-	 * of the move would create a single edge cycle.
+	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the value of
+	 * the move would create a single edge cycle.
 	 * <p>
 	 * If either of the initial terminal nodes of the given edge become unconnected in the
 	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
@@ -441,8 +452,8 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Moves the given edges to connect between the given nodes.
 	 * <p>
-	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the result
-	 * of the move would create a single edge cycle.
+	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the value of
+	 * the move would create a single edge cycle.
 	 * <p>
 	 * If either of the initial terminal nodes of any given edge become unconnected in the
 	 * graph, except by self-cyclic edges, that initial terminal node is removed from the

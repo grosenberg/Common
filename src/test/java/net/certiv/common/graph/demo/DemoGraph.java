@@ -14,16 +14,24 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 		put(GRAPH_NAME, name);
 	}
 
+	public static Walker<DemoNode, DemoEdge> walker() {
+		return new Walker<>();
+	}
+
+	public static Printer<DemoNode, DemoEdge> printer() {
+		return new Printer<>();
+	}
+
 	@Override
 	protected DemoEdge createEdge(DemoNode beg, DemoNode end) {
 		return new DemoEdge(beg, end);
 	}
 
 	public String dump() {
-		return PRINTER.dump(this);
+		return printer().dump(this);
 	}
 
-	public String dot() {
-		return PRINTER.render(this);
+	public String render() {
+		return printer().render(this);
 	}
 }

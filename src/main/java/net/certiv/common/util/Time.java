@@ -75,7 +75,7 @@ public class Time {
 
 	/**
 	 * The time given in the argument is scoped to a local (mgr default) time zone.
-	 * The result is adjusted to UTC time zone.
+	 * The value is adjusted to UTC time zone.
 	 */
 	public static String toUtcDateTimeString(long msSinceEpoch) {
 		if (msSinceEpoch == 0L) return null;

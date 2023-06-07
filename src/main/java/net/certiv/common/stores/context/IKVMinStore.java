@@ -71,18 +71,43 @@ public interface IKVMinStore {
 	KVStore delta();
 
 	/**
-	 * Merges all scopes the given {@code IKVStore} as the top-most scope(s) of the this
-	 * store.
+	 * Merges all scopes contained within the given {@code IKVStore} as the first/top-most
+	 * scope(s) of the this store.
 	 * <p>
-	 * merge KVStore -> KVStore :: puts the given KVStore values into this store.
+	 * merge KVStore -> KVStore :: puts the given KVStore values into this store
+	 * superceding any existing values having the same key.
 	 * <p>
-	 * merge KVStore -> Context :: inserts the KVStore as a new scope 0 in this context.
+	 * merge KVStore -> Context :: inserts the KVStore as a new scope 0 in this Context.
+	 * The depth of this Context is increased as necessary to accommodate the merger.
 	 * <p>
-	 * merge Context -> Context :: inserts all scopes of the given context at scope 0 in
-	 * this context.
+	 * merge Context -> Context :: inserts the collection of scopes of the given Context
+	 * beginning at scope 0 in this Context. The depth of this Context is increased as
+	 * necessary to accommodate the merger.
 	 *
 	 * @param store the store to merge into this store
-	 * @return the pre-merge top-level (scope 0) store identifier
+	 * @return the store marker identifying the pre-merge top-level (scope 0) store
+	 * @see IContext#restore(UUID)
 	 */
-	UUID merge(IKVStore store);
+	UUID mergeFirst(IKVStore store);
+
+	/**
+	 * Merges (appends) all scopes contained within the given {@code IKVStore} as the
+	 * last/bottom-most scope(s) of the this store.
+	 * <p>
+	 * merge KVStore -> KVStore :: puts the given KVStore values into this store if the
+	 * corresponding key is absent.
+	 * <p>
+	 * merge KVStore -> Context :: appends the KVStore after the bottom-most scope in this
+	 * Context. The depth of this Context is increased as necessary to accommodate the
+	 * merger.
+	 * <p>
+	 * merge Context -> Context :: appends the collection of scopes of the given Context
+	 * after the bottom-most scope in this Context. The depth of this Context is increased
+	 * as necessary to accommodate the merger.
+	 *
+	 * @param store the store to merge into this store
+	 * @return the store marker identifying the first scope of the appended store
+	 * @see IContext#restore(UUID)
+	 */
+	UUID mergeLast(IKVStore store);
 }
