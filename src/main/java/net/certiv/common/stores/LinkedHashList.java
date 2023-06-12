@@ -39,8 +39,8 @@ public class LinkedHashList<K, V> {
 		}
 	}
 
-	public LinkedHashList(Map<K, List<V>> data) {
-		for (Entry<K, List<V>> entry : data.entrySet()) {
+	public LinkedHashList(Map<K, List<? extends V>> data) {
+		for (Entry<K, List<? extends V>> entry : data.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
@@ -55,7 +55,7 @@ public class LinkedHashList<K, V> {
 		return new LinkedList<>(list);
 	}
 
-	public LinkedList<V> getOrDefault(K key, Collection<V> defaults) {
+	public LinkedList<V> getOrDefault(K key, Collection<? extends V> defaults) {
 		LinkedList<V> res = map.get(key);
 		if (res != null) return new LinkedList<>(res);
 		return new LinkedList<>(defaults);
@@ -81,7 +81,7 @@ public class LinkedHashList<K, V> {
 	 * {@link unique} is set to {@code true}, each value is added only if value is not
 	 * already present (based on object equality).
 	 */
-	public LinkedList<V> put(K key, Collection<V> values) {
+	public LinkedList<V> put(K key, Collection<? extends V> values) {
 		for (V value : values) {
 			put(key, value);
 		}
@@ -93,7 +93,7 @@ public class LinkedHashList<K, V> {
 	 * value list preexists. If {@link unique} is set to {@code true}, each value in the
 	 * value list filtered to being unique (based on object equality).
 	 */
-	public LinkedList<V> putIfAbsent(K key, Collection<V> values) {
+	public LinkedList<V> putIfAbsent(K key, Collection<? extends V> values) {
 		LinkedList<V> list = map.get(key);
 		if (list == null) return put(key, values);
 		// return map.get(key);

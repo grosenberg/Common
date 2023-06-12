@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import net.certiv.common.check.Assert;
@@ -41,8 +42,15 @@ import net.certiv.common.stores.Result;
 
 public final class FsUtil {
 
+	private static final String WIN_PREFIX = "/\\w+\\:.*";
 	private static final int DEFAULT_READING_SIZE = 8192;
 	private static final String TmpDir = System.getProperty("java.io.tmpdir");
+
+	private static final Pattern FROM = Pattern.compile("(src/(main|test)/\\w+|target/(test-)?classes)");
+	private static final String TEST_RES = "src/test/resources";
+	private static final String ERR_LOC = "Error identifying location URI: %s";
+	private static final String ERR_NOT_WRITABLE = "File not writable: %s";
+	private static final String ERR_NO_FOLDER = "Folder does not exist: %s";
 
 	private static File sysTmp;
 
@@ -71,13 +79,22 @@ public final class FsUtil {
 		return name.replace(Strings.DOT, Strings.SLASH);
 	}
 
+	public static String mkPathname(Package pkg, String name) {
+		String pkgname = slashify(pkg.getName());
+		return String.join(Strings.SLASH, pkgname, name);
+	}
+
 	/**
-	 * Returns a {@code URI} identifying the container of the given class.
+	 * Locates the container of the given class, or {@code null} if the class does not
+	 * have a recognizable location.
 	 * <p>
 	 * For a class file located on the filesystem, returns the URI of the parent
 	 * directory.
 	 * <p>
 	 * For a class file located within a jar, returns the the URI of the jar file.
+	 *
+	 * @param cls the class to locate
+	 * @return {@code URI} identifying the class container
 	 */
 	public static URI locate(Class<?> cls) {
 		if (cls != null) {
@@ -94,10 +111,35 @@ public final class FsUtil {
 				}
 
 			} catch (Exception e) {
-				Log.error("Error identifying base URI for %s.", cls.getName());
+				Log.error(ERR_LOC, cls.getName());
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Locates the test resources container of the given class, or {@code null} if the
+	 * class does not have a recognizable location.
+	 *
+	 * @param cls the class used to define the resource location
+	 * @return {@code URI} identifying the resource container
+	 */
+	public static URI locateTest(Class<?> cls) {
+		URI uri = locate(cls);
+		if (uri == null) return null;
+
+		String path = uri.getPath();
+		path = FROM.matcher(path).replaceFirst(TEST_RES);
+		if (path.matches(WIN_PREFIX)) {
+			path = path.substring(1);
+		}
+		if (path.endsWith(Strings.SLASH)) {
+			path = path.substring(0, path.length() - 1);
+		}
+		String pkg = slashify(cls.getPackageName());
+		path = String.join(Strings.SLASH, path, pkg);
+
+		return Paths.get(path).toUri();
 	}
 
 	/**
@@ -409,12 +451,52 @@ public final class FsUtil {
 	 * @return the resource content as a {@code String} or {@code null} on any IO
 	 *         exception
 	 */
-	public static Result<String> loadCheckedResource(Class<?> cls, String name) {
+	public static Result<String> loadResource(Class<?> cls, String name) {
 		try {
 			return Result.of(new String(loadByteResource(cls, name)));
 		} catch (IOException e) {
 			return Result.of(e);
 		}
+	}
+
+	public static Result<Boolean> writeResource(Class<?> cls, String name, String data) {
+		try {
+			URI folder = locateTest(cls);
+			String scheme = folder.getScheme();
+			if (folder == null || scheme == null || !scheme.equalsIgnoreCase("file")) {
+				throw new IllegalArgumentException(String.format(ERR_LOC, cls.getName()));
+			}
+
+			URI pathname = append(folder, name);
+			File out = new File(pathname);
+
+			boolean exists = out.getParentFile().exists();
+			boolean writable = out.getParentFile().canWrite();
+
+			if (!exists || !writable) {
+				String fmt = !exists ? ERR_NO_FOLDER : ERR_NOT_WRITABLE;
+				Log.error(fmt, out.toString());
+				throw new IllegalArgumentException(String.format(fmt, out.toString()));
+			}
+
+			write(out, data);
+			return Result.OK;
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	private static URI append(URI uri, String name) {
+		String path = uri.getPath();
+		if (path.matches(WIN_PREFIX)) {
+			path = path.substring(1);
+		}
+		if (path.endsWith(Strings.SLASH)) {
+			path = path.substring(0, path.length() - 1);
+		}
+		path = String.join(Strings.SLASH, path, name);
+		return Paths.get(path).toUri();
 	}
 
 	// /**

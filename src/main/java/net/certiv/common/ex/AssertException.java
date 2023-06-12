@@ -17,7 +17,7 @@ import net.certiv.common.util.MsgBuilder;
  */
 public class AssertException extends RuntimeException implements IAssertException {
 
-	private Test type;
+	private IType type;
 	private String msg;
 	private Object[] elements;
 	private boolean hasElems;
@@ -76,12 +76,12 @@ public class AssertException extends RuntimeException implements IAssertExceptio
 	}
 
 	@Override
-	public Test type() {
+	public IType type() {
 		return type;
 	}
 
 	@Override
-	public AssertException setType(Test type) {
+	public AssertException setType(IType type) {
 		this.type = type;
 		return this;
 	}

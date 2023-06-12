@@ -47,7 +47,7 @@ class OptionsTest {
 		opts.parse(new String[] { "-h" });
 		String help = opts.help();
 
-		Result<String> res = FsUtil.loadCheckedResource(getClass(), "help.txt");
+		Result<String> res = FsUtil.loadResource(getClass(), "help.txt");
 		assertTrue(res.valid());
 		assertEquals(res.value, help);
 

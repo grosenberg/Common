@@ -28,7 +28,7 @@ class GraphOpsStringTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
-		String txt = FsUtil.loadCheckedResource(getClass(), "opsString1.md").value;
+		String txt = FsUtil.loadResource(getClass(), "opsString1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}

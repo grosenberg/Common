@@ -6,7 +6,7 @@ public interface IAssertException {
 	String NULL_ARG = "Null argument(s)"; //$NON-NLS-1$
 	String EMPTY_ARG = "Empty argument(s)"; //$NON-NLS-1$
 
-	enum Test {
+	enum Test implements IType {
 		OTHER,
 		IS_TRUE,
 		IS_NULL,
@@ -16,9 +16,9 @@ public interface IAssertException {
 		NOT_EMPTY;
 	}
 
-	Test type();
+	IType type();
 
-	IAssertException setType(Test type);
+	IAssertException setType(IType type);
 
 	IAssertException msg(String msg);
 

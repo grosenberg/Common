@@ -222,6 +222,18 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		N src = getNode(beg);
 		N dst = getNode(end);
 		if (src == null || dst == null) return UniqueList.empty();
+		return getEdges(src, dst);
+	}
+
+	/**
+	 * Returns the unique set of edges existing between the given nodes.
+	 *
+	 * @param src a source node
+	 * @param dst a destination node
+	 * @return the edges existing between the given nodes
+	 * @see Graph#getEdges(Node, Node)
+	 */
+	public UniqueList<E> getEdges(N src, N dst) {
 		return graph.getEdges(src, dst);
 	}
 

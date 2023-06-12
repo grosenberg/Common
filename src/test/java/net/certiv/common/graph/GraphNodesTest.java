@@ -45,7 +45,7 @@ class GraphNodesTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
-		String txt = FsUtil.loadCheckedResource(getClass(), "node1.md").value;
+		String txt = FsUtil.loadResource(getClass(), "node1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}

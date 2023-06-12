@@ -50,7 +50,7 @@ class FsUtil_LoadResourceTest {
 
 	@Test
 	void testLoadRelativeChecked() {
-		Result<String> res = FsUtil.loadCheckedResource(getClass(), "LoadResource1.txt");
+		Result<String> res = FsUtil.loadResource(getClass(), "LoadResource1.txt");
 		assertTrue(res.valid());
 		assertEquals(res.value.trim(), "Load resource 1");
 	}

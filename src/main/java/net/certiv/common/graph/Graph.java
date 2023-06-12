@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,8 @@ import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
 
-public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
+public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
+		implements ITransform<N, E> {
 
 	public static final String GRAPH_NAME = "GraphName";
 
@@ -28,6 +30,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/** All graph nodes. */
 	private final LinkedHashSet<N> nodes = new LinkedHashSet<>();
+
+	/** Graph modification control lock. */
+	private final ReentrantLock lock = new ReentrantLock();
 
 	/** Construct a graph. */
 	public Graph() {
@@ -54,6 +59,16 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		String gid = String.valueOf(_gid);
 		if (name.equals(gid)) return gid;
 		return String.format("%s(%s)", name, gid);
+	}
+
+	/** Lock access to this graph. */
+	public void lock() {
+		lock.lock();
+	}
+
+	/** Unlock access to this graph. */
+	public void unlock() {
+		lock.unlock();
 	}
 
 	/**
@@ -83,6 +98,10 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Returns an immutable list of the current graph root nodes. Dynamically collected by
 	 * examining all nodes currently in the graph.
+	 * <p>
+	 * Roots are nominally defined as all graph nodes having no inbound edges
+	 * ({@code Sense.IN}). Where no such node exists, the first constructed node in the
+	 * graph is somewhat arbitrarily chosen as the single root node.
 	 */
 	public UniqueList<N> getRoots() {
 		UniqueList<N> roots = new UniqueList<>();
@@ -91,6 +110,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 				roots.add(node);
 			}
 		}
+		if (roots.isEmpty() && !nodes.isEmpty()) roots.add(nodes.iterator().next());
 		return roots.unmodifiable();
 	}
 
@@ -240,339 +260,238 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @see Graph#addEdge(Edge)
 	 */
 	private boolean _remove(N node) {
-		// Log2.debug("Remove node internal [%s]", node);
 		return nodes.remove(node);
 	}
 
-	/**
-	 * Removes the given node from the graph. All connecting edges are removed (and
-	 * cleared).
-	 *
-	 * @param node the node to remove
-	 * @return {@code true} if the node was present in the graph and is now removed
-	 */
+	@Override
 	public boolean removeNode(N node) {
-		Assert.notNull(node);
-		// Log2.debug("Remove node [%s]", node);
-		if (!nodes.contains(node)) return false;
+		lock();
+		try {
+			Assert.notNull(node);
+			if (!nodes.contains(node)) return false;
 
-		boolean ok = node.edges().stream().allMatch(e -> removeEdge(e, true));
-		node.clear();
-		return ok;
-	}
+			boolean ok = node.edges().stream().allMatch(e -> removeEdge(e, true));
+			node.clear();
+			return ok;
 
-	/**
-	 * Removes the given edge from the graph. Removes either terminal node if the node has
-	 * no remaining edge connections.
-	 *
-	 * @param edge  a graph edge
-	 * @param clear {@code true} to clear the edge terminal nodes and properties
-	 * @return {@code true} if the edge was removed
-	 */
-	public boolean removeEdge(E edge, boolean clear) {
-		Assert.notNull(edge);
-		// Log2.debug("Remove edge [%s] clear=%s", edge, clear);
-
-		N beg = edge.beg();
-		N end = edge.end();
-
-		boolean ok = edge.remove(clear);
-		if (beg.adjacent().isEmpty()) _remove(beg);
-		if (end.adjacent().isEmpty()) _remove(end);
-		return ok;
-	}
-
-	/**
-	 * Removes the given edges from the graph. Removes either terminal node of an edge if
-	 * that node has no remaining edge connections.
-	 *
-	 * @param edges a list of graph edges
-	 * @param clear {@code true} to clear the edge terminal nodes and properties
-	 * @return {@code true} if all of the edges were removed
-	 */
-	public boolean removeEdges(Collection<? extends E> edges, boolean clear) {
-		Assert.notNull(edges);
-		return edges.stream().allMatch(e -> removeEdge(e, clear));
-	}
-
-	/**
-	 * Removes the given edge if the edge satisfies the given filter predicate or if the
-	 * filter is {@code null}.
-	 *
-	 * @param edge   a graph edge
-	 * @param clear  {@code true} to clear the edge terminal nodes and properties
-	 * @param filter a predicate returning {@code true} to select for removal
-	 * @return {@code true} if the edge was removed
-	 */
-	public boolean removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter) {
-		Assert.notNull(edge);
-		if (filter != null && !filter.test(edge)) return false;
-		return removeEdge(edge, clear);
-	}
-
-	/**
-	 * Removes all edges directly connecting from the given source node to the given
-	 * destination node.
-	 *
-	 * @param src   a source node
-	 * @param dst   a destination node
-	 * @param clear {@code true} to clear the edge terminal nodes and properties of the
-	 *              removed edges
-	 * @return {@code true} if the selected edges were removed
-	 */
-	public boolean removeEdges(N src, N dst, boolean clear) {
-		Assert.notNull(src, dst);
-		UniqueList<E> edges = src.to(dst);
-		// Log2.debug("Remove edges %s", edges);
-		if (edges.isEmpty()) return false;
-		return edges.stream().allMatch(e -> removeEdge(e, clear));
-	}
-
-	/**
-	 * Removes all edges directly connecting from the given source node to the given
-	 * destination node and that satisfy the given filter predicate. All selected edges
-	 * are removed if the filter is {@code null}.
-	 *
-	 * @param src    a source node
-	 * @param dst    a destination node
-	 * @param clear  {@code true} to clear the edge terminal nodes and properties
-	 * @param filter a predicate returning {@code true} to select for removal
-	 * @return {@code true} if the selected edges were removed
-	 */
-	public boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter) {
-		Assert.notNull(src, dst);
-		UniqueList<E> edges = src.to(dst);
-		if (edges.isEmpty()) return false;
-		if (filter == null) return edges.stream().allMatch(e -> removeEdge(e, clear));
-		return edges.stream().filter(filter).allMatch(e -> removeEdge(e, clear));
-	}
-
-	/**
-	 * Transfers the subgraph represented by the given edge to depend from the given node.
-	 * <p>
-	 * Does nothing if the given edge begin node is the same as the given node.
-	 * <p>
-	 * If the transfer would create a new root node cycle -- the given edge end node is
-	 * the same as the given node -- the edge is removed from the graph.
-	 * <p>
-	 * If the given edge begin node becomes unconnected in the graph, except by
-	 * self-cyclic edges, that terminal node is removed from the graph. *
-	 *
-	 * <pre>
-	 * A -> B -> C -> D -> E
-	 * C -> F -> G
-	 * transfer(CF, B);	// CF becomes BF
-	 * A -> B -> C -> D -> E
-	 * B -> F -> G
-	 * </pre>
-	 *
-	 * @param edge an edge defining a subgraph
-	 * @param beg  the target beg node for the subgraph
-	 * @return {@code true} if the edge was transferred
-	 */
-	public boolean transfer(E edge, N beg) {
-		Assert.notNull(edge, beg);
-		if (edge.beg().equals(beg)) return false;
-		return move(edge, beg, edge.end(), false);
-	}
-
-	/**
-	 * Transfers the subgraphs represented by the given edges to depend from the given
-	 * node.
-	 * <p>
-	 * Does nothing for a subgraph if its given edge begin node is the same as the given
-	 * node.
-	 * <p>
-	 * If any transfer would create a new root node cycle -- that given edge end node is
-	 * the same as the given node -- that edge is removed from the graph.
-	 * <p>
-	 * If any given edge begin node becomes unconnected in the graph, except by
-	 * self-cyclic edges, that terminal node is removed from the graph.
-	 *
-	 * @param edges the edges defining subgraphs
-	 * @param beg   the target beg node for the subgraphs
-	 */
-	public void transfer(Collection<? extends E> edges, N beg) {
-		Assert.notNull(edges, beg);
-		edges.forEach(e -> transfer(e, beg));
-	}
-
-	/**
-	 * Moves the given edge to connect between the given nodes.
-	 * <p>
-	 * Removes the edge from the graph if the value of the move would create a single edge
-	 * cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of the given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edge an existing graph edge
-	 * @param beg  the new begin node
-	 * @param end  the new end node
-	 * @return {@code true} if the edge was moved
-	 */
-	public boolean move(E edge, N beg, N end) {
-		return move(edge, beg, end, false);
-	}
-
-	/**
-	 * Moves the given edge to connect between the given nodes.
-	 * <p>
-	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the value of
-	 * the move would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of the given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edge   an existing graph edge
-	 * @param beg    the new begin node
-	 * @param end    the new end node
-	 * @param cyclic {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was moved
-	 */
-	public boolean move(E edge, N beg, N end, boolean cyclic) {
-		Assert.notNull(edge, beg, end);
-
-		if (edge.beg().equals(beg) && edge.end().equals(end)) return false;
-		if (beg.equals(edge.end()) && !cyclic) { // impermissble self cycle
-			removeEdge(edge, true);
-			return false;
+		} finally {
+			unlock();
 		}
-
-		removeEdge(edge, false);
-		edge.setBeg(beg);
-		edge.setEnd(end);
-		addEdge(edge);
-
-		return true;
 	}
 
-	/**
-	 * Moves the given edges to connect between the given nodes.
-	 * <p>
-	 * If {@code cyclic} is {@code false}, removes the edge from the graph if the value of
-	 * the move would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of any given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edges  the existing graph edges
-	 * @param beg    the new begin node
-	 * @param end    the new end node
-	 * @param cyclic {@code true} to permit creation of single edge cycles
-	 */
-	public void move(Collection<? extends E> edges, N beg, N end, boolean cyclic) {
-		Assert.notNull(edges);
-		edges.forEach(e -> move(e, beg, end, cyclic));
+	@Override
+	public boolean removeEdge(E edge, boolean clear) {
+		lock();
+		try {
+			Assert.notNull(edge);
+
+			N beg = edge.beg();
+			N end = edge.end();
+
+			boolean ok = edge.remove(clear);
+			if (beg.adjacent().isEmpty()) _remove(beg);
+			if (end.adjacent().isEmpty()) _remove(end);
+			return ok;
+
+		} finally {
+			unlock();
+		}
 	}
 
-	/**
-	 * Reterminate the given edge with the given end node.
-	 * <p>
-	 * Removes the edge from the graph if retermination would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of the given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edge   a graph edge
-	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated
-	 */
+	@Override
+	public boolean removeEdges(Collection<? extends E> edges, boolean clear) {
+		lock();
+		try {
+			Assert.notNull(edges);
+			return edges.stream().allMatch(e -> removeEdge(e, clear));
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter) {
+		lock();
+		try {
+			Assert.notNull(edge);
+			if (filter != null && !filter.test(edge)) return false;
+			return removeEdge(edge, clear);
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean removeEdges(N src, N dst, boolean clear) {
+		lock();
+		try {
+			Assert.notNull(src, dst);
+			UniqueList<E> edges = src.to(dst);
+			if (edges.isEmpty()) return false;
+			return edges.stream().allMatch(e -> removeEdge(e, clear));
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter) {
+		lock();
+		try {
+			Assert.notNull(src, dst);
+			UniqueList<E> edges = src.to(dst);
+			if (edges.isEmpty()) return false;
+			if (filter == null) return edges.stream().allMatch(e -> removeEdge(e, clear));
+			return edges.stream().filter(filter).allMatch(e -> removeEdge(e, clear));
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean transfer(E edge, N beg) {
+		lock();
+		try {
+			Assert.notNull(edge, beg);
+			if (edge.beg().equals(beg)) return false;
+			return move(edge, beg, edge.end(), false);
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean transfer(Collection<? extends E> edges, N beg) {
+		lock();
+		try {
+			Assert.notNull(edges, beg);
+			return edges.stream().allMatch(e -> transfer(e, beg));
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean move(E edge, N beg, N end) {
+		lock();
+		try {
+			return move(edge, beg, end, false);
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean move(E edge, N beg, N end, boolean cyclic) {
+		lock();
+		try {
+			Assert.notNull(edge, beg, end);
+
+			if (edge.beg().equals(beg) && edge.end().equals(end)) return false;
+			if (beg.equals(edge.end()) && !cyclic) { // impermissble self cycle
+				removeEdge(edge, true);
+				return false;
+			}
+
+			removeEdge(edge, false);
+			edge.setBeg(beg);
+			edge.setEnd(end);
+			addEdge(edge);
+
+			return true;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean move(Collection<? extends E> edges, N beg, N end, boolean cyclic) {
+		lock();
+		try {
+			Assert.notNull(edges);
+			return edges.stream().allMatch(e -> move(e, beg, end, cyclic));
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
 	public boolean reterminate(E edge, N end) {
-		return reterminate(edge, end, false);
+		lock();
+		try {
+			return reterminate(edge, end, false);
+
+		} finally {
+			unlock();
+		}
 	}
 
-	/**
-	 * Reterminate the given edge with the given end node.
-	 * <p>
-	 * If {@code cyclic} is {@code false}, removes the edge from the graph if
-	 * retermination would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of the given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edge   a graph edge
-	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated
-	 */
+	@Override
 	public boolean reterminate(E edge, N end, boolean cycles) {
-		Assert.notNull(edge, end);
-		if (edge.end().equals(end)) return false;
-		return move(edge, edge.beg(), end, cycles);
+		lock();
+		try {
+			Assert.notNull(edge, end);
+			if (edge.end().equals(end)) return false;
+			return move(edge, edge.beg(), end, cycles);
+
+		} finally {
+			unlock();
+		}
 	}
 
-	/**
-	 * Reterminate the given edges with the given end node.
-	 * <p>
-	 * Removes any edge from the graph if retermination would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of any given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edges existing graph edges
-	 * @param end   a new edge end node
-	 */
-	public void reterminate(Collection<? extends E> edges, N end) {
-		reterminate(edges, end, false);
+	@Override
+	public boolean reterminate(Collection<? extends E> edges, N end) {
+		lock();
+		try {
+			return reterminate(edges, end, false);
+
+		} finally {
+			unlock();
+		}
 	}
 
-	/**
-	 * Reterminate the given edges with the given end node.
-	 * <p>
-	 * If {@code cyclic} is {@code false}, removes any edge from the graph if
-	 * retermination would create a single edge cycle.
-	 * <p>
-	 * If either of the initial terminal nodes of any given edge become unconnected in the
-	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
-	 * graph.
-	 *
-	 * @param edges  existing graph edges
-	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
-	 */
-	public void reterminate(Collection<? extends E> edges, N end, boolean cycles) {
-		Assert.notNull(edges, end);
-		edges.forEach(e -> reterminate(e, end, cycles));
+	@Override
+	public boolean reterminate(Collection<? extends E> edges, N end, boolean cycles) {
+		lock();
+		try {
+			Assert.notNull(edges, end);
+			return edges.stream().allMatch(e -> reterminate(e, end, cycles));
+
+		} finally {
+			unlock();
+		}
 	}
 
-	/**
-	 * Consolidate the edges connecting to the source nodes to the target node. Excludes
-	 * the target node from the source nodes. Removes the finally unconnected source nodes
-	 * from the graph.
-	 *
-	 * <pre>
-	 * A => B => C
-	 * D => E => F
-	 * G => H => I
-	 * consolidateEdges([B,E,H], B);	// implicitly removes [E,H]
-	 * consolidateEdges([E,H], B);		// equivalent
-	 * [A,D,G] => B => [C,F,I]
-	 * </pre>
-	 *
-	 * @param edges  the source nodes
-	 * @param target a target node
-	 * @return the newly created edges
-	 */
-	public void consolidateEdges(Collection<? extends N> edges, N target) {
-		Assert.notNull(edges, target);
-		Set<N> nodes = new LinkedHashSet<>(edges);
-		nodes.remove(target);
-		for (N node : nodes) {
-			// convert [D,G] => [E,H] to [D,G] => B
-			UniqueList<E> in = node.edges(Sense.IN);
-			reterminate(in, target);
+	@Override
+	public boolean consolidateEdges(Collection<? extends N> sources, N target) {
+		lock();
+		try {
+			Assert.notNull(sources, target);
+			Set<N> nodes = new LinkedHashSet<>(sources);
+			nodes.remove(target);
+			boolean ok = true;
+			for (N node : nodes) {
+				// convert [D,G] => [E,H] to [D,G] => B
+				UniqueList<E> in = node.edges(Sense.IN);
+				ok &= reterminate(in, target);
 
-			// convert [E,H] => [F,I] to B => [F,I]
-			UniqueList<E> out = node.edges(Sense.OUT);
-			transfer(out, target);
+				// convert [E,H] => [F,I] to B => [F,I]
+				UniqueList<E> out = node.edges(Sense.OUT);
+				ok &= transfer(out, target);
+			}
+			return ok;
+
+		} finally {
+			unlock();
 		}
 	}
 
@@ -584,9 +503,15 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return a replica of the given edge otherwise unassociated with the graph
 	 */
 	public E replicateEdge(E edge) {
-		E repl = createEdge(edge.beg(), edge.end());
-		repl.putAllIfAbsent(edge.properties());
-		return repl;
+		lock();
+		try {
+			E repl = createEdge(edge.beg(), edge.end());
+			repl.putAllIfAbsent(edge.properties());
+			return repl;
+
+		} finally {
+			unlock();
+		}
 	}
 
 	/**
@@ -600,142 +525,104 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return a replica of the given edge otherwise unassociated with the graph
 	 */
 	public E replicateEdge(E edge, N beg, N end) {
-		E repl = replicateEdge(edge);
-		repl.setBeg(beg);
-		repl.setEnd(end);
-		return repl;
-	}
+		lock();
+		try {
+			E repl = replicateEdge(edge);
+			repl.setBeg(beg);
+			repl.setEnd(end);
+			return repl;
 
-	/**
-	 * Replicates the existing edge connections with given source node to the given target
-	 * nodes. Creates new edge connections to each target node equivalent to the source
-	 * node edge connections.
-	 * <p>
-	 * All replica edges are added to the graph.
-	 *
-	 * <pre>
-	 * A => B => C
-	 * replicateEdges(B, [B,X,Y,Z]);
-	 * A => [B,X,Y,Z] => C
-	 * </pre>
-	 *
-	 * @param node    a source node
-	 * @param targets the target nodes
-	 */
-	public void replicateEdges(N node, Collection<? extends N> targets) {
-		replicateEdges(node, targets, false);
-	}
-
-	/**
-	 * Replicates the existing edge connections with given source node to the given target
-	 * nodes. Creates new edge connections to each target node equivalent to the source
-	 * node edge connections. Conditionally removes the source node.
-	 * <p>
-	 * All replica edges are added to the graph.
-	 *
-	 * <pre>
-	 * A => B => C
-	 * replicateEdges(B, [B,X,Y,Z], false);
-	 * A => [B,X,Y,Z] => C
-	 * </pre>
-	 *
-	 * <pre>
-	 * A => B => C
-	 * replicateEdges(B, [B,X,Y,Z], true); // removes B
-	 * A => [X,Y,Z] => C
-	 * </pre>
-	 *
-	 * @param node    a source node
-	 * @param targets the target nodes
-	 * @param remove  {@code true} to remove the source node
-	 */
-	public void replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
-		Set<? extends N> tgts = new LinkedHashSet<>(targets);
-		tgts.remove(node);
-
-		UniqueList<E> in = node.edges(Sense.IN);
-		UniqueList<E> out = node.edges(Sense.OUT);
-
-		for (N tgt : tgts) {
-
-			// for edges ? => node, create ? => targets
-			for (E edge : in) {
-				E repl = replicateEdge(edge, edge.beg(), tgt);
-				addEdge(repl);
-			}
-
-			// for edges node => ?, create targets => ?
-			for (E edge : out) {
-				E repl = replicateEdge(edge, tgt, edge.end());
-				addEdge(repl);
-			}
-		}
-		if (remove) removeNode(node);
-	}
-
-	/**
-	 * Reduce the graph by removing the given node while retaining the connectivity
-	 * between the inbound and outbound nodes.
-	 *
-	 * <pre>
-	 * reduce(B)
-	 * A => B => C
-	 * becomes
-	 * A => C
-	 * </pre>
-	 *
-	 * @param node the term to remove from the graph
-	 */
-	public void reduce(N node) {
-		UniqueList<E> srcs = node.edges(Sense.IN, false);	// A =>
-		UniqueList<E> dsts = node.edges(Sense.OUT, false);	// => C
-
-		for (E src : srcs) {
-			for (E dst : dsts) {
-				reduce(src, dst);
-			}
+		} finally {
+			unlock();
 		}
 	}
 
-	/**
-	 * Reduce the graph by reterminating the given source edge to the distal node of the
-	 * given destination edge. The retermination retains, and appropriately adjusts the
-	 * connectivity between the resultant distal inbound and outbound nodes. The given
-	 * destination edge is removed, potentially resulting in the shared node being
-	 * removed.
-	 *
-	 * <pre>
-	 * reduce(AB,BC)
-	 * A -> B -> C
-	 * becomes
-	 * A -> C
-	 * </pre>
-	 *
-	 * <pre>
-	 * reduce(AB,CD)
-	 * A -> B
-	 * C -> D
-	 * becomes
-	 * A -> C -> D
-	 * </pre>
-	 *
-	 * @param src the source edge
-	 * @param src the destination edge
-	 */
-	public void reduce(E src, E dst) {
-		Assert.isTrue(GraphEx.of("Invalid Edge"), src.valid() && dst.valid());
+	@Override
+	public boolean replicateEdges(N node, Collection<? extends N> targets) {
+		lock();
+		try {
+			return replicateEdges(node, targets, false);
 
-		if (src.end().equals(dst.beg())) {
-			removeEdge(src, false);
-			src.setEnd(dst.end());
-			src.putAllIfAbsent(dst.properties());
-			addEdge(src);
-			removeEdge(dst, true);
+		} finally {
+			unlock();
+		}
+	}
 
-		} else {
-			removeEdge(src, false);
-			src.setEnd(dst.beg());
-			addEdge(src);
+	@Override
+	public boolean replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
+		lock();
+		try {
+			Set<? extends N> tgts = new LinkedHashSet<>(targets);
+			tgts.remove(node);
+
+			UniqueList<E> in = node.edges(Sense.IN);
+			UniqueList<E> out = node.edges(Sense.OUT);
+
+			boolean ok = true;
+			for (N tgt : tgts) {
+				// for edges ? => node, create ? => targets
+				for (E edge : in) {
+					E repl = replicateEdge(edge, edge.beg(), tgt);
+					ok &= addEdge(repl);
+				}
+
+				// for edges node => ?, create targets => ?
+				for (E edge : out) {
+					E repl = replicateEdge(edge, tgt, edge.end());
+					ok &= addEdge(repl);
+				}
+			}
+			if (remove) ok &= removeNode(node);
+			return ok;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean reduce(N node) {
+		lock();
+		try {
+			UniqueList<E> srcs = node.edges(Sense.IN, false);	// A =>
+			UniqueList<E> dsts = node.edges(Sense.OUT, false);	// => C
+
+			boolean ok = true;
+			for (E src : srcs) {
+				for (E dst : dsts) {
+					ok &= reduce(src, dst);
+				}
+			}
+			return ok;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	@Override
+	public boolean reduce(E src, E dst) {
+		lock();
+		try {
+			Assert.isTrue(GraphEx.of("Invalid Edge"), src.valid() && dst.valid());
+
+			boolean ok = true;
+			if (src.end().equals(dst.beg())) {
+				removeEdge(src, false);
+				src.setEnd(dst.end());
+				src.putAllIfAbsent(dst.properties());
+				ok &= addEdge(src);
+				ok &= removeEdge(dst, true);
+
+			} else {
+				ok &= removeEdge(src, false);
+				src.setEnd(dst.beg());
+				ok &= addEdge(src);
+			}
+			return ok;
+
+		} finally {
+			unlock();
 		}
 	}
 

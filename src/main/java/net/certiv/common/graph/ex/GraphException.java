@@ -3,6 +3,7 @@ package net.certiv.common.graph.ex;
 import java.util.Arrays;
 
 import net.certiv.common.ex.IAssertException;
+import net.certiv.common.ex.IType;
 import net.certiv.common.util.MsgBuilder;
 
 /**
@@ -13,7 +14,7 @@ import net.certiv.common.util.MsgBuilder;
  */
 public class GraphException extends RuntimeException implements IAssertException {
 
-	private Test type;
+	private IType type;
 	private String msg;
 	private Object[] elements;
 	private boolean hasElems;
@@ -22,32 +23,32 @@ public class GraphException extends RuntimeException implements IAssertException
 		this(Test.OTHER);
 	}
 
-	public GraphException(Test type) {
+	public GraphException(IType type) {
 		super(ASSERT_FAILED);
 		this.type = type;
 	}
 
-	public GraphException(Test type, String msg) {
+	public GraphException(IType type, String msg) {
 		super(msg);
 		this.type = type;
 	}
 
-	public GraphException(Test type, String fmt, Object... args) {
+	public GraphException(IType type, String fmt, Object... args) {
 		super(String.format(fmt, args));
 		this.type = type;
 	}
 
-	public GraphException(Test type, Throwable cause) {
+	public GraphException(IType type, Throwable cause) {
 		super(cause);
 		this.type = type;
 	}
 
-	public GraphException(Test type, Throwable cause, String msg) {
+	public GraphException(IType type, Throwable cause, String msg) {
 		super(msg, cause);
 		this.type = type;
 	}
 
-	public GraphException(Test type, Throwable cause, String fmt, Object... args) {
+	public GraphException(IType type, Throwable cause, String fmt, Object... args) {
 		super(String.format(fmt, args), cause);
 		this.type = type;
 	}
@@ -72,12 +73,12 @@ public class GraphException extends RuntimeException implements IAssertException
 	}
 
 	@Override
-	public Test type() {
+	public IType type() {
 		return type;
 	}
 
 	@Override
-	public GraphException setType(Test type) {
+	public GraphException setType(IType type) {
 		this.type = type;
 		return this;
 	}
