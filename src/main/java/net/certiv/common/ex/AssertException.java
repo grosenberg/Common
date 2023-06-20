@@ -87,8 +87,11 @@ public class AssertException extends RuntimeException implements IAssertExceptio
 	}
 
 	@Override
-	public AssertException msg(String msg) {
-		this.msg = msg;
+	public AssertException on(Object... args) {
+		if (args != null && args.length > 0) {
+			String fmt = super.getMessage();
+			msg = String.format(fmt, args);
+		}
 		return this;
 	}
 
@@ -96,12 +99,6 @@ public class AssertException extends RuntimeException implements IAssertExceptio
 	public String getMessage() {
 		if (msg != null) return msg;
 		return super.getMessage();
-	}
-
-	@Override
-	public AssertException msg(String fmt, Object... args) {
-		String msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
-		return msg(msg);
 	}
 
 	@Override

@@ -54,6 +54,10 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return String.valueOf(_eid);
 	}
 
+	public String uname() {
+		return name();
+	}
+
 	/** Return the edge begin node. */
 	public N beg() {
 		return beg;
@@ -134,6 +138,15 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 */
 	public boolean cyclic() {
 		return valid() ? beg.equals(end) : false;
+	}
+
+	/**
+	 * Returns the edge weight. Default weight is {@code 1.0}.
+	 *
+	 * @return the edge weight
+	 */
+	public double weight() {
+		return 1.0;
 	}
 
 	/**

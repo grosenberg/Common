@@ -23,6 +23,8 @@
 		<jackson.ver>2.14.2</jackson.ver>
 		<diff.ver>4.12</diff.ver>
 		<log4j.ver>2.20.0</log4j.ver>
+
+		<junit.ver>5.9.2</junit.ver>
 	</properties>
 
 	<dependencies>
@@ -58,6 +60,13 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.ver}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.ver}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -142,6 +151,12 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.2</version>
 			</plugin>
 
 		</plugins>

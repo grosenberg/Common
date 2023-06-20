@@ -1,22 +1,22 @@
 digraph "Two-root Test" {
 
-  subgraph cluster_A {
+  subgraph "cluster_A(0)" {
 
-      A
-      B
-      C
+      "A(0)"
+      "B(1)"
+      "C(2)"
 
-      A -> B
-      B -> C
+      "A(0)" -> "B(1)"
+      "B(1)" -> "C(2)"
 
   }
 
-  subgraph cluster_D {
+  subgraph "cluster_D(3)" {
 
-      D
-      E
+      "D(3)"
+      "E(4)"
 
-      D -> E
+      "D(3)" -> "E(4)"
 
   }
 }

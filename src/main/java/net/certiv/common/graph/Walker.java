@@ -82,6 +82,9 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	/**
 	 * Invoke the delegate visitor with the given parameters. Return {@code true} if the
 	 * walker should walk the children of the given node.
+	 * <p>
+	 * Descent walks are identified by a {@code Sense.OUT} direction. Ascent walks are
+	 * identified by {@code Sense.OUT} direction.
 	 *
 	 * @param dir     the walk traversal direction
 	 * @param visited collection of previously visited parent/node combinations
@@ -111,6 +114,9 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 * Evaluate given parameters on {@code entry} -- before walking the children of
 		 * the given node. Return {@code true} if the walker should walk the children of
 		 * the given node.
+		 * <p>
+		 * Descent walks are identified by a {@code Sense.OUT} direction. Ascent walks are
+		 * identified by {@code Sense.OUT} direction.
 		 *
 		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations
@@ -125,6 +131,9 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		/**
 		 * Evaluate given parameters on {@code exit} -- after walking the children of the
 		 * given node. Return {@code true} on success (not currently used).
+		 * <p>
+		 * Descent walks are identified by a {@code Sense.OUT} direction. Ascent walks are
+		 * identified by {@code Sense.OUT} direction.
 		 *
 		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations

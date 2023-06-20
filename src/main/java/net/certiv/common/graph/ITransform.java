@@ -3,6 +3,8 @@ package net.certiv.common.graph;
 import java.util.Collection;
 import java.util.function.Predicate;
 
+import net.certiv.common.stores.LinkedHashList;
+
 public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	/**
@@ -112,6 +114,19 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@code true} if all edges were transferred
 	 */
 	boolean transfer(Collection<? extends E> edges, N beg);
+
+	/**
+	 * Copies the given subgraph into the graph. Both nodes and edges of the subgraph are
+	 * replicated. The destination node defines the inbound and outbound edges to the
+	 * copied subgraph. The destination node is effectively replaced by the subgraph when
+	 * {@code remove} is {@code true}.
+	 *
+	 * @param sg     subgraph map of {@code key=head; values=trailing edges}
+	 * @param dst    destination node
+	 * @param remove {@code true} to remove the destination node
+	 * @return {@code true} on copy success
+	 */
+	boolean copy(LinkedHashList<N, E> sg, N dst, boolean remove);
 
 	/**
 	 * Moves the given edge to connect between the given nodes.

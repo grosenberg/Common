@@ -1,7 +1,6 @@
 package net.certiv.common.check;
 
 import java.lang.reflect.Array;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -26,7 +25,6 @@ public final class Check {
 			for (int idx = 0; idx < len; idx++) {
 				if (isNull(Array.get(arg, idx))) return true;
 			}
-			Path.of(null);
 			return false;
 		}
 		if (arg instanceof Collection<?>) return isNull((Collection<?>) arg);

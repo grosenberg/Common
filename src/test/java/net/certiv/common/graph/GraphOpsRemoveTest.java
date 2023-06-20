@@ -29,6 +29,8 @@ class GraphOpsRemoveTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "opsRemove1.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "opsRemove1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);

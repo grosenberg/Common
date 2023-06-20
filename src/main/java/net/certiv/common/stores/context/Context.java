@@ -306,7 +306,7 @@ public class Context implements IContext {
 	@Override
 	public UUID mergeLast(IKVStore store) {
 		Assert.isTrue(store != null);
-		UUID mark = scopes.getLast().get(MARK);
+		UUID mark = !scopes.isEmpty() ? scopes.getLast().get(MARK) : NO_STORE;
 		int limit = scopes.limit();
 		if (store instanceof KVStore) {
 			if (depth() == limit) scopes.adjustLimit(limit + 1);

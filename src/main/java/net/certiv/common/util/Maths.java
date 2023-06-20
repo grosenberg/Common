@@ -44,6 +44,24 @@ public class Maths {
 		return Math.abs(RANDOM.nextInt(bound));
 	}
 
+	/**
+	 * Returns a formatted representation of a next positive pseudorandom number. The
+	 * {@code RANDOM} number generator is used to produce a uniformly distributed
+	 * {@code int} value, between 0 (inclusive) and the given positive upper bound
+	 * (exclusive). The generated number is then formatted to have the given width by left
+	 * filling with {@code 0} characters, as needed.
+	 *
+	 * @param bound the positive upper bound
+	 * @param width the resultant string width
+	 * @return a next positive pseudorandom number
+	 * @throws IllegalArgumentException if the bound parameter is not positive
+	 */
+	public static String nextRandomFilled(int bound, int width) {
+		int num = Math.abs(RANDOM.nextInt(bound));
+		String fmt = "%0" + width + "d";
+		return String.format(fmt, num);
+	}
+
 	/** Computes a modulo value (a%b) that is always positive. */
 	public static int positiveModulo(int a, int b) {
 		int m = a % b;

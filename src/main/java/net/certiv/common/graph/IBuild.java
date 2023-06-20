@@ -1,0 +1,44 @@
+package net.certiv.common.graph;
+
+import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.stores.UniqueList;
+
+public interface IBuild<N extends Node<N, E>, E extends Edge<N, E>> {
+
+	/**
+	 * Returns {@code true} if any edge exists between the given nodes.
+	 *
+	 * @param src a source node
+	 * @param dst a destination node
+	 * @return {@code true} if any edge exists
+	 */
+	boolean hasEdge(N src, N dst);
+
+	/**
+	 * Returns the unique set of all edges.
+	 *
+	 * @return the unique set of existing edges
+	 */
+	UniqueList<E> getEdges();
+
+	/**
+	 * Returns the unique set of edges existing between the given nodes.
+	 *
+	 * @param src a source node
+	 * @param dst a destination node
+	 * @return the edges existing between the given nodes
+	 */
+	UniqueList<E> getEdges(N src, N dst);
+
+	/**
+	 * Returns the unique set of edges existing between the given nodes, constrained by
+	 * the given direction.
+	 *
+	 * @param dir the connected edge direction criteria
+	 * @param src a source node
+	 * @param dst a destination node
+	 * @return the edges existing between the given nodes
+	 */
+	UniqueList<E> getEdges(Sense dir, N src, N dst);
+
+}

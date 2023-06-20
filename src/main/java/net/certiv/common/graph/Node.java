@@ -44,11 +44,23 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		putAll(props);
 	}
 
+	/** Return the object used to provide the name of this node instance. */
+	public Object nameObj() {
+		return get(NODE_NAME);
+	}
+
+	/** Set the object used to provide the name of this node instance. */
+	public Object setNameObj(Object id) {
+		Object old = nameObj();
+		put(NODE_NAME, id);
+		return old;
+	}
+
 	/** Return a simple display name for this node instance. */
 	public String name() {
-		String name = get(NODE_NAME).toString();
-		if (name == null || name.isBlank()) return String.valueOf(_nid);
-		return name;
+		Object name = nameObj();
+		if (name == null || name.toString().isBlank()) return String.valueOf(_nid);
+		return name.toString();
 	}
 
 	/** Return a unique display name for this node instance. */

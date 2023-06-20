@@ -14,6 +14,7 @@ import net.certiv.common.graph.ops.ReduceOp;
 import net.certiv.common.graph.ops.RemoveEdgeOp;
 import net.certiv.common.graph.ops.RemoveNodeOp;
 import net.certiv.common.graph.ops.ReplicateOp;
+import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 
 /**
@@ -212,6 +213,22 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	public boolean transfer(Collection<? extends E> edges, N beg) {
 		Assert.notNull(edges, beg);
 		return edges.stream().allMatch(e -> transfer(e, beg));
+	}
+
+	/**
+	 * Copies the given subgraph into the graph.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code true} if the op is recorded
+	 * @see Graph#copy(LinkedHashList, Node, boolean)
+	 */
+	@Override
+	public boolean copy(LinkedHashList<N, E> sg, N dst, boolean remove) {
+		return false;
 	}
 
 	/**

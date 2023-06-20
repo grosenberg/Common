@@ -24,7 +24,21 @@ public class KVStore implements IKVStore {
 	protected final Map<Key<?>, Value<?>> store = new LinkedHashMap<>();
 
 	public KVStore() {
-		store.put(MARK, Value.of(UUID.randomUUID()));
+		store.put(MARK, Value.of(randomUUID()));
+	}
+
+	/**
+	 * Returns a randomly selected store UUID. Will not equal
+	 * {@link IKVMinStore#NO_STORE}.
+	 *
+	 * @return a unique store UUID
+	 */
+	public static UUID randomUUID() {
+		UUID uuid = UUID.randomUUID();
+		if (uuid.equals(NO_STORE)) {
+			uuid = UUID.randomUUID();
+		}
+		return uuid;
 	}
 
 	@Override

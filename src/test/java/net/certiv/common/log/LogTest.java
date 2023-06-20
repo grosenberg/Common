@@ -3,7 +3,7 @@ package net.certiv.common.log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class Log2Test {
+class LogTest {
 
 	// defaults to "./logs"
 	// D:\DevFiles\Eclipse\Tools\Certiv\net.certiv.common\target\classes\logs

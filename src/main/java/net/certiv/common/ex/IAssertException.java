@@ -1,5 +1,7 @@
 package net.certiv.common.ex;
 
+import java.util.IllegalFormatException;
+
 public interface IAssertException {
 
 	String ASSERT_FAILED = "Assertion failed"; //$NON-NLS-1$
@@ -20,9 +22,21 @@ public interface IAssertException {
 
 	IAssertException setType(IType type);
 
-	IAssertException msg(String msg);
+	// IAssertException msg(String msg);
+	// IAssertException msg(String fmt, Object... args);
 
-	IAssertException msg(String fmt, Object... args);
+	/**
+	 * Expands the message by using the existing message as a format string against the
+	 * given arguments. Presumes the existing message is a {@link Formatter} format
+	 * string.
+	 *
+	 * @param args Arguments referenced by the format specifiers in the format string.
+	 * @throws IllegalFormatException if the message/format string contains invalid
+	 *                                syntax, insufficient arguments, etc.
+	 * @return the {@code GraphException}
+	 * @see Formatter
+	 */
+	IAssertException on(Object... args);
 
 	Object[] elements();
 

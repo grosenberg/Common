@@ -1,27 +1,27 @@
 digraph Builder {
 
-  subgraph cluster_A {
+  subgraph "cluster_A(0)" {
 
-      A
-      C
-      Delta
-      Z
-      Eta
+      "A(0)"
+      "C(2)"
+      "Delta(3)"
+      "Z(5)"
+      "Eta(4)"
 
-      A -> C
-      C -> Delta
-      Delta -> Z
-      C -> Eta
-      Eta -> Z
+      "A(0)" -> "C(2)"
+      "C(2)" -> "Delta(3)"
+      "Delta(3)" -> "Z(5)"
+      "C(2)" -> "Eta(4)"
+      "Eta(4)" -> "Z(5)"
 
   }
 
-  subgraph cluster_B {
+  subgraph "cluster_B(1)" {
 
-      B
-      C
+      "B(1)"
+      "C(2)"
 
-      B -> C
+      "B(1)" -> "C(2)"
 
   }
 }

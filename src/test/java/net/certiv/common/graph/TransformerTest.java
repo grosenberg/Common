@@ -40,6 +40,21 @@ class TransformerTest extends TestBase {
 
 	}
 
+	// @Test
+	// void testCopy() {
+	// graph.put(Graph.GRAPH_NAME, "Transformer Remove Node");
+	//
+	//
+	// Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+	// xf.copy(null, d, false);
+	// xf.exec();
+	//
+	// String dot = graph.render();
+	// String txt = FsUtil.loadResource(getClass(), "xfRemoveNode.md").value;
+	// Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
+	// assertEquals(dot, txt);
+	// }
+
 	@Test
 	void testRemoveNode() {
 		graph.put(Graph.GRAPH_NAME, "Transformer Remove Node");

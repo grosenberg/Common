@@ -8,6 +8,8 @@ public interface IKVMinStore {
 	/** Unique (UUID-based) store identifying mark. */
 	Key<UUID> MARK = Key.of("kvstore.uuid");
 
+	UUID NO_STORE = new UUID(0, 0);
+
 	RuntimeException ERR_MARK = new UnsupportedOperationException("MARK is inviolable.");
 
 	String ErrNotDef = "Key [%s] not defined.";

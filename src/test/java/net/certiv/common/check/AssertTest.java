@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.ex.AssertException;
 import net.certiv.common.ex.IAssertException;
+import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
 
 class AssertTest extends CheckBase {
@@ -16,9 +17,9 @@ class AssertTest extends CheckBase {
 	private static final Class<GraphException> ERR_CLS1 = GraphException.class;
 
 	@Test
-	void testSpecificEx() {
-		RuntimeException ex = Assert.make(GraphException.class, IAssertException.Test.IS_TRUE,
-				"Truthiness failed: %s", "message params");
+	void testGraphEx() {
+		GraphException ex = GraphEx.of(IAssertException.Test.IS_TRUE, "Truthiness failed: %s",
+				"message params");
 
 		Throwable t = assertThrows(ERR_CLS1, () -> { Assert.isTrue(ex, str2.isEmpty()); });
 		assertEquals(ex, t);

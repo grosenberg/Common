@@ -1,9 +1,9 @@
 package net.certiv.common.graph;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +45,8 @@ class GraphNodesTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "node1.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "node1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);

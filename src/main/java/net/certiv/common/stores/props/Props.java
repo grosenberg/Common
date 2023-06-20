@@ -29,6 +29,16 @@ public class Props {
 		return val;
 	}
 
+	/**
+	 * Associates the given value with the specified key in this map. Replaces any
+	 * previously contained mapping for the key. If the value is {@code null}, the mapping
+	 * is removed.
+	 *
+	 * @param key   property map key
+	 * @param value property value
+	 * @return the prior value associated with {@code key}, or {@code null} if none
+	 *         existed.
+	 */
 	@SuppressWarnings("unchecked")
 	public <K, V> V put(K key, V value) {
 		if (value == null) return (V) propMap.remove(key);

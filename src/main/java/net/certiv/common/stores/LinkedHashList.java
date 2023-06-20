@@ -8,8 +8,8 @@ package net.certiv.common.stores;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +100,7 @@ public class LinkedHashList<K, V> {
 		return null; // TODO: return value or null signalling not absent?
 	}
 
-	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
+	public void forEach(BiConsumer<? super K, ? super LinkedList<V>> action) {
 		map.forEach(action);
 	}
 
@@ -122,8 +122,8 @@ public class LinkedHashList<K, V> {
 		return map.entrySet();
 	}
 
-	public Set<K> keySet() {
-		return new HashSet<>(map.keySet());
+	public LinkedHashSet<K> keySet() {
+		return new LinkedHashSet<>(map.keySet());
 	}
 
 	public LinkedList<K> keys() {

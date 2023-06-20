@@ -35,13 +35,24 @@ public class UniqueList<E> extends LinkedList<E> {
 	}
 
 	/**
-	 * Set the queue irreversibly to an unmodifiable condition.
+	 * Makes this list shallow unmodifiable. Irreversible. Use {@link #dup()} to create a
+	 * new modifiable copy.
 	 *
 	 * @return this
 	 */
 	public UniqueList<E> unmodifiable() {
 		nomod = true;
 		return this;
+	}
+
+	/**
+	 * Makes a new instance of this list. The returned list is modifiable even if this
+	 * list is not.
+	 *
+	 * @return a new instance containing the elements of this list
+	 */
+	public UniqueList<E> dup() {
+		return new UniqueList<>(this);
 	}
 
 	/**

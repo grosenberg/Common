@@ -2,8 +2,8 @@ package net.certiv.common.graph;
 
 import static net.certiv.common.dot.DotAttr.COLOR;
 import static net.certiv.common.dot.DotAttr.LABEL;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +30,8 @@ class GraphOpsManipulationTest extends TestBase {
 		assertNull(b);
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "opsReduce1.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "opsReduce1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
@@ -53,6 +55,8 @@ class GraphOpsManipulationTest extends TestBase {
 		assertNull(b);
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "opsReduceEdge1.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "opsReduceEdge1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
@@ -76,8 +80,9 @@ class GraphOpsManipulationTest extends TestBase {
 		graph.transfer(cf, b); // cf becomes bf
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsTransfer1.md").value;
+		// FsUtil.writeResource(getClass(), "opsTransfer1.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsTransfer1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
@@ -99,8 +104,9 @@ class GraphOpsManipulationTest extends TestBase {
 		graph.move(ce, b, d);
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsMove1.md").value;
+		// FsUtil.writeResource(getClass(), "opsMove1.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsMove1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
@@ -120,8 +126,9 @@ class GraphOpsManipulationTest extends TestBase {
 		graph.consolidateEdges(nodes, b);
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsConsolidate1.md").value;
+		// FsUtil.writeResource(getClass(), "opsConsolidate1.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsConsolidate1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
@@ -138,8 +145,9 @@ class GraphOpsManipulationTest extends TestBase {
 		graph.replicateEdges(b, targets);
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsReplicate1.md").value;
+		// FsUtil.writeResource(getClass(), "opsReplicate1.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsReplicate1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
@@ -156,8 +164,9 @@ class GraphOpsManipulationTest extends TestBase {
 		graph.replicateEdges(b, targets, true);
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsReplicate2.md").value;
+		// FsUtil.writeResource(getClass(), "opsReplicate2.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsReplicate2.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}
@@ -178,8 +187,9 @@ class GraphOpsManipulationTest extends TestBase {
 		// graph.transpose(b, c);
 
 		String dot = graph.render();
-		String txt = FsUtil.loadResource(getClass(), "opsTranspose1.md").value;
+		// FsUtil.writeResource(getClass(), "opsTranspose1.md", dot);
 
+		String txt = FsUtil.loadResource(getClass(), "opsTranspose1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 	}

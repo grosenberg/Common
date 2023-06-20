@@ -1,24 +1,24 @@
 digraph "Builder Multi" {
 
-    Root
-    A
-    C
-    Delta
-    Z
-    Eta
-    B
+    "Root(0)"
+    "A(1)"
+    "C(3)"
+    "Delta(4)"
+    "Z(6)"
+    "Eta(5)"
+    "B(2)"
 
-    Root -> A
-    A -> C
-    C -> Delta
-    Delta -> Z
-    C -> Eta
-    Eta -> Z
-    C -> B
-    C -> B
-    B -> C
-    C -> Z
-    C -> C
-    Root -> B
+    "Root(0)" -> "A(1)"
+    "A(1)" -> "C(3)"
+    "C(3)" -> "Delta(4)"
+    "Delta(4)" -> "Z(6)"
+    "C(3)" -> "Eta(5)"
+    "Eta(5)" -> "Z(6)"
+    "C(3)" -> "B(2)"
+    "C(3)" -> "B(2)"
+    "B(2)" -> "C(3)"
+    "C(3)" -> "Z(6)"
+    "C(3)" -> "C(3)"
+    "Root(0)" -> "B(2)"
 
 }

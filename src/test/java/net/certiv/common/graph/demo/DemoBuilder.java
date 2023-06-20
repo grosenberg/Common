@@ -25,4 +25,5 @@ public class DemoBuilder extends Builder<String, DemoGraph, DemoNode, DemoEdge> 
 	protected String nameOf(String id) {
 		return id;
 	}
+
 }

@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import net.certiv.common.check.Assert;
+import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
@@ -24,7 +25,8 @@ import net.certiv.common.util.Strings;
  * @param <N> type of node object
  * @param <E> type of edge object
  */
-public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E extends Edge<N, E>> {
+public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E extends Edge<N, E>>
+		implements IBuild<N, E> {
 
 	public static final String ERR_NODE_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
@@ -211,33 +213,6 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 	}
 
 	/**
-	 * Returns the set of edges existing between the given named nodes.
-	 *
-	 * @param beg a source node name
-	 * @param end a destination node name
-	 * @return the edges existing between the given nodes
-	 */
-	public UniqueList<E> getEdges(String beg, String end) {
-		Assert.notEmpty(beg, end);
-		N src = getNode(beg);
-		N dst = getNode(end);
-		if (src == null || dst == null) return UniqueList.empty();
-		return getEdges(src, dst);
-	}
-
-	/**
-	 * Returns the unique set of edges existing between the given nodes.
-	 *
-	 * @param src a source node
-	 * @param dst a destination node
-	 * @return the edges existing between the given nodes
-	 * @see Graph#getEdges(Node, Node)
-	 */
-	public UniqueList<E> getEdges(N src, N dst) {
-		return graph.getEdges(src, dst);
-	}
-
-	/**
 	 * Creates new edges corresponding to the given edge spec and adds them to the graph.
 	 * Creates new named node(s) if not pre-built or pre-existing in the graph.
 	 * <p>
@@ -280,8 +255,38 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		return this;
 	}
 
+	/**
+	 * Returns the set of edges existing between the given named nodes.
+	 *
+	 * @param beg a source node name
+	 * @param end a destination node name
+	 * @return the edges existing between the given nodes
+	 */
+	public UniqueList<E> getEdges(String beg, String end) {
+		Assert.notEmpty(beg, end);
+		N src = getNode(beg);
+		N dst = getNode(end);
+		if (src == null || dst == null) return UniqueList.empty();
+		return getEdges(src, dst);
+	}
+
 	public UniqueList<E> getEdges() {
 		return edges;
+	}
+
+	@Override
+	public boolean hasEdge(N src, N dst) {
+		return false;
+	}
+
+	@Override
+	public UniqueList<E> getEdges(N src, N dst) {
+		return graph.getEdges(Sense.BOTH, src, dst);
+	}
+
+	@Override
+	public UniqueList<E> getEdges(Sense dir, N src, N dst) {
+		return null;
 	}
 
 	public void addEdges(UniqueList<E> edges) {

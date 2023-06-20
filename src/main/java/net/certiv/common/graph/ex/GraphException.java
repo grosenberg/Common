@@ -2,6 +2,7 @@ package net.certiv.common.graph.ex;
 
 import java.util.Arrays;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.ex.IAssertException;
 import net.certiv.common.ex.IType;
 import net.certiv.common.util.MsgBuilder;
@@ -34,8 +35,9 @@ public class GraphException extends RuntimeException implements IAssertException
 	}
 
 	public GraphException(IType type, String fmt, Object... args) {
-		super(String.format(fmt, args));
+		super(fmt);
 		this.type = type;
+		msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
 	}
 
 	public GraphException(IType type, Throwable cause) {
@@ -49,8 +51,9 @@ public class GraphException extends RuntimeException implements IAssertException
 	}
 
 	public GraphException(IType type, Throwable cause, String fmt, Object... args) {
-		super(String.format(fmt, args), cause);
+		super(fmt, cause);
 		this.type = type;
+		msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
 	}
 
 	@Override
@@ -84,8 +87,11 @@ public class GraphException extends RuntimeException implements IAssertException
 	}
 
 	@Override
-	public GraphException msg(String msg) {
-		this.msg = msg;
+	public GraphException on(Object... args) {
+		if (args != null && args.length > 0) {
+			String fmt = super.getMessage();
+			msg = String.format(fmt, args);
+		}
 		return this;
 	}
 
@@ -93,12 +99,6 @@ public class GraphException extends RuntimeException implements IAssertException
 	public String getMessage() {
 		if (msg != null) return msg;
 		return super.getMessage();
-	}
-
-	@Override
-	public GraphException msg(String fmt, Object... args) {
-		String msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
-		return msg(msg);
 	}
 
 	@Override

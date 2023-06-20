@@ -2,26 +2,33 @@ package net.certiv.common.graph;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import net.certiv.common.annotations.VisibleForTesting;
 import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.ex.GraphException;
 import net.certiv.common.stores.Counter;
+import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
-		implements ITransform<N, E> {
+		implements IBuild<N, E>, ITransform<N, E> {
 
-	public static final String GRAPH_NAME = "GraphName";
+	protected static final GraphException ERR_EDGE = GraphEx.of("Invalid edge.");
+	protected static final GraphException ERR_COPY = GraphEx.of("Copy args invalid.");
+
+	protected static final String GRAPH_NAME = "GraphName";
 
 	static final Counter CTR = new Counter();
 
@@ -34,31 +41,22 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/** Graph modification control lock. */
 	private final ReentrantLock lock = new ReentrantLock();
 
-	/** Construct a graph. */
+	/**
+	 * Construct a graph.
+	 */
 	public Graph() {
 		super();
 		_gid = CTR.getAndIncrement();
 	}
 
-	/** Construct a graph with the given display name. */
-	public Graph(String name) {
+	/**
+	 * Construct a graph with the given graph identifier.
+	 *
+	 * @param id a graph identifier object.
+	 */
+	public Graph(Object id) {
 		this();
-		put(GRAPH_NAME, name);
-	}
-
-	/** Return a simple display name for this graph instance. */
-	public String name() {
-		Object name = get(GRAPH_NAME);
-		if (name == null || name.toString().isBlank()) return String.valueOf(_gid);
-		return name.toString();
-	}
-
-	/** Return a unique display name for this graph instance. */
-	public String uniqueName() {
-		String name = name();
-		String gid = String.valueOf(_gid);
-		if (name.equals(gid)) return gid;
-		return String.format("%s(%s)", name, gid);
+		setNameObj(id);
 	}
 
 	/** Lock access to this graph. */
@@ -71,8 +69,73 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		lock.unlock();
 	}
 
+	/** Return the object used to provide the name of this graph instance. */
+	public Object nameObj() {
+		return get(GRAPH_NAME);
+	}
+
+	/** Set the object used to provide the name of this graph instance. */
+	public Object setNameObj(Object id) {
+		Object old = nameObj();
+		put(GRAPH_NAME, id);
+		return old;
+	}
+
+	/** Return a display name for this graph instance. */
+	public String name() {
+		Object name = nameObj();
+		if (name == null || name.toString().isBlank()) return String.valueOf(_gid);
+		return name.toString();
+	}
+
+	/** Return a unique display name for this graph instance. */
+	public String uname() {
+		String name = name();
+		String gid = String.valueOf(_gid);
+		if (name.equals(gid)) return gid;
+		return String.format("%s(%s)", name, gid);
+	}
+
+	/**
+	 * Create a new specialized walker instance for use in walking this graph.
+	 *
+	 * @return a walker
+	 */
+	public abstract Walker<N, E> walker();
+
+	/**
+	 * Creates a new node instance uniquely identifiable by the given {@code id}.
+	 * <p>
+	 * For graphs with some hierarchy of node types, the {@code id} preferably encodes the
+	 * desired node type.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
+	 * <p>
+	 * {@code Builder} notes:
+	 * <ul>
+	 * <li>{@code Builder} methods accepting string literal arguments, such as
+	 * {@code Builder#getNode(String)}, require each {@code id} have a unique string
+	 * representation.
+	 * <li>{@code Builder#findOrCreateNode(Node)} and
+	 * {@code Builder#findOrCreateNode(String)}use is preferred to protect against
+	 * creating multiple nodes with the same name.
+	 * </ul>
+	 *
+	 * @param id an object instance providing node name
+	 * @return a new node otherwise unassociated with the graph
+	 */
+	protected abstract N createNode(Object id);
+
 	/**
 	 * Creates a new edge instance with the given terminal nodes.
+	 * <p>
+	 * For graphs with some hierarchy of edge types, an actual edge type is preferably
+	 * determinable from the node types. The alternative would be to add an {@code id}
+	 * parameter to explicity define an edge type.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
 	 *
 	 * @param beg the begin terminal node
 	 * @param end the end terminal node
@@ -83,6 +146,9 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/**
 	 * Creates a new edge instance with the given terminal nodes. Adds the edge, including
 	 * the terminal nodes, to the graph.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
 	 *
 	 * @param beg the begin terminal node
 	 * @param end the end terminal node
@@ -91,8 +157,59 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	public E createAndAddEdge(N beg, N end) {
 		Assert.notNull(beg, end);
 		E edge = createEdge(beg, end);
-		addEdge(edge); // add edge, including nodes, to graph
+		addEdge(edge);
 		return edge;
+	}
+
+	/**
+	 * Copy the given node to create a new node instance.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
+	 *
+	 * @param node a reference node
+	 * @return a new node otherwise unassociated with the graph
+	 */
+	public N copyNode(N node) {
+		N repl = createNode(node.nameObj());
+		repl.putAll(node.properties());
+		return repl;
+	}
+
+	/**
+	 * Copy the given edge to create a new edge instance with the given terminal nodes.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
+	 *
+	 * @param edge the reference edge
+	 * @param beg  the begin terminal node
+	 * @param end  the end terminal node
+	 * @return a new edge otherwise unassociated with the graph
+	 */
+	public E copyEdge(E edge, N beg, N end) {
+		E repl = createEdge(beg, end);
+		repl.putAll(edge.properties());
+		return repl;
+	}
+
+	/**
+	 * Copy the given edge to create a new edge instance with the given terminal nodes.
+	 * Adds the edge, including the terminal nodes, to the graph.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
+	 *
+	 * @param edge the reference edge
+	 * @param beg  the begin terminal node
+	 * @param end  the end terminal node
+	 * @return a new edge newly associated with the graph
+	 */
+	public E copyAndAddEdge(E edge, N beg, N end) {
+		Assert.notNull(edge, beg, end);
+		E copy = copyEdge(edge, beg, end);
+		addEdge(copy);
+		return copy;
 	}
 
 	/**
@@ -167,17 +284,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 				.unmodifiable();
 	}
 
-	/** Returns {@code true} if any edge exists between the given nodes. */
+	@Override
 	public boolean hasEdge(N src, N dst) {
 		Assert.notNull(src, dst);
 		return src.isAdjacent(dst);
 	}
 
-	/**
-	 * Returns the unique set of all edges in the graph.
-	 *
-	 * @return the unique set of existing edges
-	 */
+	@Override
 	public UniqueList<E> getEdges() {
 		UniqueList<E> edges = new UniqueList<>();
 		for (N node : nodes) {
@@ -186,17 +299,18 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return edges;
 	}
 
-	/**
-	 * Returns the unique set of edges existing between the given nodes.
-	 *
-	 * @param src a source node
-	 * @param dst a destination node
-	 * @return the edges existing between the given nodes
-	 */
+	@Override
 	public UniqueList<E> getEdges(N src, N dst) {
-		Assert.notNull(src, dst);
-		return src.edges(Sense.BOTH, e -> e.between(src, dst));
+		return getEdges(Sense.BOTH, src, dst);
 	}
+
+	@Override
+	public UniqueList<E> getEdges(Sense dir, N src, N dst) {
+		Assert.notNull(dir, src, dst);
+		return src.edges(dir, e -> e.between(src, dst));
+	}
+
+	// --------------------------------------
 
 	/**
 	 * Primary graph tree constuction entry point. Adds the given edge to the graph.
@@ -233,7 +347,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @returns {@code true} if either terminal node was not already present in the graph
 	 */
 	public boolean addEdge(E edge) {
-		Assert.notNull(GraphEx.of("Invalid edge"), edge, edge.beg(), edge.end());
+		Assert.notNull(ERR_EDGE, edge, edge.beg(), edge.end());
 		edge.beg().add(edge, Sense.OUT);
 		edge.end().add(edge, Sense.IN);
 		boolean ok = _add(edge.beg());
@@ -374,6 +488,45 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 		} finally {
 			unlock();
+		}
+	}
+
+	@Override
+	public boolean copy(LinkedHashList<N, E> sg, N dst, boolean remove) {
+		lock();
+		try {
+			Assert.isTrue(ERR_COPY, sg != null && contains(dst));
+			boolean ok = true;
+
+			if (!sg.isEmpty()) {
+				UniqueList<E> in = dst.edges(Sense.IN);
+				UniqueList<E> out = dst.edges(Sense.OUT);
+
+				for (N head : sg.keySet()) {
+					LinkedList<E> path = sg.get(head);
+
+					for (E src : in) {
+						E start = copyAndAddEdge(src, src.beg(), copyNode(head));
+						copySubgraphPath(start, path, out);
+					}
+				}
+			}
+			if (remove) reduce(dst);
+
+			return ok;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	private void copySubgraphPath(E start, LinkedList<E> path, UniqueList<E> out) {
+		E last = start;
+		for (E edge : path) {
+			last = copyAndAddEdge(edge, last.end(), copyNode(edge.end()));
+		}
+		for (E next : out) {
+			copyAndAddEdge(next, last.end(), next.end());
 		}
 	}
 
@@ -670,6 +823,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/** Required for testing. */
+	@VisibleForTesting
 	public void reset() {
 		Graph.CTR.set(0);
 		Node.CTR.set(0);
@@ -692,6 +846,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public String toString() {
-		return uniqueName();
+		return uname();
 	}
 }

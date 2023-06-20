@@ -1,7 +1,7 @@
 package net.certiv.common.graph;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +9,7 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class GraphBuildTest extends TestBase {
+class BuilderTest extends TestBase {
 
 	@Test
 	void testGraph() {
@@ -27,6 +27,8 @@ class GraphBuildTest extends TestBase {
 		assertNotNull(c);
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build0.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "build0.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
@@ -41,13 +43,14 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("B", "D");
 		builder.createAndAddEdge("D", "E");
 
-		String dump = graph.dump();
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build1.md", dot);
 
 		String txt = FsUtil.loadResource(getClass(), "build1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
+		String dump = graph.dump();
 		String dtxt = FsUtil.loadResource(getClass(), "build1dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
@@ -61,12 +64,13 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("D", "E");
 
 		String dot = graph.render();
-		String dump = graph.dump();
+		// FsUtil.writeResource(getClass(), "build2.md", dot);
 
 		String txt = FsUtil.loadResource(getClass(), "build2.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
+		String dump = graph.dump();
 		String dtxt = FsUtil.loadResource(getClass(), "build2dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
@@ -80,6 +84,7 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("B", "C");
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build3.md", dot);
 
 		String txt = FsUtil.loadResource(getClass(), "build3.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
@@ -98,13 +103,14 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("D", "F");
 		builder.createAndAddEdge("F", "B");
 
-		String dump = graph.dump();
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build4.md", dot);
 
 		String txt = FsUtil.loadResource(getClass(), "build4.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
 
+		String dump = graph.dump();
 		String dtxt = FsUtil.loadResource(getClass(), "build4dump.txt").value;
 		assertEquals(dump, dtxt);
 	}
@@ -121,6 +127,7 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdge("C", "D");
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build5.md", dot);
 
 		String txt = FsUtil.loadResource(getClass(), "build5.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
@@ -134,6 +141,8 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build6.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "build6.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
@@ -149,6 +158,8 @@ class GraphBuildTest extends TestBase {
 		builder.createAndAddEdges("C => [B,C]");
 
 		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), "build7.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), "build7.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
 		assertEquals(dot, txt);
