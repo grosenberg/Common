@@ -9,7 +9,7 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class BuilderTest extends TestBase {
+class BuilderOpsTest extends TestBase {
 
 	@Test
 	void testGraph() {

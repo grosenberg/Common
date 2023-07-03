@@ -1,6 +1,6 @@
 package net.certiv.common.dot;
 
-public enum DotAttr {
+public enum DotAttr implements IDotStr {
 
 	ARROWHEAD("arrowhead"),
 	ARROWSIZE("arrowsize"),

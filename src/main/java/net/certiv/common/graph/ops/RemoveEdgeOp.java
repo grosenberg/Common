@@ -1,59 +1,55 @@
 package net.certiv.common.graph.ops;
 
-import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.ex.TransformException;
+import net.certiv.common.graph.Transformer;
+import net.certiv.common.graph.XfPermits;
+import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.stores.Result;
 
 public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
 
 	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveEdgeOp<N, E> of(E edge, boolean clear) {
-		RemoveEdgeOp<N, E> op = new RemoveEdgeOp<>();
-		op.edges.put(edge, clear);
-		return op;
+		return new RemoveEdgeOp<>(List.of(edge), clear);
+	}
+
+	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveEdgeOp<N, E> of(
+			Collection<? extends E> edges, boolean clear) {
+		return new RemoveEdgeOp<>(edges, clear);
 	}
 
 	// --------------------------------
 
-	/** key=edge; value=clear */
-	private final LinkedHashMap<E, Boolean> edges = new LinkedHashMap<>();
+	public final List<? extends E> edge;
+	public final boolean clear;
 
-	public LinkedHashMap<E, Boolean> getEdges() {
-		return edges;
-	}
-
-	public boolean mergeRule(ITransformOp<N, E> rule) {
-		RuleType type = type();
-		if (rule == this) throw new TransformException(ERR_SELF_MERGE, type);
-		if (rule.type() != type) {
-			throw new TransformException(ERR_MERGE, rule.type(), type);
-		}
-		this.edges.putAll(((RemoveEdgeOp<N, E>) rule).edges);
-		return true;
+	private RemoveEdgeOp(Collection<? extends E> edges, boolean clear) {
+		this.edge = List.copyOf(edges);
+		this.clear = clear;
 	}
 
 	@Override
-	public boolean exec(Graph<N, E> graph) {
-		boolean ok = true;
-		for (E edge : edges.keySet()) {
-			if (graph.contains(edge)) {
-				ok &= graph.removeEdge(edge, edges.get(edge));
-			}
-		}
-		return ok;
+	public XfPermits type() {
+		return XfPermits.REMOVE_EDGE;
 	}
 
 	@Override
-	public RuleType type() {
-		return RuleType.REMOVE_EDGE;
+	public Result<Boolean> canApply(Transformer<N, E> xf) {
+		return xf.removeEdges(XfPolicy.CHECK, edge, clear);
+	}
+
+	@Override
+	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+		return xf.removeEdges(policy, edge, clear);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(edges);
+		return Objects.hash(clear, edge);
 	}
 
 	@Override
@@ -62,11 +58,11 @@ public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		RemoveEdgeOp<?, ?> other = (RemoveEdgeOp<?, ?>) obj;
-		return Objects.equals(edges, other.edges);
+		return clear == other.clear && Objects.equals(edge, other.edge);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s", type(), edges);
+		return String.format("[%s] %s", type(), edge);
 	}
 }

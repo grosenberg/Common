@@ -1,7 +1,9 @@
 package net.certiv.common.util;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.DateFormat;
@@ -56,7 +58,6 @@ public class GsonUtil {
 			.create();
 
 	@SuppressWarnings("unchecked")
-	@Deprecated
 	public static final <T> T dup(T value) {
 		return SerDes.fromJson(SerDes.toJson(value), (Class<T>) value.getClass());
 	}
@@ -142,8 +143,14 @@ public class GsonUtil {
 				in.nextNull();
 				return null;
 			}
-			String nextString = in.nextString();
-			return "null".equals(nextString) ? null : new URL(nextString);
+			String next = in.nextString();
+			if (next == null || next.equals("null")) return null;
+
+			try {
+				return new URI(next).toURL();
+			} catch (MalformedURLException | URISyntaxException e) {
+				throw new IOException(e);
+			}
 		}
 
 		@Override

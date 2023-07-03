@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.stores.Result;
 
-class FsUtil_LoadResourceTest {
+class FsUtilLoadResourceTest {
 
 	@Test
 	void testLoadRoot() {

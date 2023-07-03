@@ -1,35 +1,47 @@
 package net.certiv.common.graph.ops;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
+import net.certiv.common.graph.Transformer;
+import net.certiv.common.graph.XfPermits;
+import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.stores.Result;
 
 /**
- * A transform describes an elementary graph manipulation operation. Transforms are
- * executed by applying them to a {@code Graph}.
+ * TransformOps describe elementary, deferrable graph manipulation operations. Each op is
+ * executed by application to a {@code Graph}.
  */
 public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
 
-	String ERR_SELF_MERGE = "Cannot merge %s rule into self.";
-	String ERR_MERGE = "Cannot merge %s into %s.";
+	GraphException ERR_APPLY = GraphEx.of("Error applying graph transform op: %s.");
 
-	public enum RuleType {
-		CONSOLIDATE,
-		MOVE,
-		REDUCE,
-		REMOVE_NODE,
-		REMOVE_EDGE,
-		REPLICATE,
-	}
+	/** @return the transform op type */
+	XfPermits type();
 
 	/**
-	 * Execute {@code this} transform on the given {@code Graph}.
+	 * Determine if this rule can be applied to the given {@code Graph}. Evaluates
+	 * pre-conditions; not a full simulation of the transform application.
 	 *
-	 * @param graph the graph to transform
-	 * @return {@code true} on success
+	 * @param xf {@link Transformer} for the target graph
+	 * @return {@link Result.OK} on success, or (conditional on policy) a
+	 *         {@link Result#err} on failure
+	 * @see XfPolicy#CHECK
 	 */
-	boolean exec(Graph<N, E> graph);
+	Result<Boolean> canApply(Transformer<N, E> xf);
 
-	/** @return the transform type */
-	RuleType type();
+	/**
+	 * Apply {@code this} transform on the given {@code Graph} subject to the given
+	 * compliance policy.
+	 *
+	 * @param xf     {@link Transformer} for the target graph
+	 * @param policy execution condition compliance
+	 * @return {@link Result.OK} on success, or (conditional on policy) a
+	 *         {@link Result#err} on failure
+	 * @throws (conditional on policy) GraphException on failure
+	 * @see XfPolicy#PERMIT
+	 * @see XfPolicy#EXEC
+	 */
+	Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy);
 }

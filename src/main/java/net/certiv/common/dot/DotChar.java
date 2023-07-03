@@ -202,5 +202,4 @@ public class DotChar {
 	255 FF  U+00A0      no-break space
 	 * </pre>
 	 */
-
 }

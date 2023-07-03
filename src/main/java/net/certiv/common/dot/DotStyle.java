@@ -1,5 +1,8 @@
 package net.certiv.common.dot;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.apache.commons.text.TextStringBuilder;
 
 import net.certiv.common.dot.Dictionary.ON;
@@ -70,25 +73,27 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the default {@code ON} category. If the
-	 * value is {@code null}, all mappings are removed.
+	 * Adds or alters a dot attribute/value mapping for the default {@code ON} category.
+	 * If the value is {@code null}, the mapping is removed.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
 	 *
 	 * @param key   the dot attribute key
 	 * @param value the new value
 	 */
 	public final void put(DotAttr key, Object value) {
-		if (Dictionary.valid(key)) {
-			if (value != null) {
-				table.put(key, category, value);
-			} else {
-				table.remove(key, category);
-			}
-		}
+		put(key, category, value);
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the given {@code ON} category. If the value
-	 * is {@code null}, the mapping will be removed.
+	 * Adds or alters a dot attribute/value mapping for the given {@code ON} category. If
+	 * the given value is {@code null}, the mapping will be removed.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
 	 *
 	 * @param key      the dot attribute key
 	 * @param category the dot defining category
@@ -97,7 +102,11 @@ public class DotStyle {
 	public final void put(DotAttr key, ON category, Object value) {
 		if (Dictionary.valid(key)) {
 			if (value != null) {
-				table.put(key, category, value);
+				if (value instanceof IDotStr) {
+					table.put(key, category, value.toString());
+				} else {
+					table.put(key, category, value);
+				}
 			} else {
 				table.remove(key, category);
 			}
@@ -105,8 +114,12 @@ public class DotStyle {
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping to the default {@code ON} category iff the given
-	 * key is not already defined for that category.
+	 * Adds or alters a dot attribute/value mapping to the default {@code ON} category iff
+	 * the given key is not already defined for that category.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
 	 *
 	 * @param key   the dot attribute key
 	 * @param value the new value
@@ -114,13 +127,17 @@ public class DotStyle {
 	 */
 	public final boolean putIfAbsent(DotAttr key, Object value) {
 		if (has(key)) return false;
-		put(key, value);
+		put(key, category, value);
 		return true;
 	}
 
 	/**
-	 * Adds a dot attribute/value mapping for the given category iff the given key is not
-	 * already defined for that category.
+	 * Adds or alters a dot attribute/value mapping for the given category iff the given
+	 * key is not already defined for that category.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
 	 *
 	 * @param key      the dot attribute key
 	 * @param category the dot defining category
@@ -130,6 +147,96 @@ public class DotStyle {
 	public final boolean putIfAbsent(DotAttr key, ON category, Object value) {
 		if (has(key, category)) return false;
 		put(key, category, value);
+		return true;
+	}
+
+	/**
+	 * Adds or alters a dot attribute/value mapping for the default {@code ON} category.
+	 * If the given value is {@code null}, the mapping will be removed.
+	 * <p>
+	 * The inserted value is a concatenation of the individual {@code #toString()}
+	 * representations of the given values.
+	 *
+	 * @param key   the dot attribute key
+	 * @param value the new value(s)
+	 */
+	public final void put(DotAttr key, IDotStr... values) {
+		if (Dictionary.valid(key)) {
+			if (values == null || values.length == 0 || values[0] == null) {
+				table.remove(key, category);
+			} else {
+				List<String> vals = Stream.of(values).map(IDotStr::toString).toList();
+				table.put(key, category, String.join(Strings.COMMA, vals));
+			}
+		}
+	}
+
+	/**
+	 * Adds or alters a dot attribute/value mapping for the given {@code ON} category. If
+	 * the given value is {@code null}, the mapping will be removed.
+	 * <p>
+	 * The inserted value is a concatenation of the individual {@code #toString()}
+	 * representations of the given values.
+	 *
+	 * @param key      the dot attribute key
+	 * @param category the dot defining category
+	 * @param value    the new value(s)
+	 */
+	public final void put(DotAttr key, ON category, IDotStr... values) {
+		if (Dictionary.valid(key)) {
+			if (values == null || values.length == 0 || values[0] == null) {
+				table.remove(key, category);
+			} else {
+				List<String> vals = Stream.of(values).map(IDotStr::toString).toList();
+				table.put(key, category, String.join(Strings.COMMA, vals));
+			}
+		}
+	}
+
+	/**
+	 * Adds or alters a dot attribute/value mapping to the default {@code ON} category iff
+	 * the given key is not already defined for that category.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
+	 *
+	 * @param key   the dot attribute key
+	 * @param value the new value
+	 * @return {@code true} if the given attribute/value mapping was added
+	 */
+	public final boolean putIfAbsent(DotAttr key, IDotStr... values) {
+		if (has(key)) return false;
+		if (values == null || values.length == 0 || values[0] == null) {
+			table.remove(key, category);
+		} else {
+			List<String> vals = Stream.of(values).map(IDotStr::toString).toList();
+			table.put(key, category, String.join(Strings.COMMA, vals));
+		}
+		return true;
+	}
+
+	/**
+	 * Adds or alters a dot attribute/value mapping for the given category iff the given
+	 * key is not already defined for that category.
+	 * <p>
+	 * In the special case where the value class implements the marking interface
+	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
+	 * inserted.
+	 *
+	 * @param key      the dot attribute key
+	 * @param category the dot defining category
+	 * @param value    the new value
+	 * @return {@code true} if the given attribute/value mapping was added
+	 */
+	public final boolean putIfAbsent(DotAttr key, ON category, IDotStr... values) {
+		if (has(key, category)) return false;
+		if (values == null || values.length == 0 || values[0] == null) {
+			table.remove(key, category);
+		} else {
+			List<String> vals = Stream.of(values).map(IDotStr::toString).toList();
+			table.put(key, category, String.join(Strings.COMMA, vals));
+		}
 		return true;
 	}
 
@@ -170,16 +277,4 @@ public class DotStyle {
 	private String fmt(DotAttr key, Object value) {
 		return String.format(Fmt, key, value);
 	}
-
-	// private static final Pattern LIST = Pattern.compile(".*?[\\h,].*");
-	//
-	// private String Fmt(DotAttr key, Object value) {
-	// String Fmt = "%s=%s";
-	// if (Dictionary.isCompoundType(key) && LIST.matcher(value.toString()).matches()) {
-	// Fmt = "%s=\"%s\"";
-	// }
-	// return String.format(Fmt, key, value);
-	// }
-	//
-
 }

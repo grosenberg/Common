@@ -1,4 +1,4 @@
-digraph "Transformer Move" {
+digraph "Transfuture Move" {
 
     "A(0)"
     "B(1)"

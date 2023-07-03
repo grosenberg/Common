@@ -2,13 +2,13 @@ package net.certiv.common.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
-import net.certiv.common.ex.AssertEx;
-import net.certiv.common.ex.IAssertException.Test;
+import net.certiv.common.ex.IllegalArgsEx;
 import net.certiv.common.stores.Result;
 
 public class Reflect {
@@ -311,6 +311,8 @@ public class Reflect {
 			C inst = cast(ctor.newInstance());
 			return Result.of(inst);
 
+		} catch (InvocationTargetException e) {
+			return Result.of(e.getTargetException());
 		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
@@ -334,6 +336,8 @@ public class Reflect {
 			C inst = cast(ctor.newInstance(args));
 			return Result.of(inst);
 
+		} catch (InvocationTargetException e) {
+			return Result.of(e.getTargetException());
 		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
@@ -342,7 +346,7 @@ public class Reflect {
 	private static void chkArgs(Class<?>[] params, Object[] args) {
 		if (params == null && args == null) return;
 		if (params != null && args != null && params.length == args.length) return;
-		throw AssertEx.of(Test.OTHER, ERR_CHK, params, args);
+		throw IllegalArgsEx.of(ERR_CHK, params, args);
 	}
 
 	@SuppressWarnings("unchecked")

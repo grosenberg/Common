@@ -295,7 +295,12 @@ public class Maths {
 
 	/**
 	 * Returns the given value constrained to the range defined by the given min and max
-	 * values.
+	 * numbers: {@code min <= value <= max}.
+	 *
+	 * @param value input value to constrain
+	 * @param min   range minimum
+	 * @param max   range maximum
+	 * @return the constrained value
 	 */
 	public static int constrain(int value, int min, int max) {
 		value = Math.max(min, value);
@@ -305,7 +310,12 @@ public class Maths {
 
 	/**
 	 * Returns the given value constrained to the range defined by the given min and max
-	 * values.
+	 * numbers: {@code min <= value <= max}.
+	 *
+	 * @param value input value to constrain
+	 * @param min   range minimum
+	 * @param max   range maximum
+	 * @return the constrained value
 	 */
 	public static double constrain(double value, double min, double max) {
 		value = Math.max(value, min);

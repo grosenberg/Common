@@ -139,7 +139,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		sb.appendln(GRAPH_BEG, fix(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
-		Walker<N, E> walker = new Walker<>();
+		Walker<N, E> walker = graph.walker();
 		UniqueList<N> roots = graph.getRoots();
 		switch (roots.size()) {
 			case 0:

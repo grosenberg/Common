@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 - 2017 Certiv Analytics and others.
+ * Copyright (c) 2016 - 2023 Certiv Analytics and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -33,10 +32,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import net.certiv.common.check.Assert;
+import net.certiv.common.ex.IllegalArgsEx;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.Result;
 
@@ -85,13 +86,14 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Locates the container of the given class, or {@code null} if the class does not
-	 * have a recognizable location.
+	 * Returns the container location for the given class, or {@code null} if the class
+	 * does not have a recognizable location.
 	 * <p>
-	 * For a class file located on the filesystem, returns the URI of the parent
+	 * For a class file located on the filesystem, returns the URI of the location
 	 * directory.
 	 * <p>
-	 * For a class file located within a jar, returns the the URI of the jar file.
+	 * For a class file located within a jar, returns the the URI of the jar file
+	 * location.
 	 *
 	 * @param cls the class to locate
 	 * @return {@code URI} identifying the class container
@@ -128,18 +130,21 @@ public final class FsUtil {
 		URI uri = locate(cls);
 		if (uri == null) return null;
 
-		String path = uri.getPath();
-		path = FROM.matcher(path).replaceFirst(TEST_RES);
-		if (path.matches(WIN_PREFIX)) {
-			path = path.substring(1);
+		String path = uri.toString();
+		Matcher m = FROM.matcher(path);
+		if (m.find()) {
+			path = m.reset().replaceFirst(TEST_RES);
+		} else {
+			path = append(path, TEST_RES).toString();
 		}
+
 		if (path.endsWith(Strings.SLASH)) {
 			path = path.substring(0, path.length() - 1);
 		}
 		String pkg = slashify(cls.getPackageName());
 		path = String.join(Strings.SLASH, path, pkg);
 
-		return Paths.get(path).toUri();
+		return URI.create(path);
 	}
 
 	/**
@@ -270,32 +275,40 @@ public final class FsUtil {
 		return sb.toString();
 	}
 
-	public static BufferedWriter getWriter(File file) {
-		try {
-			return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Strings.UTF_8));
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+	@Deprecated
 	public static BufferedWriter getWriter(OutputStream out) {
-		OutputStreamWriter writer;
-		try {
-			writer = new OutputStreamWriter(out, Strings.UTF_8);
+		try (OutputStreamWriter writer = new OutputStreamWriter(out, Strings.UTF_8)) {
 			return new BufferedWriter(writer);
-		} catch (UnsupportedEncodingException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static void write(File out, CharSequence page) {
-		try (FileOutputStream fos = new FileOutputStream(out); BufferedWriter writer = getWriter(fos)) {
-			writer.append(page);
-		} catch (IOException e) {
+	@Deprecated
+	public static BufferedWriter getWriter(File file) {
+		try (FileOutputStream fos = new FileOutputStream(file); //
+				OutputStreamWriter writer = new OutputStreamWriter(fos, Strings.UTF_8)) {
+			return new BufferedWriter(writer);
+
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	public static void write(File file, CharSequence txt) {
+		try (FileOutputStream fos = new FileOutputStream(file); //
+				OutputStreamWriter osw = new OutputStreamWriter(fos, Strings.UTF_8);
+				BufferedWriter writer = new BufferedWriter(osw)) {
+
+			writer.append(txt);
+			writer.flush();
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Deprecated
 	public static void close(Closeable io) {
 		if (io == null) return;
 		try {
@@ -444,12 +457,17 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Returns the content of the given named resource as a {@code String}.
+	 * Reads, to a {@code String}, the contents of the resource file having the given name
+	 * in the package folder, defined by the package of the given class, under the project
+	 * {@code <resource>} directory.
+	 * <p>
+	 * For a {@code <resource>} directory of {@code <project>/src/test/resources},
+	 * reference class of {@code a.b.c.D.class}, and name {@code y/Z.txt}, data will be
+	 * read from {@code <project>/src/test/resources/a/b/c/y/Z.txt}.
 	 *
 	 * @param cls  a resource classloader relative class
-	 * @param name the resource name
-	 * @return the resource content as a {@code String} or {@code null} on any IO
-	 *         exception
+	 * @param name the resource filename
+	 * @return a {@link Result} containing a read data {@code String} or failure exception
 	 */
 	public static Result<String> loadResource(Class<?> cls, String name) {
 		try {
@@ -459,27 +477,48 @@ public final class FsUtil {
 		}
 	}
 
+	/**
+	 * Writes, or overwrites, the given data to a resource file of the given name in the
+	 * package folder, defined by the package of the given class, under the project
+	 * {@code test/resources} directory.
+	 * <p>
+	 * For a {@code test/resources} directory of {@code <project>/src/test/resources},
+	 * reference class of {@code a.b.c.D.class}, and name {@code y/Z.txt}, the data will
+	 * be written to {@code <project>/src/test/resources/a/b/c/y/Z.txt}.
+	 *
+	 * @param cls  reference class defining the resource package folder
+	 * @param name the resource filename
+	 * @param data the data to write
+	 * @return a {@link Result} providing a success flag or failure exception
+	 */
 	public static Result<Boolean> writeResource(Class<?> cls, String name, String data) {
 		try {
 			URI folder = locateTest(cls);
 			String scheme = folder.getScheme();
 			if (folder == null || scheme == null || !scheme.equalsIgnoreCase("file")) {
-				throw new IllegalArgumentException(String.format(ERR_LOC, cls.getName()));
+				throw IllegalArgsEx.of(ERR_LOC, cls.getName());
 			}
 
 			URI pathname = append(folder, name);
-			File out = new File(pathname);
+			File dst = new File(pathname);
 
-			boolean exists = out.getParentFile().exists();
-			boolean writable = out.getParentFile().canWrite();
+			File parent = dst.getParentFile();
+			if (!parent.exists()) {
+				try {
+					parent.mkdirs();
+				} catch (Exception e) {}
+			}
+
+			boolean exists = parent.exists();
+			boolean writable = parent.canWrite();
 
 			if (!exists || !writable) {
 				String fmt = !exists ? ERR_NO_FOLDER : ERR_NOT_WRITABLE;
-				Log.error(fmt, out.toString());
-				throw new IllegalArgumentException(String.format(fmt, out.toString()));
+				Log.error(fmt, dst.toString());
+				throw IllegalArgsEx.of(fmt, dst);
 			}
 
-			write(out, data);
+			write(dst, data);
 			return Result.OK;
 
 		} catch (Exception e) {
@@ -488,15 +527,19 @@ public final class FsUtil {
 	}
 
 	private static URI append(URI uri, String name) {
-		String path = uri.getPath();
-		if (path.matches(WIN_PREFIX)) {
-			path = path.substring(1);
+		String basepath = uri.toString();
+		return append(basepath, name);
+	}
+
+	private static URI append(String basepath, String name) {
+		if (basepath.matches(WIN_PREFIX)) {
+			basepath = "file:/" + basepath;
 		}
-		if (path.endsWith(Strings.SLASH)) {
-			path = path.substring(0, path.length() - 1);
+		if (basepath.endsWith(Strings.SLASH)) {
+			basepath = basepath.substring(0, basepath.length() - 1);
 		}
-		path = String.join(Strings.SLASH, path, name);
-		return Paths.get(path).toUri();
+		basepath = String.join(Strings.SLASH, basepath, name);
+		return URI.create(basepath);
 	}
 
 	// /**

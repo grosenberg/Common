@@ -50,18 +50,65 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 		return r.get(col);
 	}
 
-	public boolean put(R key, C col, V value) {
-		LinkedHashMap<C, LinkedList<V>> colList = get(key);
-		if (colList == null) {
-			colList = new LinkedHashMap<>();
-			table.put(key, colList);
+	/**
+	 * Put the given row key into the table. Does nothing if the row pre-exists.
+	 *
+	 * @param row the table row
+	 * @return @true if a new row was added
+	 */
+	public boolean put(R row) {
+		LinkedHashMap<C, LinkedList<V>> cols = get(row);
+		if (cols == null) {
+			cols = new LinkedHashMap<>();
+			table.put(row, cols);
+			return true;
 		}
-		LinkedList<V> list = colList.get(col);
-		if (list == null) {
-			list = new LinkedList<>();
-			colList.put(col, list);
+		return false;
+	}
+
+	/**
+	 * Put the given row/column keys into the table. Does nothing if the row/column
+	 * pre-exists.
+	 *
+	 * @param row the table row
+	 * @param col the table column
+	 * @return @true if a new row/column was added
+	 */
+	public boolean put(R row, C col) {
+		LinkedHashMap<C, LinkedList<V>> cols = get(row);
+		if (cols == null) {
+			cols = new LinkedHashMap<>();
+			table.put(row, cols);
 		}
-		return list.add(value);
+		LinkedList<V> values = cols.get(col);
+		if (values == null) {
+			values = new LinkedList<>();
+			cols.put(col, values);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Appends the value at the given row/column in the table.
+	 *
+	 * @param row   the table row
+	 * @param col   the table column
+	 * @param value the value to append
+	 * @return @true if the value was added
+	 */
+	public boolean put(R row, C col, V value) {
+		LinkedHashMap<C, LinkedList<V>> cols = get(row);
+		if (cols == null) {
+			cols = new LinkedHashMap<>();
+			table.put(row, cols);
+		}
+		LinkedList<V> values = cols.get(col);
+		if (values == null) {
+			values = new LinkedList<>();
+			cols.put(col, values);
+		}
+		return values.add(value);
 	}
 
 	/**
@@ -136,21 +183,33 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 	}
 
 	public boolean contains(R row, C col) {
-		LinkedHashMap<C, LinkedList<V>> colList = table.get(row);
-		if (colList == null) return false;
-		return colList.containsKey(col);
+		LinkedHashMap<C, LinkedList<V>> cols = table.get(row);
+		if (cols == null) return false;
+		return cols.containsKey(col);
 	}
 
 	public void forEach(BiConsumer<? super R, ? super LinkedHashMap<C, LinkedList<V>>> action) {
 		table.forEach(action);
 	}
 
-	public LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> rowMap() {
-		return table;
+	public LinkedList<R> rows() {
+		return new LinkedList<>(table.keySet());
+	}
+
+	public LinkedList<C> cols() {
+		LinkedList<C> cols = new LinkedList<>();
+		for (LinkedHashMap<C, LinkedList<V>> col : table.values()) {
+			cols.addAll(col.keySet());
+		}
+		return cols;
 	}
 
 	public Set<R> rowSet() {
 		return table.keySet();
+	}
+
+	public LinkedHashMap<R, LinkedHashMap<C, LinkedList<V>>> rowMap() {
+		return table;
 	}
 
 	public Set<Entry<R, LinkedHashMap<C, LinkedList<V>>>> entrySet() {
@@ -256,27 +315,43 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 	}
 
 	public boolean isEmpty() {
-		return size() == 0;
+		return table.isEmpty();
 	}
 
-	/** Returns the number of rows in this Table. */
+	/** Returns the number of rows in this table. */
 	public int rowSize() {
 		return table.size();
+	}
+
+	/** Returns the number of columns in this table for the given row. */
+	public int colSize(R row) {
+		LinkedHashMap<C, LinkedList<V>> cols = table.get(row);
+		return cols != null ? cols.size() : 0;
+	}
+
+	/** Returns the number of values in this table for the given row and column. */
+	public int valuesSize(R row, C col) {
+		LinkedHashMap<C, LinkedList<V>> cols = table.get(row);
+		if (cols == null) return 0;
+		LinkedList<V> values = cols.get(col);
+		return values != null ? values.size() : 0;
 	}
 
 	/** Returns the size of this Table (total number of value lists held). */
 	public int size() {
 		int cnt = 0;
-		for (LinkedHashMap<C, LinkedList<V>> rows : table.values()) {
-			cnt += rows.size();
+		for (LinkedHashMap<C, LinkedList<V>> cols : table.values()) {
+			for (C col : cols.keySet()) {
+				LinkedList<V> values = cols.get(col);
+				if (values != null) {
+					cnt += values.size();
+				}
+			}
 		}
 		return cnt;
 	}
 
 	public void clear() {
-		for (R row : rowSet()) {
-			table.get(row).clear();
-		}
 		table.clear();
 	}
 }

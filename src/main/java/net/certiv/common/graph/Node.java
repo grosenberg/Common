@@ -24,9 +24,9 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	static final Counter CTR = new Counter();
 
 	/** Set of inbound edges */
-	private final IEdgeSet<N, E> in;
+	protected final IEdgeSet<N, E> in;
 	/** Set of outbound edges */
-	private final IEdgeSet<N, E> out;
+	protected final IEdgeSet<N, E> out;
 
 	/** Unique numerical node identifier */
 	public final long _nid;
@@ -239,6 +239,16 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
+	 * Checks whether the node is valid. A valid node may exist disconnected from the
+	 * graph, <i>i.e.</i> pending reconnection. Nominally, any non-null node is valid.
+	 *
+	 * @return {@code true} if this node is valid
+	 */
+	public boolean valid() {
+		return true;
+	}
+
+	/**
 	 * Returns the edge count, including self-cyclic edges (each counted once).
 	 *
 	 * @return the total count of unique connected edges
@@ -333,13 +343,39 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		}
 	}
 
-	/** Walker callback. */
-	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> listener, N node) {
+	/**
+	 * Walker enter callback. Default implementation does nothing, while permitting the
+	 * walk to proceed. Typically, implement in a {@code Node} subclass as
+	 *
+	 * <pre>
+	 * return listener.enter(dir, visited, parent, (N) this);
+	 * </pre>
+	 *
+	 * @param dir      the walk traversal direction
+	 * @param visited  collection of previously visited parent/node combinations
+	 * @param listener the defining visitor/listener
+	 * @param parent   the parent node
+	 * @return {@code true} to walk the children of the current node
+	 */
+	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> listener, N parent) {
 		return true;
 	}
 
-	/** Walker callback. */
-	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> listener, N node) {
+	/**
+	 * Walker exit callback. Default implementation does nothing, while permitting the
+	 * walk to proceed. Typically, implement in a {@code Node} subclass as
+	 *
+	 * <pre>
+	 * return listener.exit(dir, visited, parent, (N) this);
+	 * </pre>
+	 *
+	 * @param dir      the walk traversal direction
+	 * @param visited  collection of previously visited parent/node combinations
+	 * @param listener the defining visitor/listener
+	 * @param parent   the parent node
+	 * @return {@code true} on success
+	 */
+	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> listener, N parent) {
 		return true;
 	}
 

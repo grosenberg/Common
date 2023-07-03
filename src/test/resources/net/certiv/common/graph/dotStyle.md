@@ -4,7 +4,7 @@ digraph "Dot Styles" {
   edge [fontcolor="black" fontname="roboto, fira sans, lucida sans, segoe ui" fontsize="10"]
 
     "A(0)" [label="Node A" color="blue" fillcolor="lightblue" style="filled"]
-    "B(1)" [label="Node B" color="red" fillcolor="orange" shape="rectangle" style="filled, rounded"]
+    "B(1)" [label="Node B" color="red" fillcolor="orange" shape="rectangle" style="filled,rounded"]
     "C(2)"
 
     "A(0)" -> "B(1)" [label="Edge 0" color="blue" penwidth="2"]

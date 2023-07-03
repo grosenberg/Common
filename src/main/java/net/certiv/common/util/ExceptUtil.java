@@ -61,9 +61,21 @@ public class ExceptUtil {
 	}
 
 	private static String msg(Throwable t) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(t.getClass().getSimpleName());
+		sb.append(": ");
+
 		String msg = t.getMessage();
 		msg = msg != null ? msg : "<no detail>";
-		return String.format("%s [%s]", msg, t.getClass().getSimpleName());
+		sb.append(msg);
+
+		StackTraceElement[] traces = t.getStackTrace();
+		if (traces.length > 0) {
+			StackTraceElement elem = traces[0];
+			sb.append(String.format(" @%s.%s line: %s", //
+					elem.getClassName(), elem.getMethodName(), elem.getLineNumber()));
+		}
+		return sb.toString();
 	}
 
 	public static String stacktrace(Throwable t) {

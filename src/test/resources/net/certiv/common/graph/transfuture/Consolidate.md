@@ -1,4 +1,4 @@
-digraph "Transformer Consolidate" {
+digraph "Transfuture Consolidate" {
 
   subgraph "cluster_A(0)" {
 

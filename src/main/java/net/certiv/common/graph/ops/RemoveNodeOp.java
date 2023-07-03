@@ -4,9 +4,11 @@ import java.util.Collection;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.ex.TransformException;
+import net.certiv.common.graph.Transformer;
+import net.certiv.common.graph.XfPermits;
+import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 
 public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
@@ -26,35 +28,21 @@ public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 
 	// --------------------------------
 
-	private final UniqueList<N> nodes = new UniqueList<>();
+	public final UniqueList<N> nodes = new UniqueList<>();
 
-	public UniqueList<N> getNodes() {
-		return nodes;
-	}
-
-	public boolean mergeRule(ITransformOp<N, E> rule) {
-		RuleType type = type();
-		if (rule == this) throw new TransformException(ERR_SELF_MERGE, type);
-		if (rule.type() != type) {
-			throw new TransformException(ERR_MERGE, rule.type(), type);
-		}
-		return nodes.addAll(((RemoveNodeOp<N, E>) rule).nodes);
+	@Override
+	public XfPermits type() {
+		return XfPermits.REMOVE_NODE;
 	}
 
 	@Override
-	public boolean exec(Graph<N, E> graph) {
-		boolean ok = true;
-		for (N node : nodes) {
-			if (graph.contains(node)) {
-				ok &= graph.removeNode(node);
-			}
-		}
-		return ok;
+	public Result<Boolean> canApply(Transformer<N, E> xf) {
+		return xf.removeNodes(XfPolicy.CHECK, nodes);
 	}
 
 	@Override
-	public RuleType type() {
-		return RuleType.REMOVE_NODE;
+	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+		return xf.removeNodes(policy, nodes);
 	}
 
 	@Override
@@ -72,6 +60,6 @@ public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s", type(), nodes);
+		return String.format("[%s] %s", type(), nodes);
 	}
 }

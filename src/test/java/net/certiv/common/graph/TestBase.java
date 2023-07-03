@@ -7,6 +7,9 @@ import net.certiv.common.graph.demo.DemoGraph;
 
 public class TestBase {
 
+	static final String XForm = "transform/";
+	static final String XFuture = "transfuture/";
+
 	DemoGraph graph = new DemoGraph("Names");
 	DemoBuilder builder = new DemoBuilder(graph);
 

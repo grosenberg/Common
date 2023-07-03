@@ -32,12 +32,9 @@ import net.certiv.common.stores.UniqueList;
 public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	/** path edges */
-	private final UniqueList<E> list = new UniqueList<>();
+	private final UniqueList<E> edges = new UniqueList<>();
 	/** path terminals */
 	private final UniqueList<N> terminals = new UniqueList<>();
-
-	/** Path weight property key */
-	private final String key;
 
 	/** Index key=edges */
 	private final LinkedHashSet<E> index = new LinkedHashSet<>();
@@ -45,6 +42,9 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	private final LinkedHashList<N, E> idxBeg = new LinkedHashList<>();
 	/** Index key=end node; value=edges */
 	private final LinkedHashList<N, E> idxEnd = new LinkedHashList<>();
+
+	/** Path weight property key */
+	private final String key;
 
 	public GraphPath(String key) {
 		this.key = key;
@@ -55,14 +55,21 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 		return key;
 	}
 
+	/** @return head node (begin node of first edge) of this path */
+	public N head() {
+		return !edges.isEmpty() ? edges.peek().beg() : null;
+	}
+
+	/** @return all nodes included within this path */
 	public UniqueList<N> nodes() {
 		UniqueList<N> nodes = new UniqueList<>(idxBeg.keys());
 		nodes.addAll(idxEnd.keys());
 		return nodes.unmodifiable();
 	}
 
+	/** @return all edges included within this path */
 	public UniqueList<E> edges() {
-		return new UniqueList<>(list).unmodifiable();
+		return new UniqueList<>(edges).unmodifiable();
 	}
 
 	/**
@@ -193,7 +200,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public void add(int idx, E e) {
 		if (!index.contains(e)) {
-			list.add(idx, e);
+			edges.add(idx, e);
 			index.add(e);
 			idxBeg.put(e.beg(), e);
 			idxEnd.put(e.end(), e);
@@ -202,7 +209,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public void addFirst(E e) {
 		if (!index.contains(e)) {
-			list.addFirst(e);
+			edges.addFirst(e);
 			index.add(e);
 			idxBeg.put(e.beg(), e);
 			idxEnd.put(e.end(), e);
@@ -211,7 +218,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public void addLast(E e) {
 		if (!index.contains(e)) {
-			list.addLast(e);
+			edges.addLast(e);
 			index.add(e);
 			idxBeg.put(e.beg(), e);
 			idxEnd.put(e.end(), e);
@@ -223,7 +230,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public void addAll(int idx, Collection<? extends E> c) {
-		if (idx == list.size()) {
+		if (idx == edges.size()) {
 			addAll(c);
 		} else {
 			List<E> l = new ArrayList<>(c);
@@ -234,15 +241,15 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public E get(int idx) {
-		return list.get(idx);
+		return edges.get(idx);
 	}
 
 	public E peekFirst() {
-		return list.peekFirst();
+		return edges.peekFirst();
 	}
 
 	public E peekLast() {
-		return list.peekLast();
+		return edges.peekLast();
 	}
 
 	public List<E> subList(int from, int to) {
@@ -250,7 +257,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public E set(int idx, E e) {
-		E prior = list.set(idx, e);
+		E prior = edges.set(idx, e);
 		if (prior != null && !prior.equals(e)) {
 			index.remove(prior);
 			idxBeg.remove(prior.beg(), prior);
@@ -265,7 +272,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public boolean remove(E e) {
 		if (!index.contains(e)) return false;
-		list.remove(e);
+		edges.remove(e);
 		index.remove(e);
 		idxBeg.remove(e.beg(), e);
 		idxEnd.remove(e.end(), e);
@@ -273,7 +280,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public E remove(int idx) {
-		E e = list.get(idx);
+		E e = edges.get(idx);
 		remove(e);
 		return e;
 	}
@@ -283,7 +290,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public E removeLast() {
-		return remove(list.size() - 1);
+		return remove(edges.size() - 1);
 	}
 
 	public boolean removeAll(Collection<? extends E> c) {
@@ -315,19 +322,23 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public boolean retainAll(Collection<? extends E> c) {
-		return list.retainAll(c);
+		return edges.retainAll(c);
 	}
 
 	public int indexOf(E e) {
-		return list.indexOf(e);
+		return edges.indexOf(e);
 	}
 
 	public int lastIndexOf(E e) {
-		return list.lastIndexOf(e);
+		return edges.lastIndexOf(e);
+	}
+
+	public boolean valid() {
+		return head() != null;
 	}
 
 	public boolean isEmpty() {
-		return list.isEmpty();
+		return edges.isEmpty();
 	}
 
 	/**
@@ -336,7 +347,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	 */
 	public void clear() {
 		edges().forEach(n -> n.put(key, null));
-		list.clear();
+		edges.clear();
 		terminals.clear();
 		index.clear();
 		idxBeg.clear();
@@ -346,27 +357,34 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	/**
 	 * Returns the number of edges in this path.
 	 *
-	 * @return the number of elements in this list
+	 * @return the number of elements in this edges
 	 */
 	public int size() {
-		return list.size();
+		return edges.size();
 	}
 
 	public Iterator<E> iterator() {
-		return list.iterator();
+		return edges.iterator();
 	}
 
 	public Iterator<E> descendingIterator() {
-		return list.descendingIterator();
+		return edges.descendingIterator();
 	}
 
 	public Stream<E> stream() {
-		return list.stream();
+		return edges.stream();
+	}
+
+	public GraphPath<N, E> dup() {
+		GraphPath<N, E> cp = new GraphPath<>(key);
+		cp.addAll(edges);
+		terminals.forEach(t -> cp.addTerminal(t));
+		return cp;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(list);
+		return Objects.hash(edges);
 	}
 
 	@Override
@@ -375,11 +393,11 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		GraphPath<?, ?> other = (GraphPath<?, ?>) obj;
-		return Objects.equals(list, other.list);
+		return Objects.equals(edges, other.edges);
 	}
 
 	@Override
 	public String toString() {
-		return list.toString();
+		return edges.toString();
 	}
 }

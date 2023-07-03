@@ -1,9 +1,13 @@
 package net.certiv.common.graph;
 
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.ex.GraphException;
 import net.certiv.common.stores.UniqueList;
 
 public interface IBuild<N extends Node<N, E>, E extends Edge<N, E>> {
+
+	GraphException ERR_EDGE = GraphEx.of("Invalid edge.");
 
 	/**
 	 * Returns {@code true} if any edge exists between the given nodes.

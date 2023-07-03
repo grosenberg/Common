@@ -1,4 +1,4 @@
-digraph "Transformer Remove Edge" {
+digraph "Transfuture Remove Edge" {
 
   subgraph "cluster_A(0)" {
 

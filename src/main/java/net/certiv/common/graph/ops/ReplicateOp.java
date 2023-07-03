@@ -1,90 +1,59 @@
 package net.certiv.common.graph.ops;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.ex.TransformException;
-import net.certiv.common.stores.LinkedHashList;
+import net.certiv.common.graph.Transformer;
+import net.certiv.common.graph.XfPermits;
+import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.stores.Result;
+import net.certiv.common.stores.UniqueList;
+import net.certiv.common.util.Strings;
 
 public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
 
 	/**
-	 * @param node    a source node
+	 * @param src     a source node
 	 * @param targets the target nodes
 	 * @param remove  {@code true} to remove the source node
 	 */
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReplicateOp<N, E> of(N node,
+	public static <N extends Node<N, E>, E extends Edge<N, E>> ReplicateOp<N, E> of(N src,
 			Collection<? extends N> targets, boolean remove) {
-		return new ReplicateOp<>(node, targets, remove);
+		return new ReplicateOp<>(src, targets, remove);
 	}
 
 	// --------------------------------
 
-	/** key=source node; value=list of args */
-	private final LinkedHashList<N, ReplArgs> repls = new LinkedHashList<>();
+	public final N src;
+	public final UniqueList<N> targets = new UniqueList<>();
+	public final boolean remove;
 
-	public class ReplArgs {
-		public final Collection<? extends N> targets;
-		public final boolean remove;
-
-		private ReplArgs(Collection<? extends N> targets, boolean remove) {
-			this.targets = targets;
-			this.remove = remove;
-		}
-	}
-
-	private ReplicateOp(N node, Collection<? extends N> targets, boolean remove) {
-		ReplArgs replArgs = new ReplArgs(targets, remove);
-		repls.put(node, replArgs);
-	}
-
-	public LinkedHashList<N, ReplArgs> replArgs() {
-		return repls;
-	}
-
-	public boolean mergeRule(ITransformOp<N, E> rule) {
-		RuleType type = type();
-		if (rule == this) throw new TransformException(ERR_SELF_MERGE, type);
-		if (rule.type() != type) {
-			throw new TransformException(ERR_MERGE, rule.type(), type);
-		}
-
-		LinkedHashList<N, ReplArgs> in = ((ReplicateOp<N, E>) rule).repls;
-		for (N src : in.keySet()) {
-			if (!repls.containsKey(src)) {
-				repls.put(src, in.get(src));
-			} else {
-				LinkedList<ReplArgs> replArgs = repls.get(src);
-				replArgs.addAll(in.get(src));
-			}
-		}
-
-		return true;
+	private ReplicateOp(N src, Collection<? extends N> targets, boolean remove) {
+		this.src = src;
+		this.targets.addAll(targets);
+		this.remove = remove;
 	}
 
 	@Override
-	public boolean exec(Graph<N, E> graph) {
-		boolean ok = true;
-		for (N src : repls.keySet()) {
-			for (ReplArgs args : repls.get(src)) {
-				ok &= graph.replicateEdges(src, args.targets, args.remove);
-			}
-		}
-		return ok;
+	public XfPermits type() {
+		return XfPermits.REPLICATE;
 	}
 
 	@Override
-	public RuleType type() {
-		return RuleType.REPLICATE;
+	public Result<Boolean> canApply(Transformer<N, E> xf) {
+		return xf.replicateEdges(XfPolicy.CHECK, src, targets, remove);
+	}
+
+	@Override
+	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+		return xf.replicateEdges(policy, src, targets, remove);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(repls);
+		return Objects.hash(src, remove, targets);
 	}
 
 	@Override
@@ -93,11 +62,12 @@ public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		ReplicateOp<?, ?> other = (ReplicateOp<?, ?>) obj;
-		return Objects.equals(repls, other.repls);
+		return Objects.equals(src, other.src) && remove == other.remove
+				&& Objects.equals(targets, other.targets);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s", type(), repls);
+		return String.format("[%s] %s -> %s %s", type(), src, targets, remove ? "rmv" : Strings.EMPTY);
 	}
 }

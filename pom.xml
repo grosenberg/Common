@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -6,23 +7,26 @@
 
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 
 	<name>net.certiv :: common</name>
 	<description>Common utilities</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jdk.ver>11</jdk.ver>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<jdk.ver>17</jdk.ver>
 		<maven.compiler.source>${jdk.ver}</maven.compiler.source>
 		<maven.compiler.target>${jdk.ver}</maven.compiler.target>
 
 		<comm-lang3.ver>3.12.0</comm-lang3.ver>
 		<comm-text.ver>1.10.0</comm-text.ver>
-		<gson.ver>2.10.1</gson.ver>
-		<jackson.ver>2.14.2</jackson.ver>
 		<diff.ver>4.12</diff.ver>
 		<log4j.ver>2.20.0</log4j.ver>
+
+		<gson.ver>2.10.1</gson.ver>
+		<jackson.ver>2.14.2</jackson.ver>
+		<microstream.ver>08.01.00-MS-GA</microstream.ver>
 
 		<junit.ver>5.9.2</junit.ver>
 	</properties>
@@ -43,6 +47,12 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>${gson.ver}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>one.microstream</groupId>
+			<artifactId>microstream-storage-embedded</artifactId>
+			<version>${microstream.ver}</version>
 		</dependency>
 
 		<dependency>
@@ -86,6 +96,7 @@
 				<configuration>
 					<archive>
 						<manifest>
+							<addClasspath>true</addClasspath>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
@@ -146,6 +157,7 @@
 				</configuration>
 				<executions>
 					<execution>
+						<id>attach-javadoc</id>
 						<goals>
 							<goal>javadoc</goal>
 						</goals>

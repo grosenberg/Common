@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
+import net.certiv.common.dot.LineStyle;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
@@ -28,7 +29,7 @@ class DotStyleTest extends TestBase {
 		ds.put(LABEL, "Node " + a.name());
 		ds.put(COLOR, "blue");
 		ds.put(FILLCOLOR, "lightblue");
-		ds.put(STYLE, "filled");
+		ds.put(STYLE, LineStyle.filled);
 
 		DemoNode b = builder.findOrCreateNode("B");
 		ds = b.getDotStyle();
@@ -36,7 +37,7 @@ class DotStyleTest extends TestBase {
 		ds.put(COLOR, "red");
 		ds.put(FILLCOLOR, "orange");
 		ds.put(SHAPE, "rectangle");
-		ds.put(STYLE, "filled, rounded");
+		ds.put(STYLE, LineStyle.filled, LineStyle.rounded);
 
 		DemoNode c = builder.findOrCreateNode("C");
 

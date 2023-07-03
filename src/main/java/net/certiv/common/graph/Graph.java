@@ -2,9 +2,7 @@ package net.certiv.common.graph;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -15,18 +13,14 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.ex.GraphEx;
-import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.graph.algorithms.GraphPath;
+import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.stores.Counter;
-import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
 
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
-		implements IBuild<N, E>, ITransform<N, E> {
-
-	protected static final GraphException ERR_EDGE = GraphEx.of("Invalid edge.");
-	protected static final GraphException ERR_COPY = GraphEx.of("Copy args invalid.");
+		implements IBuild<N, E> {
 
 	protected static final String GRAPH_NAME = "GraphName";
 
@@ -236,15 +230,27 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return nodes.contains(node);
 	}
 
-	/** Returns the size of the graph. Equivalent to the node count. */
-	public int size() {
-		return nodes.size();
-	}
-
 	/** Returns {@code true} if the graph contains the given edge. */
 	public boolean contains(E edge) {
 		if (!edge.valid()) return false;
 		return getEdges(edge.beg(), edge.end()).stream().anyMatch(e -> e.equals(edge));
+	}
+
+	/** Returns {@code true} if the graph contains the given path. */
+	public boolean contains(GraphPath<N, E> path) {
+		if (path == null) return false;
+		return getEdges().containsAll(path.edges());
+	}
+
+	/** Returns {@code true} if the graph contains the given paths. */
+	public boolean containsAll(Collection<GraphPath<N, E>> paths) {
+		if (paths == null) return false;
+		return paths.stream().allMatch(p -> contains(p));
+	}
+
+	/** Returns the size of the graph. Equivalent to the node count. */
+	public int size() {
+		return nodes.size();
 	}
 
 	/**
@@ -362,7 +368,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if not already present
 	 * @see Graph#addEdge(Edge)
 	 */
-	private boolean _add(N node) {
+	boolean _add(N node) {
 		return nodes.add(node);
 	}
 
@@ -373,294 +379,23 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return {@code true} if removed
 	 * @see Graph#addEdge(Edge)
 	 */
-	private boolean _remove(N node) {
+	boolean _remove(N node) {
 		return nodes.remove(node);
 	}
 
-	@Override
-	public boolean removeNode(N node) {
-		lock();
-		try {
-			Assert.notNull(node);
-			if (!nodes.contains(node)) return false;
-
-			boolean ok = node.edges().stream().allMatch(e -> removeEdge(e, true));
-			node.clear();
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean removeEdge(E edge, boolean clear) {
-		lock();
-		try {
-			Assert.notNull(edge);
-
-			N beg = edge.beg();
-			N end = edge.end();
-
-			boolean ok = edge.remove(clear);
-			if (beg.adjacent().isEmpty()) _remove(beg);
-			if (end.adjacent().isEmpty()) _remove(end);
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean removeEdges(Collection<? extends E> edges, boolean clear) {
-		lock();
-		try {
-			Assert.notNull(edges);
-			return edges.stream().allMatch(e -> removeEdge(e, clear));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter) {
-		lock();
-		try {
-			Assert.notNull(edge);
-			if (filter != null && !filter.test(edge)) return false;
-			return removeEdge(edge, clear);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean removeEdges(N src, N dst, boolean clear) {
-		lock();
-		try {
-			Assert.notNull(src, dst);
-			UniqueList<E> edges = src.to(dst);
-			if (edges.isEmpty()) return false;
-			return edges.stream().allMatch(e -> removeEdge(e, clear));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter) {
-		lock();
-		try {
-			Assert.notNull(src, dst);
-			UniqueList<E> edges = src.to(dst);
-			if (edges.isEmpty()) return false;
-			if (filter == null) return edges.stream().allMatch(e -> removeEdge(e, clear));
-			return edges.stream().filter(filter).allMatch(e -> removeEdge(e, clear));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean transfer(E edge, N beg) {
-		lock();
-		try {
-			Assert.notNull(edge, beg);
-			if (edge.beg().equals(beg)) return false;
-			return move(edge, beg, edge.end(), false);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean transfer(Collection<? extends E> edges, N beg) {
-		lock();
-		try {
-			Assert.notNull(edges, beg);
-			return edges.stream().allMatch(e -> transfer(e, beg));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean copy(LinkedHashList<N, E> sg, N dst, boolean remove) {
-		lock();
-		try {
-			Assert.isTrue(ERR_COPY, sg != null && contains(dst));
-			boolean ok = true;
-
-			if (!sg.isEmpty()) {
-				UniqueList<E> in = dst.edges(Sense.IN);
-				UniqueList<E> out = dst.edges(Sense.OUT);
-
-				for (N head : sg.keySet()) {
-					LinkedList<E> path = sg.get(head);
-
-					for (E src : in) {
-						E start = copyAndAddEdge(src, src.beg(), copyNode(head));
-						copySubgraphPath(start, path, out);
-					}
-				}
-			}
-			if (remove) reduce(dst);
-
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	private void copySubgraphPath(E start, LinkedList<E> path, UniqueList<E> out) {
-		E last = start;
-		for (E edge : path) {
-			last = copyAndAddEdge(edge, last.end(), copyNode(edge.end()));
-		}
-		for (E next : out) {
-			copyAndAddEdge(next, last.end(), next.end());
-		}
-	}
-
-	@Override
-	public boolean move(E edge, N beg, N end) {
-		lock();
-		try {
-			return move(edge, beg, end, false);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean move(E edge, N beg, N end, boolean cyclic) {
-		lock();
-		try {
-			Assert.notNull(edge, beg, end);
-
-			if (edge.beg().equals(beg) && edge.end().equals(end)) return false;
-			if (beg.equals(edge.end()) && !cyclic) { // impermissble self cycle
-				removeEdge(edge, true);
-				return false;
-			}
-
-			removeEdge(edge, false);
-			edge.setBeg(beg);
-			edge.setEnd(end);
-			addEdge(edge);
-
-			return true;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean move(Collection<? extends E> edges, N beg, N end, boolean cyclic) {
-		lock();
-		try {
-			Assert.notNull(edges);
-			return edges.stream().allMatch(e -> move(e, beg, end, cyclic));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reterminate(E edge, N end) {
-		lock();
-		try {
-			return reterminate(edge, end, false);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reterminate(E edge, N end, boolean cycles) {
-		lock();
-		try {
-			Assert.notNull(edge, end);
-			if (edge.end().equals(end)) return false;
-			return move(edge, edge.beg(), end, cycles);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reterminate(Collection<? extends E> edges, N end) {
-		lock();
-		try {
-			return reterminate(edges, end, false);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reterminate(Collection<? extends E> edges, N end, boolean cycles) {
-		lock();
-		try {
-			Assert.notNull(edges, end);
-			return edges.stream().allMatch(e -> reterminate(e, end, cycles));
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean consolidateEdges(Collection<? extends N> sources, N target) {
-		lock();
-		try {
-			Assert.notNull(sources, target);
-			Set<N> nodes = new LinkedHashSet<>(sources);
-			nodes.remove(target);
-			boolean ok = true;
-			for (N node : nodes) {
-				// convert [D,G] => [E,H] to [D,G] => B
-				UniqueList<E> in = node.edges(Sense.IN);
-				ok &= reterminate(in, target);
-
-				// convert [E,H] => [F,I] to B => [F,I]
-				UniqueList<E> out = node.edges(Sense.OUT);
-				ok &= transfer(out, target);
-			}
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
 	/**
-	 * Replicates the given edge. Override, if needed, to adjust edge decorations. The
-	 * returned replica edge is unassociated with the graph.
+	 * Duplicates the given edge. Override, if needed, to adjust edge decorations. The
+	 * returned duplicate edge is unassociated with the graph.
 	 *
-	 * @param edge the exemplar edge
-	 * @return a replica of the given edge otherwise unassociated with the graph
+	 * @param edge an exemplar edge
+	 * @return a duplicate edge
 	 */
-	public E replicateEdge(E edge) {
+	public E duplicateEdge(E edge) {
 		lock();
 		try {
-			E repl = createEdge(edge.beg(), edge.end());
-			repl.putAllIfAbsent(edge.properties());
-			return repl;
+			E dup = createEdge(edge.beg(), edge.end());
+			dup.putAllIfAbsent(edge.properties());
+			return dup;
 
 		} finally {
 			unlock();
@@ -668,115 +403,40 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Replicates the given edge and changes the edge terminals to the given nodes.
+	 * Duplicates the given edge and changes the edge terminals to the given nodes.
 	 * Override, if needed, to adjust edge decorations that are dependent on the changed
-	 * terminals. The returned replica edge is unassociated with the graph.
+	 * terminals. The returned duplicate edge is unassociated with the graph.
 	 *
-	 * @param edge the exemplar edge
-	 * @param beg  the begin terminal node name
-	 * @param end  the end terminal node name
-	 * @return a replica of the given edge otherwise unassociated with the graph
+	 * @param edge an exemplar edge
+	 * @param beg  duplicate begin node
+	 * @param end  duplicate end node
+	 * @return a duplicate edge
 	 */
-	public E replicateEdge(E edge, N beg, N end) {
+	public E duplicateEdge(E edge, N beg, N end) {
 		lock();
 		try {
-			E repl = replicateEdge(edge);
-			repl.setBeg(beg);
-			repl.setEnd(end);
-			return repl;
+			E dup = duplicateEdge(edge);
+			dup.setBeg(beg);
+			dup.setEnd(end);
+			return dup;
 
 		} finally {
 			unlock();
 		}
 	}
 
-	@Override
-	public boolean replicateEdges(N node, Collection<? extends N> targets) {
-		lock();
-		try {
-			return replicateEdges(node, targets, false);
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
-		lock();
-		try {
-			Set<? extends N> tgts = new LinkedHashSet<>(targets);
-			tgts.remove(node);
-
-			UniqueList<E> in = node.edges(Sense.IN);
-			UniqueList<E> out = node.edges(Sense.OUT);
-
-			boolean ok = true;
-			for (N tgt : tgts) {
-				// for edges ? => node, create ? => targets
-				for (E edge : in) {
-					E repl = replicateEdge(edge, edge.beg(), tgt);
-					ok &= addEdge(repl);
-				}
-
-				// for edges node => ?, create targets => ?
-				for (E edge : out) {
-					E repl = replicateEdge(edge, tgt, edge.end());
-					ok &= addEdge(repl);
-				}
-			}
-			if (remove) ok &= removeNode(node);
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reduce(N node) {
-		lock();
-		try {
-			UniqueList<E> srcs = node.edges(Sense.IN, false);	// A =>
-			UniqueList<E> dsts = node.edges(Sense.OUT, false);	// => C
-
-			boolean ok = true;
-			for (E src : srcs) {
-				for (E dst : dsts) {
-					ok &= reduce(src, dst);
-				}
-			}
-			return ok;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	@Override
-	public boolean reduce(E src, E dst) {
-		lock();
-		try {
-			Assert.isTrue(GraphEx.of("Invalid Edge"), src.valid() && dst.valid());
-
-			boolean ok = true;
-			if (src.end().equals(dst.beg())) {
-				removeEdge(src, false);
-				src.setEnd(dst.end());
-				src.putAllIfAbsent(dst.properties());
-				ok &= addEdge(src);
-				ok &= removeEdge(dst, true);
-
-			} else {
-				ok &= removeEdge(src, false);
-				src.setEnd(dst.beg());
-				ok &= addEdge(src);
-			}
-			return ok;
-
-		} finally {
-			unlock();
-		}
+	/**
+	 * Defines whether this graph permits a graph manipulation/transform operation of the
+	 * given type.
+	 * <p>
+	 * Default is to allow all manipulation/transform operation types.
+	 *
+	 * @param type a manipulation/transform operation type
+	 * @return {@code true} if the operation is permitted
+	 * @see ITransformOp#canApply(Graph)
+	 */
+	public boolean permits(XfPermits type) {
+		return true;
 	}
 
 	/**

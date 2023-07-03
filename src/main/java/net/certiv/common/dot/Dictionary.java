@@ -103,9 +103,7 @@ public class Dictionary {
 	private static final String[] Any = Strings.EMPTY_STRINGS;
 	private static final String Empty = Strings.EMPTY;
 
-	private static final String[] ArrowType = { "box", "crow", "curve", "icurve", "diamond", "dot", "odot",
-			"ediamond", "empty", "inv", "invdot", "invodot", "invempty", "none", "normal", "open", "tee",
-			"vee", "o", "l", "r" };
+	// private static final String[] ArrowType = ArrowType.toArray();
 	private static final String[] Boolean = { "true", "false" };
 	private static final String[] ClusterMode = { "local", "global", "none" };
 	// private static final String[] ColorNames = DotColors.getColorNames();
@@ -119,19 +117,9 @@ public class Dictionary {
 	private static final String[] RankType = { "same", "min", "source", "max", "sink" };
 	private static final String[] RankDir = { "TB", "LR", "BT", "RL" };
 	private static final String[] Schemes = { "x11", "svg", "brewer" };
-	private static final String[] Shape = { "assembly", "box", "box3d", "cds", "circle", "component",
-			"cylinder", "diamond", "doublecircle", "doubleoctagon", "egg", "ellipse", "fivepoverhang",
-			"folder", "hexagon", "house", "insulator", "invhouse", "invtrapezium", "invtriange", "larrow",
-			"lpromoter", "Mcircle", "Mdiamond", "Mrecord", "Mhouse", "none", "note", "noverhang", "octagon",
-			"oval", "parallelogram", "pentagon", "plain", "plaintext", "point", "polygon", "primersite",
-			"promotor", "proteasite", "proteinstab", "rarrow", "record", "rect", "rectangle",
-			"restrictionsite", "ribosite", "rnastab", "rpromoter", "septagon", "signature", "square", "star",
-			"tab", "terminator", "threepoverhang", "trapezium", "triange", "tripleoctagon", "underline",
-			"utr" };
-	private static final String[] Splines = { "true", "false", "none", "line", "spline", "polyline", "ortho",
-			"curved" };
-	private static final String[] Style = { "bold", "dashed", "diagonals", "dotted", "filled", "invis",
-			"radial", "rounded", "solid", "striped", "tapered", "wedged" };
+	// private static final String[] Shape = Shape.toArray();
+	// private static final String[] Splines = Spline.toArray();
+	// private static final String[] Style = LineStyle.toArray();
 
 	private static final Map<DotAttr, Entry> AttrMap = new LinkedHashMap<>();
 	private static final Map<String, DotAttr> NameMap = new LinkedHashMap<>();
@@ -139,9 +127,9 @@ public class Dictionary {
 	static {
 		put(DotAttr.INVALID, TYPE.INVALID, Any, Empty);
 
-		put(DotAttr.ARROWHEAD, TYPE.LIST, ArrowType, "normal", ON.EDGES);
+		put(DotAttr.ARROWHEAD, TYPE.LIST, ArrowType.toArray(), "normal", ON.EDGES);
 		put(DotAttr.ARROWSIZE, TYPE.NUMBER, Any, "1.0", ON.EDGES);
-		put(DotAttr.ARROWTAIL, TYPE.LIST, ArrowType, "normal", ON.EDGES);
+		put(DotAttr.ARROWTAIL, TYPE.LIST, ArrowType.toArray(), "normal", ON.EDGES);
 		put(DotAttr.BB, TYPE.RECT, Any, Empty, ON.GRAPHS);
 		put(DotAttr.BGCOLOR, TYPE.COLORS, Any, Empty, ON.GRAPHS, ON.CLUSTERS);
 		put(DotAttr.CENTER, TYPE.LIST, Boolean, "false", ON.GRAPHS);
@@ -190,11 +178,11 @@ public class Dictionary {
 		put(DotAttr.RANKDIR, TYPE.LIST, RankDir, Empty, ON.GRAPHS);
 		put(DotAttr.RANKSEP, TYPE.NUMBER, Any, "0.5", ON.GRAPHS);
 		put(DotAttr.REGULAR, TYPE.LIST, Boolean, "false", ON.NODES);
-		put(DotAttr.SHAPE, TYPE.LIST, Shape, "ellipse", ON.NODES);
+		put(DotAttr.SHAPE, TYPE.LIST, Shape.toArray(), "ellipse", ON.NODES);
 		put(DotAttr.SIDES, TYPE.NUMBER, Any, "4", ON.NODES);
 		put(DotAttr.SKEW, TYPE.NUMBER, Any, "0.0", ON.NODES);
-		put(DotAttr.SPLINES, TYPE.STRING, Splines, Empty, ON.GRAPHS);
-		put(DotAttr.STYLE, TYPE.LIST, Style, Empty, ON.GRAPHS, ON.CLUSTERS, ON.NODES, ON.EDGES);
+		put(DotAttr.SPLINES, TYPE.STRING, Spline.toArray(), Empty, ON.GRAPHS);
+		put(DotAttr.STYLE, TYPE.LIST, LineStyle.toArray(), Empty, ON.GRAPHS, ON.CLUSTERS, ON.NODES, ON.EDGES);
 		put(DotAttr.TAILCLIP, TYPE.STRING, Any, "true", ON.EDGES);
 		put(DotAttr.TAILLABEL, TYPE.STRING, Any, Empty, ON.EDGES);
 		put(DotAttr.TAILPORT, TYPE.STRING, Any, "center", ON.EDGES);

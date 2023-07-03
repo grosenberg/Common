@@ -1,10 +1,11 @@
-digraph "Transformer Reduce Node" {
+digraph "Transfuture Transfer" {
 
     "A(0)"
     "B(1)"
     "C(2)"
     "D(3)"
     "E(4)"
+    "F(5)"
     "G(6)"
 
     "A(0)" -> "B(1)"
@@ -12,8 +13,9 @@ digraph "Transformer Reduce Node" {
     "C(2)" -> "D(3)"
     "D(3)" -> "E(4)"
     "C(2)" -> "B(1)"
+    "B(1)" -> "F(5)"
+    "F(5)" -> "G(6)"
     "C(2)" -> "C(2)"
     "C(2)" -> "E(4)"
-    "C(2)" -> "G(6)"
 
 }

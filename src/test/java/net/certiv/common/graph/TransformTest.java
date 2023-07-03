@@ -14,7 +14,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class GraphOpsManipulationTest extends TestBase {
+class TransformTest extends TestBase {
 
 	@Test
 	void testReduceNode() {
@@ -24,17 +24,19 @@ class GraphOpsManipulationTest extends TestBase {
 		builder.createAndAddEdge("B", "C");
 
 		DemoNode b = builder.getNode("B");
-		graph.reduce(b);
+
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.reduce(b);
 
 		b = builder.getNode("B");
 		assertNull(b);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsReduce1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Reduce1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsReduce1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Reduce1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -49,17 +51,18 @@ class GraphOpsManipulationTest extends TestBase {
 		UniqueList<DemoEdge> ab = builder.getEdges("A", "B");
 		UniqueList<DemoEdge> cd = builder.getEdges("C", "D");
 
-		graph.reduce(ab.getFirst(), cd.getFirst());
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.reduce(ab.getFirst(), cd.getFirst());
 
 		DemoNode b = builder.getNode("B");
 		assertNull(b);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsReduceEdge1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"ReduceEdge1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsReduceEdge1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "ReduceEdge1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -77,14 +80,15 @@ class GraphOpsManipulationTest extends TestBase {
 		DemoNode b = builder.getNode("B");
 		UniqueList<DemoEdge> cf = builder.getEdges("C", "F");
 
-		graph.transfer(cf, b); // cf becomes bf
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.transfer(cf, b); // cf becomes bf
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsTransfer1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Transfer1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsTransfer1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Transfer1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -101,14 +105,15 @@ class GraphOpsManipulationTest extends TestBase {
 		DemoNode b = builder.getNode("B");
 		DemoNode d = builder.getNode("D");
 
-		graph.move(ce, b, d);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.move(ce, b, d);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsMove1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Move1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsMove1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Move1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -123,14 +128,15 @@ class GraphOpsManipulationTest extends TestBase {
 		UniqueList<DemoNode> nodes = builder.findNodes("[B,E,H]");
 		DemoNode b = builder.getNode("B");
 
-		graph.consolidateEdges(nodes, b);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.consolidateEdges(nodes, b);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsConsolidate1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Consolidate1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsConsolidate1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Consolidate1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -142,14 +148,15 @@ class GraphOpsManipulationTest extends TestBase {
 
 		DemoNode b = builder.getNode("B");
 
-		graph.replicateEdges(b, targets);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.replicateEdges(b, targets);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsReplicate1.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Replicate1.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsReplicate1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate1.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test
@@ -161,36 +168,14 @@ class GraphOpsManipulationTest extends TestBase {
 
 		DemoNode b = builder.getNode("B");
 
-		graph.replicateEdges(b, targets, true);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.replicateEdges(b, targets, true);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsReplicate2.md", dot);
+		// FsUtil.writeResource(getClass(), XFuture+"Replicate2.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), "opsReplicate2.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
-	}
-
-	@Test
-	void testTranspose() {
-		graph.put(Graph.GRAPH_NAME, "Transpose");
-
-		builder.createAndAddEdges("A => B => C => D");
-		builder.createAndAddEdges("B => E => F => [C,G]");
-
-		/*
-		 * NOT IMPLEMENTED
-		 */
-
-		// DemoNode b = graph.getNode("B");
-		// DemoNode c = graph.getNode("C");
-		// graph.transpose(b, c);
-
-		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "opsTranspose1.md", dot);
-
-		String txt = FsUtil.loadResource(getClass(), "opsTranspose1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate2.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 }

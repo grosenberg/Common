@@ -1,73 +1,60 @@
 package net.certiv.common.graph.ops;
 
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.ex.TransformException;
+import net.certiv.common.graph.Transformer;
+import net.certiv.common.graph.XfPermits;
+import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.stores.Result;
 
 public class ReduceOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
 
-	/**
-	 * @param src the source edge
-	 * @param dst the destination edge
-	 */
+	public static <N extends Node<N, E>, E extends Edge<N, E>> ReduceOp<N, E> of(N node) {
+		return new ReduceOp<>(node);
+	}
+
 	public static <N extends Node<N, E>, E extends Edge<N, E>> ReduceOp<N, E> of(E src, E dst) {
 		return new ReduceOp<>(src, dst);
 	}
 
 	// --------------------------------
 
-	/** key=edge; value=args */
-	private final LinkedHashMap<E, E> args = new LinkedHashMap<>();
+	public final N node;
+	public final E src;
+	public final E dst;
+
+	private ReduceOp(N node) {
+		this.node = node;
+		this.src = null;
+		this.dst = null;
+	}
 
 	private ReduceOp(E src, E dst) {
-		args.put(src, dst);
-	}
-
-	public LinkedHashMap<E, E> args() {
-		return args;
-	}
-
-	public boolean mergeRule(ITransformOp<N, E> rule) {
-		RuleType type = type();
-		if (rule == this) throw new TransformException(ERR_SELF_MERGE, type);
-		if (rule.type() != type) {
-			throw new TransformException(ERR_MERGE, rule.type(), type);
-		}
-
-		boolean ok = true;
-		LinkedHashMap<E, E> in = ((ReduceOp<N, E>) rule).args;
-		for (Entry<E, E> entry : in.entrySet()) {
-			ok &= args.putIfAbsent(entry.getKey(), entry.getValue()) == null;
-		}
-
-		return ok;
+		this.node = null;
+		this.src = src;
+		this.dst = dst;
 	}
 
 	@Override
-	public boolean exec(Graph<N, E> graph) {
-		boolean ok = true;
-		for (E src : args.keySet()) {
-			E dst = args.get(src);
-			if (graph.contains(src) && graph.contains(dst)) {
-				ok &= graph.reduce(src, dst);
-			}
-		}
-		return ok;
+	public XfPermits type() {
+		return XfPermits.REDUCE;
 	}
 
 	@Override
-	public RuleType type() {
-		return RuleType.REDUCE;
+	public Result<Boolean> canApply(Transformer<N, E> xf) {
+		return node != null ? xf.reduce(XfPolicy.CHECK, node) : xf.reduce(XfPolicy.CHECK, src, dst);
+	}
+
+	@Override
+	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+		return node != null ? xf.reduce(policy, node) : xf.reduce(policy, src, dst);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(args);
+		return Objects.hash(node, dst, src);
 	}
 
 	@Override
@@ -76,11 +63,13 @@ public class ReduceOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITr
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		ReduceOp<?, ?> other = (ReduceOp<?, ?>) obj;
-		return Objects.equals(args, other.args);
+		return Objects.equals(node, other.node) && Objects.equals(dst, other.dst)
+				&& Objects.equals(src, other.src);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s", type(), args);
+		if (node != null) return String.format("[%s] %s", type(), node);
+		return String.format("[%s] %s::%s", type(), src, dst);
 	}
 }

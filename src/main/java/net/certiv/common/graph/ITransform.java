@@ -1,20 +1,58 @@
 package net.certiv.common.graph;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Predicate;
 
-import net.certiv.common.stores.LinkedHashList;
+import net.certiv.common.ex.Explainer;
+import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.algorithms.GraphPath;
+import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.stores.Result;
 
 public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	GraphException ERR_SENSE = GraphEx.of("Sense is null");
+	GraphException ERR_NO_PATH = GraphEx.of("GraphPath is null");
+	GraphException ERR_EDGE = GraphEx.of("Invalid edge.");
+	GraphException ERR_COPY_FIND = GraphEx.of("Copy: added node not found: %s");
+
+	String NODE_NULL = "Node %s is null";
+	String NODE_LIST_NULL = "Node list is null";
+
+	String EDGE_NULL = "Edge %s is null";
+	String EDGE_LIST_NULL = "Edge list is null";
+	String EDGE_NODE_NULL = "Edge %s %s node is null";
+	String EDGE_FILTER_FAIL = "Edge %s %s filter failed";
+
+	String NO_GRAPH_NODE = "Graph does not contain node %s %s";
+	String NO_GRAPH_EDGE_NODE = "Graph does not contain edge %s %s node %s";
+
+	String BEGIN = "begin";
+	String END = "end";
+
+	// ---- Operations ---------
+
 	/**
-	 * Removes the given node from the graph. All connecting edges are removed (and
-	 * cleared).
+	 * Removes the given node from the graph. All connecting edges are removed and
+	 * cleared.
 	 *
 	 * @param node the node to remove
-	 * @return {@code true} if the node was present in the graph and is now removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeNode(N node);
+	Result<Boolean> removeNode(N node);
+
+	/**
+	 * Removes the given nodes from the graph. All connecting edges are removed and
+	 * cleared.
+	 *
+	 * @param nodes the nodes to remove
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
+	 */
+	Result<Boolean> removeNodes(Collection<? extends N> nodes);
 
 	/**
 	 * Removes the given edge from the graph. Removes either terminal node if the node has
@@ -22,9 +60,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edge  a graph edge
 	 * @param clear {@code true} to clear the edge terminal nodes and properties
-	 * @return {@code true} if the edge was removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeEdge(E edge, boolean clear);
+	Result<Boolean> removeEdge(E edge, boolean clear);
 
 	/**
 	 * Removes the given edges from the graph. Removes either terminal node of an edge if
@@ -32,44 +71,89 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edges a list of graph edges
 	 * @param clear {@code true} to clear the edge terminal nodes and properties
-	 * @return {@code true} if all of the edges were removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeEdges(Collection<? extends E> edges, boolean clear);
+	Result<Boolean> removeEdges(Collection<? extends E> edges, boolean clear);
 
 	/**
 	 * Removes the given edge if the edge satisfies the given filter predicate or if the
-	 * filter is {@code null}.
+	 * filter is {@code null}. Non-removal of an edge because the edge does not satisfiy
+	 * the filter predicate is not a failure.
 	 *
 	 * @param edge   a graph edge
 	 * @param clear  {@code true} to clear the edge terminal nodes and properties
 	 * @param filter a predicate returning {@code true} to select for removal
-	 * @return {@code true} if the edge was removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter);
+	Result<Boolean> removeEdgeIf(E edge, boolean clear, Predicate<? super E> filter);
 
 	/**
-	 * Removes all edges directly connecting from the given source node to the given
-	 * destination node.
+	 * Removes all edges, constrained to the given direction sense, directly connecting
+	 * the given source and destination nodes.
 	 *
+	 * @param dir   edge direction {@link Sense}
 	 * @param src   a source node
 	 * @param dst   a destination node
 	 * @param clear {@code true} to clear the removed edge terminal nodes and properties
-	 * @return {@code true} if the selected edges were removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeEdges(N src, N dst, boolean clear);
+	Result<Boolean> removeEdges(Sense dir, N src, N dst, boolean clear);
 
 	/**
-	 * Removes all edges directly connecting from the given source node to the given
-	 * destination node and that satisfy the given filter predicate. All selected edges
-	 * are removed if the filter is {@code null}.
+	 * Removes all edges, constrained to the given direction sense, directly connecting
+	 * the given source and destination nodes that satisfy the given filter predicate. A
+	 * {@code null} filter functionally tests as {@code true}. Non-removal of an edge
+	 * because the edge does not satisfiy the filter predicate is not a failure.
 	 *
+	 * @param dir    edge direction {@link Sense}
 	 * @param src    a source node
 	 * @param dst    a destination node
 	 * @param clear  {@code true} to clear the edge terminal nodes and properties
 	 * @param filter a predicate returning {@code true} to select for removal
-	 * @return {@code true} if the selected edges were removed
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean removeEdgesIf(N src, N dst, boolean clear, Predicate<? super E> filter);
+	Result<Boolean> removeEdgesIf(Sense dir, N src, N dst, boolean clear, Predicate<? super E> filter);
+
+	/**
+	 * Removes the given edges that satisfy the given filter predicate. A {@code null}
+	 * filter functionally tests as {@code true}. Non-removal of an edge because the edge
+	 * does not satisfiy the filter predicate is not a failure.
+	 *
+	 * @param edges  edges to conditionally remove
+	 * @param clear  {@code true} to clear the edge terminal nodes and properties
+	 * @param filter a predicate returning {@code true} to select for removal
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
+	 */
+	Result<Boolean> removeEdgesIf(Collection<? extends E> edges, boolean clear, Predicate<? super E> filter);
+
+	/**
+	 * Removes all edges connecting the given path to the graph and conditionally removes
+	 * the nodes contained within the path from the graph.
+	 *
+	 * @param path  a graph path
+	 * @param clear {@code true} to remove and clear the properties of the nodes and edges
+	 *              contained within this path
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
+	 */
+	Result<Boolean> remove(GraphPath<N, E> path, boolean clear);
+
+	/**
+	 * Removes all edges connecting the given subgraph to the graph and conditionally
+	 * removes the nodes contained within the subgraph from the graph.
+	 *
+	 * @param path  a graph path
+	 * @param clear {@code true} to remove and clear the properties of the nodes and edges
+	 *              contained within this subgraph
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
+	 */
+	Result<Boolean> remove(Map<N, GraphPath<N, E>> subgraph, boolean clear);
 
 	/**
 	 * Transfers the subgraph represented by the given edge to depend from the given node.
@@ -92,9 +176,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edge an edge defining a subgraph
 	 * @param beg  the target beg node for the subgraph
-	 * @return {@code true} if the edge was transferred
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean transfer(E edge, N beg);
+	Result<Boolean> transfer(E edge, N beg);
 
 	/**
 	 * Transfers the subgraphs represented by the given edges to depend from the given
@@ -111,9 +196,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edges the edges defining subgraphs
 	 * @param beg   the target beg node for the subgraphs
-	 * @return {@code true} if all edges were transferred
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean transfer(Collection<? extends E> edges, N beg);
+	Result<Boolean> transfer(Collection<? extends E> edges, N beg);
 
 	/**
 	 * Copies the given subgraph into the graph. Both nodes and edges of the subgraph are
@@ -121,12 +207,13 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * copied subgraph. The destination node is effectively replaced by the subgraph when
 	 * {@code remove} is {@code true}.
 	 *
-	 * @param sg     subgraph map of {@code key=head; values=trailing edges}
+	 * @param sg     subgraph map of {@code key=head node; value=GraphPath}
 	 * @param dst    destination node
 	 * @param remove {@code true} to remove the destination node
-	 * @return {@code true} on copy success
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean copy(LinkedHashList<N, E> sg, N dst, boolean remove);
+	Result<Boolean> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove);
 
 	/**
 	 * Moves the given edge to connect between the given nodes.
@@ -141,9 +228,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param edge an existing graph edge
 	 * @param beg  the new begin node
 	 * @param end  the new end node
-	 * @return {@code true} if the edge was moved
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean move(E edge, N beg, N end);
+	Result<Boolean> move(E edge, N beg, N end);
 
 	/**
 	 * Moves the given edge to connect between the given nodes.
@@ -159,9 +247,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param beg    the new begin node
 	 * @param end    the new end node
 	 * @param cyclic {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was moved
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean move(E edge, N beg, N end, boolean cyclic);
+	Result<Boolean> move(E edge, N beg, N end, boolean cyclic);
 
 	/**
 	 * Moves the given edges to connect between the given nodes.
@@ -177,9 +266,9 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param beg    the new begin node
 	 * @param end    the new end node
 	 * @param cyclic {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edges were moved
+	 * @return {@link Result#OK} on move success, or {@link Explainer} describing failure
 	 */
-	boolean move(Collection<? extends E> edges, N beg, N end, boolean cyclic);
+	Result<Boolean> move(Collection<? extends E> edges, N beg, N end, boolean cyclic);
 
 	/**
 	 * Reterminate the given edge with the given end node.
@@ -193,9 +282,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param edge   a graph edge
 	 * @param end    a new edge end node
 	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reterminate(E edge, N end);
+	Result<Boolean> reterminate(E edge, N end);
 
 	/**
 	 * Reterminate the given edge with the given end node.
@@ -209,10 +299,11 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edge   a graph edge
 	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edge was reterminated
+	 * @param cyclic {@code true} to permit creation of single edge cycles
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reterminate(E edge, N end, boolean cycles);
+	Result<Boolean> reterminate(E edge, N end, boolean cyclic);
 
 	/**
 	 * Reterminate the given edges with the given end node.
@@ -225,9 +316,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edges existing graph edges
 	 * @param end   a new edge end node
-	 * @return {@code true} if the edges were reterminated
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reterminate(Collection<? extends E> edges, N end);
+	Result<Boolean> reterminate(Collection<? extends E> edges, N end);
 
 	/**
 	 * Reterminate the given edges with the given end node.
@@ -241,10 +333,11 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param edges  existing graph edges
 	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
-	 * @return {@code true} if the edges were reterminated
+	 * @param cyclic {@code true} to permit creation of single edge cycles
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reterminate(Collection<? extends E> edges, N end, boolean cycles);
+	Result<Boolean> reterminate(Collection<? extends E> edges, N end, boolean cyclic);
 
 	/**
 	 * Consolidate the edges connecting to the source nodes to the target node. Excludes
@@ -262,9 +355,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param sources collection of edge begin nodes
 	 * @param target  a target node
-	 * @return
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean consolidateEdges(Collection<? extends N> sources, N target);
+	Result<Boolean> consolidateEdges(Collection<? extends N> sources, N target);
 
 	/**
 	 * Replicates the existing edge connections with given source node to the given target
@@ -281,9 +375,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param node    a source node
 	 * @param targets the target nodes
-	 * @return {@code true} on replication success
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean replicateEdges(N node, Collection<? extends N> targets);
+	Result<Boolean> replicateEdges(N node, Collection<? extends N> targets);
 
 	/**
 	 * Replicates the existing edge connections with given source node to the given target
@@ -307,9 +402,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param node    a source node
 	 * @param targets the target nodes
 	 * @param remove  {@code true} to remove the source node
-	 * @return {@code true} on replication success
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean replicateEdges(N node, Collection<? extends N> targets, boolean remove);
+	Result<Boolean> replicateEdges(N node, Collection<? extends N> targets, boolean remove);
 
 	/**
 	 * Reduce the graph by removing the given node while retaining the connectivity
@@ -323,9 +419,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * </pre>
 	 *
 	 * @param node the term to remove from the graph
-	 * @return {@code true} on reduction success
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reduce(N node);
+	Result<Boolean> reduce(N node);
 
 	/**
 	 * Reduce the graph by reterminating the given source edge to the distal node of the
@@ -351,7 +448,8 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param src the source edge
 	 * @param dst the destination edge
-	 * @return {@code true} on reduction success
+	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
+	 *         failure
 	 */
-	boolean reduce(E src, E dst);
+	Result<Boolean> reduce(E src, E dst);
 }
