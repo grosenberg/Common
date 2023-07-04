@@ -117,29 +117,6 @@ class TransformTest extends TestBase {
 	}
 
 	@Test
-	void testConsolidate() {
-		graph.put(Graph.GRAPH_NAME, "Consolidate");
-
-		builder.createAndAddEdges("Root->[A,D,G]");
-		builder.createAndAddEdges("A => B => C");
-		builder.createAndAddEdges("D => E => F");
-		builder.createAndAddEdges("G => H => I");
-
-		UniqueList<DemoNode> nodes = builder.findNodes("[B,E,H]");
-		DemoNode b = builder.getNode("B");
-
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		xf.consolidateEdges(nodes, b);
-
-		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Consolidate1.md", dot);
-
-		String txt = FsUtil.loadResource(getClass(), XForm + "Consolidate1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
-		assertEquals(txt, dot);
-	}
-
-	@Test
 	void testReplicate() {
 		graph.put(Graph.GRAPH_NAME, "Replicate");
 
@@ -149,7 +126,7 @@ class TransformTest extends TestBase {
 		DemoNode b = builder.getNode("B");
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		xf.replicateEdges(b, targets);
+		xf.replicateEdges(b, targets); // replicate =>B=> to =>[targets-B]=>
 
 		String dot = graph.render();
 		// FsUtil.writeResource(getClass(), XFuture+"Replicate1.md", dot);

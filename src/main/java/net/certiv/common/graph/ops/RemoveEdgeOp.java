@@ -39,7 +39,7 @@ public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.removeEdges(XfPolicy.CHECK, edge, clear);
+		return xf.removeEdges(edge, clear);
 	}
 
 	@Override

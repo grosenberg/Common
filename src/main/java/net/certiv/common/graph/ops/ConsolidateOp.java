@@ -35,7 +35,7 @@ public class ConsolidateOp<N extends Node<N, E>, E extends Edge<N, E>> implement
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.consolidateEdges(XfPolicy.CHECK, sources, target);
+		return xf.consolidateEdges(sources, target);
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.replicateEdges(XfPolicy.CHECK, src, targets, remove);
+		return xf.replicateEdges(src, targets, remove);
 	}
 
 	@Override

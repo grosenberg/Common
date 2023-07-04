@@ -45,7 +45,7 @@ public class MoveOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.move(XfPolicy.CHECK, edges, beg, end, cyclic);
+		return xf.move(edges, beg, end, cyclic);
 	}
 
 	@Override

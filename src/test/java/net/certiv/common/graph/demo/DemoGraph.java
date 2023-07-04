@@ -14,8 +14,8 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 
 	@Override
 	public DemoNode createNode(Object id) {
-		return new DemoNode(this, new EdgeSet<DemoNode, DemoEdge>(Sense.IN),
-				new EdgeSet<DemoNode, DemoEdge>(Sense.OUT), (String) id);
+		return new DemoNode(this, new EdgeSet<>(Sense.IN),
+				new EdgeSet<>(Sense.OUT), (String) id);
 	}
 
 	@Override

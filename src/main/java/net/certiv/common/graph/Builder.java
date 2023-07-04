@@ -198,6 +198,57 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		return edge;
 	}
 
+	// TODO: consider adding
+	// /**
+	// * @param beg
+	// * @param end
+	// * @return
+	// * @see Graph#createAndAddEdge(Node, Node)
+	// */
+	// public E createAndAddEdge(N beg, N end) {
+	// return graph.createAndAddEdge(beg, end);
+	// }
+	//
+	// /**
+	// * @param node
+	// * @return
+	// * @see Graph#copyNode(Node)
+	// */
+	// public N copyNode(N node) {
+	// return graph.copyNode(node);
+	// }
+	//
+	// /**
+	// * @param edge
+	// * @param beg
+	// * @param end
+	// * @return
+	// * @see Graph#copyEdge(Edge, Node, Node)
+	// */
+	// public E copyEdge(E edge, N beg, N end) {
+	// return graph.copyEdge(edge, beg, end);
+	// }
+	//
+	// /**
+	// * @param edge
+	// * @param beg
+	// * @param end
+	// * @return
+	// * @see Graph#copyAndAddEdge(Edge, Node, Node)
+	// */
+	// public E copyAndAddEdge(E edge, N beg, N end) {
+	// return graph.copyAndAddEdge(edge, beg, end);
+	// }
+	//
+	// /**
+	// * @param edge
+	// * @return
+	// * @see Graph#addEdge(Edge)
+	// */
+	// public boolean addEdge(E edge) {
+	// return graph.addEdge(edge);
+	// }
+
 	/**
 	 * Verifies that the given name references a unique (or non-existant) node.
 	 *
@@ -270,13 +321,24 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		return getEdges(src, dst);
 	}
 
+	/**
+	 * Returns the unique set of all edges known to this builder.
+	 *
+	 * @return the unique set of builder edges
+	 */
+	@Override
 	public UniqueList<E> getEdges() {
 		return edges;
 	}
 
 	@Override
+	public UniqueList<E> getEdges(boolean cyclic) {
+		return graph.getEdges(cyclic);
+	}
+
+	@Override
 	public boolean hasEdge(N src, N dst) {
-		return false;
+		return !src.to(dst).isEmpty();
 	}
 
 	@Override
@@ -286,7 +348,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 
 	@Override
 	public UniqueList<E> getEdges(Sense dir, N src, N dst) {
-		return null;
+		return graph.getEdges(dir, src, dst);
 	}
 
 	public void addEdges(UniqueList<E> edges) {

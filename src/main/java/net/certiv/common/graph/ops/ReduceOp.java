@@ -44,7 +44,7 @@ public class ReduceOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITr
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return node != null ? xf.reduce(XfPolicy.CHECK, node) : xf.reduce(XfPolicy.CHECK, src, dst);
+		return node != null ? xf.reduce(node) : xf.reduce(src, dst);
 	}
 
 	@Override

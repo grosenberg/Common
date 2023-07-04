@@ -29,8 +29,31 @@ public class TransformCpTest extends TestBase {
 	}
 
 	@Test
-	void testCopy() {
-		graph.put(Graph.GRAPH_NAME, "Copy");
+	void testCopyEnd() {
+		graph.put(Graph.GRAPH_NAME, "Copy End");
+
+		DemoNode g = builder.getNode("G");
+		DemoNode u = builder.getNode("U");
+
+		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
+		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
+
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		xf.copy(sg, g, true);	// copy in like =>G=>, removing G
+		xf.remove(sg, true);	// remove source subgraph
+
+		String dot = graph.render();
+		// FsUtil.writeResource(getClass(), XForm + "CopyEnd.md", dot);
+
+		String txt = FsUtil.loadResource(getClass(), XForm + "CopyEnd.md").value;
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+
+		assertEquals(txt, dot);
+	}
+
+	@Test
+	void testCopyMid() {
+		graph.put(Graph.GRAPH_NAME, "Copy Mid");
 
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
@@ -39,13 +62,13 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, false);
+		Result<Boolean> res = xf.copy(sg, f, false); // copy in like =>F=>
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "Copy.md", dot);
+		// FsUtil.writeResource(getClass(), XForm + "CopyMid.md", dot);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Copy.md").value;
+		String txt = FsUtil.loadResource(getClass(), XForm + "CopyMid.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -61,7 +84,7 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, true);
+		Result<Boolean> res = xf.copy(sg, f, true); // copy in like =>F=>, removing F
 		assertTrue(res.valid());
 
 		String dot = graph.render();
@@ -83,10 +106,10 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, true);
+		Result<Boolean> res = xf.copy(sg, f, true); // copy in like =>F=>, removing F
 		assertTrue(res.valid());
 
-		res = xf.remove(sg, true);
+		res = xf.remove(sg, true); // remove & clear source subgraph nodes
 		assertTrue(res.valid());
 
 		String dot = graph.render();
@@ -96,4 +119,5 @@ public class TransformCpTest extends TestBase {
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
+
 }

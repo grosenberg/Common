@@ -343,6 +343,8 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Consolidate the edges connecting to the source nodes to the target node. Excludes
 	 * the target node from the source nodes. Removes the finally unconnected source nodes
 	 * from the graph.
+	 * <p>
+	 * Existing cycles are moved. May create new cycles.
 	 *
 	 * <pre>
 	 * A => B => C
@@ -388,15 +390,15 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * All replica edges are added to the graph.
 	 *
 	 * <pre>
-	 * A => B => C
-	 * replicateEdges(B, [B,X,Y,Z], false);
-	 * A => [B,X,Y,Z] => C
+	 * builder.createAndAddEdges("A => B => C");
+	 * builder.findOrCreateNodes("[B,X,Y,Z]");
+	 * replicateEdges(b, [b,x,y,z], false);
+	 * a => [b,x,y,z] => c
 	 * </pre>
 	 *
 	 * <pre>
-	 * A => B => C
 	 * replicateEdges(B, [B,X,Y,Z], true); // removes B
-	 * A => [X,Y,Z] => C
+	 * a => [x,y,z] => c
 	 * </pre>
 	 *
 	 * @param node    a source node

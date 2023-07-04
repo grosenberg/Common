@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
@@ -56,7 +57,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.qualify()) {
-				ok &= chkNode(xpr, ok, node);
+				ok &= chkNode(xpr, ok, node, !policy.repair());
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -65,7 +66,9 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			ok &= rmNode(xpr, node);
+			if (!(policy.repair() && !graph.contains(node))) {
+				ok &= rmNode(xpr, node);
+			}
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -97,7 +100,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.qualify()) {
-				ok &= chkNodes(xpr, ok, nodes);
+				ok &= chkNodes(xpr, ok, nodes, !policy.repair());
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -278,7 +281,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, dir, "Sense direction is null");
-				ok &= chkNodes(xpr, ok, List.of(src, dst));
+				ok &= chkNodes(xpr, ok, List.of(src, dst), true);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -332,7 +335,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, dir, "Sense direction is null");
-				ok &= chkNodes(xpr, ok, List.of(src, dst));
+				ok &= chkNodes(xpr, ok, List.of(src, dst), true);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -528,7 +531,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdge(xpr, ok, edge);
-				ok &= chkNode(xpr, ok, beg);
+				ok &= chkNode(xpr, ok, beg, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -571,7 +574,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdges(xpr, ok, edges);
-				ok &= chkNode(xpr, ok, beg);
+				ok &= chkNode(xpr, ok, beg, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -735,7 +738,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdge(xpr, ok, edge);
-				ok &= chkNodes(xpr, ok, List.of(beg, end));
+				ok &= chkNodes(xpr, ok, List.of(beg, end), false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -779,7 +782,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdges(xpr, ok, edges);
-				ok &= chkNodes(xpr, ok, List.of(beg, end));
+				ok &= chkNodes(xpr, ok, List.of(beg, end), false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -838,7 +841,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdge(xpr, ok, edge);
-				ok &= chkNode(xpr, ok, end);
+				ok &= chkNode(xpr, ok, end, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -891,7 +894,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= chkEdges(xpr, ok, edges);
-				ok &= chkNode(xpr, ok, end);
+				ok &= chkNode(xpr, ok, end, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -940,8 +943,8 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.qualify()) {
-				ok &= chkNodes(xpr, ok, sources);
-				ok &= chkNode(xpr, ok, target);
+				ok &= chkNodes(xpr, ok, sources, true);
+				ok &= chkNode(xpr, ok, target, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -959,15 +962,24 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			Set<N> nodes = new LinkedHashSet<>(sources);
 			nodes.remove(target);
 
-			for (N node : nodes) {
-				// lead edges [D,G] => [X,Y] to [D,G] => B
-				for (E edge : node.edges(Sense.IN)) {
-					ok &= mvEdge(xpr, edge, edge.beg(), target, false);
-				}
-				// tail edges [X,Y] => [F,I] to B => [F,I]
-				for (E edge : node.edges(Sense.OUT)) {
-					ok &= mvEdge(xpr, edge, target, edge.end(), true);
-				}
+			UniqueList<E> leads = nodes.stream().map(n -> n.edges(Sense.IN)).flatMap(Collection::stream)
+					.collect(Collectors.toCollection(UniqueList::new));
+			UniqueList<E> tails = nodes.stream().map(n -> n.edges(Sense.OUT)).flatMap(Collection::stream)
+					.collect(Collectors.toCollection(UniqueList::new));
+			UniqueList<E> cycles = nodes.stream().map(n -> n.edges(Sense.OUT, e -> e.cyclic()))
+					.flatMap(Collection::stream).collect(Collectors.toCollection(UniqueList::new));
+
+			// lead edges [D,G] => [X,Y] to [D,G] => B
+			for (E edge : leads) {
+				ok &= mvEdge(xpr, edge, edge.beg(), target, true);
+			}
+			// tail edges [X,Y] => [F,I] to B => [F,I]
+			for (E edge : tails) {
+				ok &= mvEdge(xpr, edge, target, edge.end(), true);
+			}
+			// cyclic edges [X,Y] => [X,Y] to B => B
+			for (E edge : cycles) {
+				ok &= mvEdge(xpr, edge, target, target, true);
 			}
 
 			if (ok) return Result.OK;
@@ -1010,8 +1022,8 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.qualify()) {
-				ok &= chkNode(xpr, ok, node);
-				ok &= chkNodes(xpr, ok, targets);
+				ok &= chkNode(xpr, ok, node, true);
+				ok &= chkNodes(xpr, ok, targets, false);
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -1022,7 +1034,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.repair()) {
-				targets = targets.stream().filter(n -> n != null && n.valid() && graph.contains(n)).toList();
+				targets = targets.stream().filter(n -> n != null && n.valid()).toList();
 				ok = true;
 			}
 
@@ -1077,7 +1089,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (policy.qualify()) {
-				ok &= chkNode(xpr, ok, node);
+				ok &= chkNode(xpr, ok, node, !policy.repair());
 
 				if (ok && policy.block()) return Result.OK;
 				if (!ok && (policy.block() || policy.condStop())) {
@@ -1086,12 +1098,14 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			UniqueList<E> leads = node.edges(Sense.IN, false);	// =>N
-			UniqueList<E> tails = node.edges(Sense.OUT, false);	// N=>
+			if (!(policy.repair() && !graph.contains(node))) {
+				UniqueList<E> leads = node.edges(Sense.IN, false);	// =>N
+				UniqueList<E> tails = node.edges(Sense.OUT, false);	// N=>
 
-			for (E lead : leads) {
-				for (E tail : tails) {
-					ok &= reduceEdges(xpr, lead, tail);
+				for (E lead : leads) {
+					for (E tail : tails) {
+						ok &= reduceEdges(xpr, lead, tail);
+					}
 				}
 			}
 
@@ -1240,14 +1254,15 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * Check a node for validity: that the node is not {@code null} and exists in the
 	 * graph.
 	 *
-	 * @param xpr  {@link Explainer}
-	 * @param ok   conditional check flag
-	 * @param node node to check
+	 * @param xpr    {@link Explainer}
+	 * @param ok     conditional check flag
+	 * @param node   node to check
+	 * @param exists {@code true} to test for existence in graph
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkNode(Explainer xpr, boolean ok, N node) {
+	public final boolean chkNode(Explainer xpr, boolean ok, N node, boolean exists) {
 		ok &= xpr.notNull(ok, node, NODE_NULL);
-		ok &= xpr.is(ok, graph.contains(node), NO_GRAPH_NODE);
+		if (exists) ok &= xpr.is(ok, graph.contains(node), NO_GRAPH_NODE);
 		return ok;
 	}
 
@@ -1255,15 +1270,16 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * Check nodes for validity: that each node is not {@code null} and exists in the
 	 * graph.
 	 *
-	 * @param xpr   {@link Explainer}
-	 * @param ok    conditional check flag
-	 * @param nodes node to check
+	 * @param xpr    {@link Explainer}
+	 * @param ok     conditional check flag
+	 * @param nodes  node to check
+	 * @param exists {@code true} to test for existence in graph
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkNodes(Explainer xpr, boolean ok, Collection<? extends N> nodes) {
+	public final boolean chkNodes(Explainer xpr, boolean ok, Collection<? extends N> nodes, boolean exists) {
 		ok &= xpr.notNull(ok, nodes, NODE_LIST_NULL);
 		ok &= xpr.any(ok, nodes, n -> n != null, NODE_NULL);
-		ok &= xpr.any(ok, nodes, n -> graph.contains(n), NO_GRAPH_NODE);
+		if (exists) ok &= xpr.any(ok, nodes, n -> graph.contains(n), NO_GRAPH_NODE);
 		return ok;
 	}
 
@@ -1272,6 +1288,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		try {
 			E dup = graph.duplicateEdge(edge, beg, end);
 			graph.addEdge(dup);
+			// Log.debug("Dup: %s :: %s -> %s", edge, beg, end);
 			return true;
 
 		} catch (Exception e) {

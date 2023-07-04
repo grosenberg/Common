@@ -1,4 +1,4 @@
-digraph Copy {
+digraph "Copy Mid" {
 
   subgraph "cluster_A(0)" {
 

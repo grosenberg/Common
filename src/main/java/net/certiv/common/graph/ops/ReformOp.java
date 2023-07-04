@@ -56,8 +56,8 @@ public class ReformOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITr
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		if (XfPermits.TRANSFER == type) return xf.transfer(XfPolicy.CHECK, edges, target);
-		return xf.reterminate(XfPolicy.CHECK, edges, target, cyclic);
+		if (XfPermits.TRANSFER == type) return xf.transfer(edges, target);
+		return xf.reterminate(edges, target, cyclic);
 	}
 
 	@Override

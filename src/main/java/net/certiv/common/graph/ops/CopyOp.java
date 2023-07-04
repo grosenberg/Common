@@ -40,7 +40,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.copy(XfPolicy.CHECK, sg, dst, remove);
+		return xf.copy(sg, dst, remove);
 	}
 
 	@Override

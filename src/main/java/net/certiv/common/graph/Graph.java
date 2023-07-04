@@ -239,7 +239,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	/** Returns {@code true} if the graph contains the given path. */
 	public boolean contains(GraphPath<N, E> path) {
 		if (path == null) return false;
-		return getEdges().containsAll(path.edges());
+		return getEdges(true).containsAll(path.edges());
 	}
 
 	/** Returns {@code true} if the graph contains the given paths. */
@@ -298,9 +298,14 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public UniqueList<E> getEdges() {
+		return getEdges(false);
+	}
+
+	@Override
+	public UniqueList<E> getEdges(boolean cyclic) {
 		UniqueList<E> edges = new UniqueList<>();
 		for (N node : nodes) {
-			edges.addAll(node.edges());
+			edges.addAll(node.edges(Sense.BOTH, cyclic));
 		}
 		return edges;
 	}
@@ -477,7 +482,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public void clear() {
-		getEdges().forEach(e -> e.remove(true));
+		getEdges(true).forEach(e -> e.remove(true));
 		nodes.forEach(n -> n.clear());
 		super.clear();
 	}

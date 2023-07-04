@@ -19,11 +19,19 @@ public interface IBuild<N extends Node<N, E>, E extends Edge<N, E>> {
 	boolean hasEdge(N src, N dst);
 
 	/**
-	 * Returns the unique set of all edges.
+	 * Returns the unique set of all non-cyclic edges.
 	 *
 	 * @return the unique set of existing edges
 	 */
 	UniqueList<E> getEdges();
+
+	/**
+	 * Returns the unique set of graph edges, conditionally including cyclic edges.
+	 *
+	 * @param cyclic {@code true} to include cyclic edges
+	 * @return the unique set of existing edges
+	 */
+	UniqueList<E> getEdges(boolean cyclic);
 
 	/**
 	 * Returns the unique set of edges existing between the given nodes.

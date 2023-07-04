@@ -22,27 +22,11 @@ import net.certiv.common.util.FsUtil;
 
 class TransfutureTest extends TestBase {
 
-	DemoNode a;
-	DemoNode b;
-	DemoNode c;
-	DemoNode d;
-	DemoNode e;
-	DemoNode f;
-	DemoNode g;
-
 	@BeforeEach
 	void setUp() {
 		builder.createAndAddEdges("A->B->C->D->E");
 		builder.createAndAddEdges("C->F->G");
 		builder.createAndAddEdges("C->[B,C,E]");
-
-		a = builder.getNode("A");
-		b = builder.getNode("B");
-		c = builder.getNode("C");
-		d = builder.getNode("D");
-		e = builder.getNode("E");
-		f = builder.getNode("F");
-		g = builder.getNode("G");
 	}
 
 	@Test
@@ -51,6 +35,8 @@ class TransfutureTest extends TestBase {
 
 		builder.createAndAddEdges("U->X->Y");
 		builder.createAndAddEdges("U->Z");
+
+		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
 		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
@@ -78,6 +64,8 @@ class TransfutureTest extends TestBase {
 
 		builder.createAndAddEdges("U->X->Y");
 		builder.createAndAddEdges("U->Z");
+
+		DemoNode g = builder.getNode("G");
 		DemoNode u = builder.getNode("U");
 
 		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
@@ -101,6 +89,8 @@ class TransfutureTest extends TestBase {
 	void testRemoveNode() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Remove Node");
 
+		DemoNode f = builder.getNode("F");
+
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		xf.removeNode(f);
 		xf.apply();
@@ -115,7 +105,10 @@ class TransfutureTest extends TestBase {
 	void testRemoveEdge() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Remove Edge");
 
+		DemoNode c = builder.getNode("C");
+		DemoNode f = builder.getNode("F");
 		UniqueList<DemoEdge> edges = builder.getEdges(c, f);
+
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		for (DemoEdge edge : edges) {
 			xf.removeEdge(edge, true);
@@ -132,6 +125,8 @@ class TransfutureTest extends TestBase {
 	void testReduceNode() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Reduce Node");
 
+		DemoNode f = builder.getNode("F");
+
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		xf.reduce(f);
 		xf.apply();
@@ -147,7 +142,9 @@ class TransfutureTest extends TestBase {
 	void testTransfer() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Transfer");
 
+		DemoNode b = builder.getNode("B");
 		UniqueList<DemoEdge> cf = builder.getEdges("C", "F");
+
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		xf.transfer(cf, b); // cf becomes bf
 		xf.apply();
@@ -162,7 +159,12 @@ class TransfutureTest extends TestBase {
 	void testMove() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Move");
 
+		DemoNode b = builder.getNode("B");
+		DemoNode c = builder.getNode("C");
+		DemoNode d = builder.getNode("D");
+		DemoNode e = builder.getNode("E");
 		UniqueList<DemoEdge> ce = builder.getEdges(c, e);
+
 		for (DemoEdge edge : ce) {
 			DotStyle ds = edge.getDotStyle();
 			ds.put(LABEL, "Edge " + edge.name());
@@ -170,30 +172,13 @@ class TransfutureTest extends TestBase {
 		}
 
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
-		for (DemoEdge edge : ce) {
-			xf.move(edge, b, d);
-		}
+		xf.move(ce, b, d, false);
 		xf.apply();
 
 		String dot = graph.render();
 		// FsUtil.writeResource(getClass(), XFuture+"Move.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Move.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
-		assertEquals(txt, dot);
-	}
-
-	@Test
-	void testConsolidate() {
-		graph.put(Graph.GRAPH_NAME, "Transfuture Consolidate");
-
-		UniqueList<DemoNode> nodes = builder.findNodes("[C,E,F]");
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
-		xf.consolidateEdges(nodes, b);
-		xf.apply();
-
-		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Consolidate.md", dot);
-		String txt = FsUtil.loadResource(getClass(), XFuture + "Consolidate.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -202,6 +187,7 @@ class TransfutureTest extends TestBase {
 	void testReplicate() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Replicate");
 
+		DemoNode b = builder.getNode("B");
 		UniqueList<DemoNode> targets = builder.findOrCreateNodes("[B,X,Y,Z]");
 
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
@@ -210,6 +196,7 @@ class TransfutureTest extends TestBase {
 
 		String dot = graph.render();
 		// FsUtil.writeResource(getClass(), XFuture+"Replicate.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Replicate.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
@@ -219,13 +206,16 @@ class TransfutureTest extends TestBase {
 	void testReplicateReduce() {
 		graph.put(Graph.GRAPH_NAME, "Transfuture Replicate Reduce");
 
+		DemoNode b = builder.getNode("B");
 		UniqueList<DemoNode> targets = builder.findOrCreateNodes("[X,Y,Z]");
+
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		xf.replicateEdges(b, targets, true);
 		xf.apply();
 
 		String dot = graph.render();
 		// FsUtil.writeResource(getClass(), XFuture+"ReplicateReduce.md", dot);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "ReplicateReduce.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.XfPolicy.Flg;
 import net.certiv.common.graph.algorithms.GraphPath;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ops.ConsolidateOp;
@@ -40,25 +41,52 @@ import net.certiv.common.stores.UniqueList;
  */
 public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements ITransform<N, E> {
 
+	private static final XfPolicy CHECK = XfPolicy.of(XfPolicy.TEST, Flg.Repair);
+
 	private final LinkedList<ITransformOp<N, E>> ops = new LinkedList<>();
 	private final Transformer<N, E> xf;
 	private final XfPolicy policy;
 
 	/**
-	 * Constructor for initially collecting transform ops and subsequently applying the
-	 * ops, subject to a permissive transform policy, against the given graph.
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application to the given graph, subject to the given execution transform policy.
+	 * <p>
+	 * Default execution policy: {@link XfPolicy#DEFAULT}.
+	 * <p>
+	 * Permissive recordation acceptance policy: {@link Flg#Qualify}, {@link Flg#Repair},
+	 * {@link Flg#Block}, {@link Flg#Report}.
+	 *
+	 * @param graph target graph
 	 */
 	public Transfuture(Graph<N, E> graph) {
-		this(graph, XfPolicy.PERMIT);
+		this(graph, XfPolicy.DEFAULT, CHECK);
 	}
 
 	/**
-	 * Constructor for initially collecting transform ops and subsequently applying the
-	 * ops, subject to the given transform policy, against the given graph.
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application to the given graph, subject to the given execution transform policy.
+	 * <p>
+	 * Permissive recordation acceptance policy: {@link Flg#Qualify}, {@link Flg#Repair},
+	 * {@link Flg#Block}, {@link Flg#Report}.
+	 *
+	 * @param graph target graph
+	 * @param exec  execution policy
 	 */
-	public Transfuture(Graph<N, E> graph, XfPolicy policy) {
-		xf = new Transformer<>(graph, XfPolicy.CHECK); // check as default
-		this.policy = policy;
+	public Transfuture(Graph<N, E> graph, XfPolicy exec) {
+		this(graph, exec, CHECK);
+	}
+
+	/**
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application to the given graph, subject to the given execution transform policy.
+	 *
+	 * @param graph target graph
+	 * @param exec  execution policy
+	 * @param check recordation acceptance policy; {@link Flg#Block} is enforced
+	 */
+	public Transfuture(Graph<N, E> graph, XfPolicy exec, XfPolicy check) {
+		xf = new Transformer<>(graph, XfPolicy.of(check, Flg.Block)); // must block
+		this.policy = exec;
 	}
 
 	/** @return the accumulated transform ops (modifiable) */
