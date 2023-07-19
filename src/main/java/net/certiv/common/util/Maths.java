@@ -326,7 +326,7 @@ public class Maths {
 	/**
 	 * Computes the max for an array of doubles.
 	 *
-	 * @param vector the array
+	 * @param vals the array
 	 * @return the maximum
 	 */
 	public static double max(double[] vals) {
@@ -344,7 +344,7 @@ public class Maths {
 	/**
 	 * Computes the minimum for an array of doubles.
 	 *
-	 * @param vector the array
+	 * @param vals the array
 	 * @return the minimum value
 	 */
 	public static double min(double[] vals) {

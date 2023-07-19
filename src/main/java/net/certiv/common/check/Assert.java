@@ -90,7 +90,7 @@ public final class Assert {
 	 * collection-style element does not itself include any {@code null} element (deep
 	 * examination). Throws the given unchecked exception on failure.
 	 *
-	 * @param arg the object array to check
+	 * @param args the object array to check
 	 */
 	public static void notNull(Object... args) {
 		if (Check.isNull(args)) throw exception(Test.NOT_NULL, NULL_ARG).setElements(args);
@@ -119,8 +119,8 @@ public final class Assert {
 	 * collection-style element does not itself include any {@code null} element (deep
 	 * examination). Throws the given unchecked exception on failure.
 	 *
-	 * @param ex  the unchecked exception to throw
-	 * @param arg the object array to check
+	 * @param ex   the unchecked exception to throw
+	 * @param args the object array to check
 	 */
 	public static <E extends RuntimeException> void notNull(E ex, Object... args) {
 		if (Check.isNull(args)) {
@@ -183,7 +183,7 @@ public final class Assert {
 	 * <p>
 	 * Empty means zero-length or {@code null}.
 	 *
-	 * @param cls  the unchecked exception class
+	 * @param ex   the unchecked exception class
 	 * @param args the object array to check
 	 */
 	public static <E extends RuntimeException> void notEmpty(E ex, Object... args) {
@@ -201,7 +201,7 @@ public final class Assert {
 	 *
 	 * @param cls  the unchecked exception class
 	 * @param type the exception type qualifier
-	 * @param msg  the exception message (if args is empty), or message format otherwise
+	 * @param fmt  the exception message (if args is empty), or message format otherwise
 	 * @param args the message parameters (may be empty)
 	 * @return specific unchecked exception instance
 	 */
@@ -210,7 +210,7 @@ public final class Assert {
 		String msg = args != null && args.length > 0 ? String.format(fmt, args) : fmt;
 		msg = String.format(FMT1, type, msg);
 		Result<? extends RuntimeException> res = Reflect.make(cls, type, msg);
-		return res.valid() ? res.value : new RuntimeException(res.err);
+		return res.present() ? res.value : new RuntimeException(res.err);
 	}
 
 	private static AssertException exception(Test type, String msg) {

@@ -85,8 +85,53 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param check recordation acceptance policy; {@link Flg#Block} is enforced
 	 */
 	public Transfuture(Graph<N, E> graph, XfPolicy exec, XfPolicy check) {
-		xf = new Transformer<>(graph, XfPolicy.of(check, Flg.Block)); // must block
+		this(new Transformer<>(graph), exec, check);
+	}
+
+	/**
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application using the given transformer, subject to the given execution transform
+	 * policy.
+	 * <p>
+	 * Default execution policy: {@link XfPolicy#DEFAULT}.
+	 * <p>
+	 * Permissive recordation acceptance policy: {@link Flg#Qualify}, {@link Flg#Repair},
+	 * {@link Flg#Block}, {@link Flg#Report}.
+	 *
+	 * @param xf reference transformer
+	 */
+	public Transfuture(Transformer<N, E> xf) {
+		this(xf, XfPolicy.DEFAULT, CHECK);
+	}
+
+	/**
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application using the given transformer, subject to the given execution transform
+	 * policy.
+	 * <p>
+	 * Permissive recordation acceptance policy: {@link Flg#Qualify}, {@link Flg#Repair},
+	 * {@link Flg#Block}, {@link Flg#Report}.
+	 *
+	 * @param xf   reference transformer
+	 * @param exec execution policy
+	 */
+	public Transfuture(Transformer<N, E> xf, XfPolicy exec) {
+		this(xf, exec, CHECK);
+	}
+
+	/**
+	 * Constructor. Enables qualified recording of transform ops for subsequent
+	 * application using the given transformer, subject to the given execution transform
+	 * policy.
+	 *
+	 * @param xf    reference transformer
+	 * @param exec  execution policy
+	 * @param check recordation acceptance policy; {@link Flg#Block} is enforced
+	 */
+	public Transfuture(Transformer<N, E> xf, XfPolicy exec, XfPolicy check) {
+		this.xf = xf;
 		this.policy = exec;
+		this.xf.setPolicy(XfPolicy.of(check, Flg.Block)); // must block
 	}
 
 	/** @return the accumulated transform ops (modifiable) */
@@ -433,6 +478,65 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	/**
+	 * Records the copying of the given edge into the graph between the given nodes.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 *         a pre-condition failure explaination
+	 */
+	@Override
+	public Result<E> copy(E edge, N beg, N end) {
+		Result<LinkedList<E>> res = copy(List.of(edge), beg, end, false);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	/**
+	 * Records the copying of the given edge into the graph between the given nodes.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 *         a pre-condition failure explaination
+	 */
+	@Override
+	public Result<E> copy(E edge, N beg, N end, boolean cyclic) {
+		Result<LinkedList<E>> res = copy(List.of(edge), beg, end, cyclic);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	/**
+	 * Records the copying of the given edges into the graph between the given nodes.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 *         a pre-condition failure explaination
+	 */
+	@Override
+	public Result<LinkedList<E>> copy(Collection<? extends E> edges, N beg, N end, boolean cyclic) {
+		if (!policy.qualify()) {
+			ops.add(CopyOp.of(edges, beg, end, cyclic));
+			return Result.nil();
+		}
+
+		Result<LinkedList<E>> res = xf.copy(edges, beg, end, cyclic);
+		if (res.valid()) ops.add(CopyOp.of(edges, beg, end, cyclic));
+		return report(res);
+	}
+
+	/**
 	 * Records the copying the given subgraph into the graph.
 	 * <p>
 	 * Implementation:
@@ -444,13 +548,13 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove) {
 		if (!policy.qualify()) {
 			ops.add(CopyOp.of(sg, dst, remove));
-			return Result.OK;
+			return Result.nil();
 		}
 
-		Result<Boolean> res = xf.copy(sg, dst, remove);
+		Result<LinkedList<E>> res = xf.copy(sg, dst, remove);
 		if (res.valid()) ops.add(CopyOp.of(sg, dst, remove));
 		return report(res);
 	}
@@ -632,7 +736,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> replicateEdges(N node, Collection<? extends N> targets) {
+	public Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets) {
 		return replicateEdges(node, targets, false);
 	}
 
@@ -649,13 +753,13 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
+	public Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
 		if (!policy.qualify()) {
 			ops.add(ReplicateOp.of(node, targets, remove));
-			return Result.OK;
+			return Result.nil();
 		}
 
-		Result<Boolean> res = xf.replicateEdges(node, targets, remove);
+		Result<LinkedList<E>> res = xf.replicateEdges(node, targets, remove);
 		if (res.valid()) ops.add(ReplicateOp.of(node, targets, remove));
 		return report(res);
 	}
@@ -708,7 +812,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		return report(res);
 	}
 
-	private Result<Boolean> report(Result<Boolean> res) {
+	private <T> Result<T> report(Result<T> res) {
 		if (res.err()) Log.debug(res.err.getMessage());
 		return res;
 	}

@@ -16,6 +16,10 @@ import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
 
+/**
+ * Abstract base class for a directed multigraph node. Edge connections are managed
+ * through separate input and output edge sets.
+ */
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
 
 	public static final String NODE_NAME = "NodeName";
@@ -200,7 +204,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	/**
 	 * Returns the set of outbound edges that connect with the given node.
 	 *
-	 * @param node a distal node
+	 * @param end a distal node
 	 * @return set of connecting edges
 	 */
 	public UniqueList<E> to(N end) {
@@ -210,7 +214,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	/**
 	 * Returns the set of inbound edges that connect with the given node.
 	 *
-	 * @param node a distal node
+	 * @param beg a distal node
 	 * @return set of connecting edges
 	 */
 	public UniqueList<E> from(N beg) {

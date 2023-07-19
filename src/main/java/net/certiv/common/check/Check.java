@@ -35,7 +35,7 @@ public final class Check {
 	/**
 	 * Checks that the given array or an included element is {@code null}.
 	 *
-	 * @param arg the array object to check
+	 * @param args the array object to check
 	 * @return {@code true} if the arg array is or contains {@code null}
 	 */
 	public static boolean isNull(Object... args) {
@@ -47,13 +47,13 @@ public final class Check {
 	/**
 	 * Checks that the given collection or an included element is {@code null}.
 	 *
-	 * @param arg the collection to check
+	 * @param args the collection to check
 	 * @return {@code true} if the collection is or contains {@code null}
 	 */
-	public static boolean isNull(Collection<?> coll) {
-		if (coll == null) return true;
-		if (coll.isEmpty()) return false;
-		return coll.stream().anyMatch(v -> isNull(v));
+	public static boolean isNull(Collection<?> args) {
+		if (args == null) return true;
+		if (args.isEmpty()) return false;
+		return args.stream().anyMatch(v -> isNull(v));
 	}
 
 	// /**
@@ -80,7 +80,7 @@ public final class Check {
 	/**
 	 * Checks that the given array and any included elements are not {@code null}.
 	 *
-	 * @param arg the array object to check
+	 * @param args the array object to check
 	 * @return {@code true} if the arg array is not {@code null}
 	 */
 	public static boolean notNull(Object... args) {
@@ -90,7 +90,7 @@ public final class Check {
 	/**
 	 * Checks that the given collection and any included elements are not {@code null}.
 	 *
-	 * @param arg the collection to check
+	 * @param args the collection to check
 	 * @return {@code true} if the collection is not and does not contain {@code null}
 	 */
 	public static boolean notNull(Collection<?> args) {
@@ -184,7 +184,7 @@ public final class Check {
 	 * Checks that the given {@code arg} array is not {@code null}, not {@code empty}, and
 	 * the individual elements are {@code notEmpty}.
 	 *
-	 * @param arg the args array to test
+	 * @param args the args array to test
 	 * @return {@code true} if the args array and contained elements are effectively not
 	 *         {@code empty}
 	 */
@@ -196,11 +196,11 @@ public final class Check {
 	 * Checks that the given collection is not {@code null}, not {@code empty}, and the
 	 * individual elements are {@code notEmpty}.
 	 *
-	 * @param arg the args collection to test
+	 * @param args the args collection to test
 	 * @return {@code true} if the collection and contained elements are not {@code empty}
 	 */
-	public static boolean notEmpty(Collection<?> coll) {
-		return !empty(coll);
+	public static boolean notEmpty(Collection<?> args) {
+		return !empty(args);
 	}
 
 	// /**
@@ -242,7 +242,7 @@ public final class Check {
 	 * {@code empty}. Returns {@code true} if <strong>all</strong> elements are
 	 * {@code null} or {@code empty}.
 	 *
-	 * @param arg the array to test
+	 * @param args the array to test
 	 * @return {@code true} if the array is completely empty
 	 */
 	public static boolean allEmpty(Object... args) {

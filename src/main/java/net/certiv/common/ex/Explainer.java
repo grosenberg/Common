@@ -13,8 +13,14 @@ import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Maths;
+import net.certiv.common.util.Strings;
 
 public class Explainer extends RuntimeException {
+
+	private static final String EXPLAINER = "Explainer";
+	private static final String TAT = "\tat ";
+
+	private static final String ERR_NULL = "Collection is 'null'";
 
 	/** Caption for reasons list */
 	private static final String MSG_CAPTION = "%s - Reasons: ";
@@ -29,71 +35,75 @@ public class Explainer extends RuntimeException {
 	private boolean last = true;
 
 	public Explainer() {
-		this("Explainer");
+		this(EXPLAINER);
 	}
 
 	public Explainer(String title) {
 		super(title);
 	}
 
-	public boolean add(Result<Boolean> res) {
-		if (res.err()) return add(res.err);
-		return last;
-	}
-
-	public boolean add(Throwable t) {
-		if (t instanceof Explainer) {
-			add(((Explainer) t).reasons());
-		} else {
-			reasons.add(getTrace(t));
-			last = false;
-		}
-		return last;
-	}
-
-	public boolean add(List<String> reasons) {
-		this.reasons.addAll(reasons);
-		return this.last = this.reasons.isEmpty();
-	}
-
-	public boolean addFirst(Result<Boolean> res) {
-		if (res.err()) return addFirst(res.err);
-		return last;
-	}
-
-	public boolean addFirst(Throwable t) {
-		if (t instanceof Explainer) {
-			addFirst(((Explainer) t).reasons());
-		} else {
-			reasons.addFirst(getTrace(t));
-			last = false;
-		}
-		return last;
-	}
-
-	public boolean addFirst(List<String> reasons) {
-		this.reasons.addAll(0, reasons);
-		return this.last = this.reasons.isEmpty();
-	}
-
 	public LinkedList<String> reasons() {
 		return reasons;
 	}
 
-	public boolean reason(String msg) {
-		return reasons.add(msg);
+	public Explainer add(Result<Boolean> res) {
+		if (res.err()) add(res.err);
+		return this;
 	}
 
-	public boolean reason(String fmt, Object... args) {
-		return reasons.add(String.format(fmt, args));
+	public Explainer add(Throwable t) {
+		if (t instanceof Explainer) {
+			add(((Explainer) t).reasons());
+		} else if (t != null) {
+			reasons.add(getTrace(t));
+			last = false;
+		}
+		return this;
 	}
 
-	public boolean reason(boolean ok, String msg) {
+	public Explainer add(List<String> reasons) {
+		this.reasons.addAll(reasons);
+		this.last = this.reasons.isEmpty();
+		return this;
+	}
+
+	public Explainer addFirst(Result<Boolean> res) {
+		if (res.err()) addFirst(res.err);
+		return this;
+	}
+
+	public Explainer addFirst(Throwable t) {
+		if (t instanceof Explainer) {
+			addFirst(((Explainer) t).reasons());
+		} else if (t != null) {
+			reasons.addFirst(getTrace(t));
+			last = false;
+		}
+		return this;
+	}
+
+	public Explainer addFirst(List<String> reasons) {
+		this.reasons.addAll(0, reasons);
+		this.last = this.reasons.isEmpty();
+		return this;
+	}
+
+	public Explainer reason(String msg) {
+		reasons.add(msg);
+		return this;
+	}
+
+	public Explainer reason(String fmt, Object... args) {
+		reasons.add(String.format(fmt, args));
+		return this;
+	}
+
+	public Explainer reason(boolean ok, String msg) {
 		if (ok) {
 			reasons.add(msg);
 			this.last = ok;
 		}
-		return ok;
+		return this;
 	}
 
 	public boolean reason(boolean ok, String fmt, Object... args) {
@@ -194,7 +204,7 @@ public class Explainer extends RuntimeException {
 	 */
 	public <E> boolean any(boolean ok, Collection<? extends E> elems, Predicate<E> pred, String msg) {
 		if (ok) {
-			Assert.notNull(GraphEx.of("Collection is 'null'"), elems);
+			Assert.notNull(GraphEx.of(ERR_NULL), elems);
 			boolean flg = true;
 			List<E> tmp = new ArrayList<>(elems);
 			for (int idx = 0; idx < tmp.size(); idx++) {
@@ -234,7 +244,7 @@ public class Explainer extends RuntimeException {
 		TextStringBuilder sb = new TextStringBuilder(super.getMessage());
 		sb.appendln(MSG_CAPTION, super.getMessage());
 		for (String reason : reasons) {
-			sb.appendln("\t" + reason);
+			sb.appendln(Strings.TAB + reason);
 		}
 		return sb.toString();
 	}
@@ -252,7 +262,7 @@ public class Explainer extends RuntimeException {
 		if (len > 0) {
 			sb.appendln(TRACE_CAPTION);
 			for (int idx = 0; idx < len; idx++) {
-				sb.appendln("\tat " + trace[idx]);
+				sb.appendln(TAT + trace[idx]);
 			}
 		}
 
@@ -263,14 +273,14 @@ public class Explainer extends RuntimeException {
 			if (clen > 0) {
 				sb.appendln(CAUSE_CAPTION);
 				for (int idx = 0; idx < clen; idx++) {
-					sb.appendln("\tat " + causes[idx]);
+					sb.appendln(TAT + causes[idx]);
 				}
 			}
 		}
 		return sb.toString();
 	}
 
-	/** @deprecated cause is blocked/not implemented */
+	/** @deprecated {@code cause} is blocked/not implemented */
 	@Deprecated
 	@Override
 	public synchronized Throwable initCause(Throwable cause) {

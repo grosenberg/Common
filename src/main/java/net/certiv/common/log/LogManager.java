@@ -13,38 +13,35 @@ public class LogManager {
 	 * Returns a Logger with the name of the calling class.
 	 *
 	 * @return The Logger for the calling class.
-	 * @throws UnsupportedOperationException if the calling class cannot be
-	 *             determined.
+	 * @throws UnsupportedOperationException if the calling class cannot be determined.
 	 */
 	public static Logger getLogger() {
 		return getLogger(StackLocatorUtil.getCallerClass(2));
 	}
 
 	/**
-	 * Returns a Logger using the fully qualified class name of the value as the
-	 * Logger name.
+	 * Returns a Logger using the fully qualified class name of the value as the Logger
+	 * name.
 	 *
-	 * @param value The value whose class name should be used as the Logger name. If
-	 *            null the name of the calling class will be used as the logger
-	 *            name.
+	 * @param value The value whose class name should be used as the Logger name. If null
+	 *              the name of the calling class will be used as the logger name.
 	 * @return The Logger.
-	 * @throws UnsupportedOperationException if {@code value} is {@code null} and
-	 *             the calling class cannot be determined.
+	 * @throws UnsupportedOperationException if {@code value} is {@code null} and the
+	 *                                       calling class cannot be determined.
 	 */
 	public static Logger getLogger(final Object value) {
 		return getLogger(value != null ? value.getClass() : StackLocatorUtil.getCallerClass(2));
 	}
 
 	/**
-	 * Returns a Logger using the fully qualified name of the Class as the Logger
-	 * name.
+	 * Returns a Logger using the fully qualified name of the Class as the Logger name.
 	 *
-	 * @param origin The class whose name should be used as the Logger name. If
-	 *            {@code null} it will default to the calling class.
-	 * @param config
-	 * @return The Logger.
-	 * @throws UnsupportedOperationException if {@code origin} is {@code null} and
-	 *             the calling class cannot be determined.
+	 * @param origin  The class whose name should be used as the Logger name. If
+	 *                {@code null} it will default to the calling class.
+	 * @param context logger context
+	 * @return extended logger
+	 * @throws UnsupportedOperationException if {@code origin} is {@code null} and the
+	 *                                       calling class cannot be determined.
 	 */
 	public static ExtendedLogger getLogger(final Class<?> origin, final LoggerContext context) {
 		final Class<?> cls = callerClass(origin);

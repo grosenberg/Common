@@ -1,6 +1,7 @@
 package net.certiv.common.graph;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -147,9 +148,9 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Removes all edges connecting the given subgraph to the graph and conditionally
 	 * removes the nodes contained within the subgraph from the graph.
 	 *
-	 * @param path  a graph path
-	 * @param clear {@code true} to remove and clear the properties of the nodes and edges
-	 *              contained within this subgraph
+	 * @param subgraph a map of graph paths
+	 * @param clear    {@code true} to remove and clear the properties of the nodes and
+	 *                 edges contained within this subgraph
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
@@ -202,18 +203,60 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	Result<Boolean> transfer(Collection<? extends E> edges, N beg);
 
 	/**
+	 * Copies the given edge to connect between the given nodes, provided the copy would
+	 * not create a single edge cycle.
+	 *
+	 * @param edge an existing graph edge
+	 * @param beg  the new begin node
+	 * @param end  the new end node
+	 * @return {@link Result} containing the new edge, or {@link Result#err()} explaining
+	 *         the failure
+	 */
+	Result<E> copy(E edge, N beg, N end);
+
+	/**
+	 * Copies the given edge to connect between the given nodes.
+	 * <p>
+	 * If {@code cyclic} is {@code false}, no edge is created if the copy would create a
+	 * single edge cycle.
+	 *
+	 * @param edge   an existing graph edge
+	 * @param beg    the new begin node
+	 * @param end    the new end node
+	 * @param cyclic {@code true} to permit creation of single edge cycles
+	 * @return {@link Result} containing the new edge, or {@link Result#err()} explaining
+	 *         the failure
+	 */
+	Result<E> copy(E edge, N beg, N end, boolean cyclic);
+
+	/**
+	 * Copies the given edges to connect between the given nodes.
+	 * <p>
+	 * If {@code cyclic} is {@code false}, edges will not be created if the copy would
+	 * create a single edge cycle.
+	 *
+	 * @param edges  the existing graph edges
+	 * @param beg    the new begin node
+	 * @param end    the new end node
+	 * @param cyclic {@code true} to permit creation of single edge cycles
+	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
+	 *         the failure
+	 */
+	Result<LinkedList<E>> copy(Collection<? extends E> edges, N beg, N end, boolean cyclic);
+
+	/**
 	 * Copies the given subgraph into the graph. Both nodes and edges of the subgraph are
 	 * replicated. The destination node defines the inbound and outbound edges to the
 	 * copied subgraph. The destination node is effectively replaced by the subgraph when
 	 * {@code remove} is {@code true}.
 	 *
-	 * @param sg     subgraph map of {@code key=head node; value=GraphPath}
+	 * @param sg     subgraph of {@code key=head node; value=GraphPath}
 	 * @param dst    destination node
 	 * @param remove {@code true} to remove the destination node
-	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
-	 *         failure
+	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
+	 *         the failure
 	 */
-	Result<Boolean> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove);
+	Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove);
 
 	/**
 	 * Moves the given edge to connect between the given nodes.
@@ -266,7 +309,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param beg    the new begin node
 	 * @param end    the new end node
 	 * @param cyclic {@code true} to permit creation of single edge cycles
-	 * @return {@link Result#OK} on move success, or {@link Explainer} describing failure
+	 * @return {@link Result#OK} on success, or {@link Explainer} describing failure
 	 */
 	Result<Boolean> move(Collection<? extends E> edges, N beg, N end, boolean cyclic);
 
@@ -279,9 +322,8 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * graph, except by self-cyclic edges, that initial terminal node is removed from the
 	 * graph.
 	 *
-	 * @param edge   a graph edge
-	 * @param end    a new edge end node
-	 * @param cycles {@code true} to permit creation of single edge cycles
+	 * @param edge a graph edge
+	 * @param end  a new edge end node
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
@@ -380,7 +422,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
-	Result<Boolean> replicateEdges(N node, Collection<? extends N> targets);
+	Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets);
 
 	/**
 	 * Replicates the existing edge connections with given source node to the given target
@@ -407,7 +449,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
-	Result<Boolean> replicateEdges(N node, Collection<? extends N> targets, boolean remove);
+	Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets, boolean remove);
 
 	/**
 	 * Reduce the graph by removing the given node while retaining the connectivity

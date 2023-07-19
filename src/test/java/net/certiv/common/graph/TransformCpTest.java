@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, false); // copy in like =>F=>
+		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, false); // copy in like =>F=>
 		assertTrue(res.valid());
 
 		String dot = graph.render();
@@ -84,7 +85,8 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, true); // copy in like =>F=>, removing F
+		// copy in like =>F=>, removing F
+		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());
 
 		String dot = graph.render();
@@ -106,11 +108,13 @@ public class TransformCpTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, true); // copy in like =>F=>, removing F
+		// copy in like =>F=>, removing F
+		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());
 
-		res = xf.remove(sg, true); // remove & clear source subgraph nodes
-		assertTrue(res.valid());
+		// remove & clear source subgraph nodes
+		Result<Boolean> rm = xf.remove(sg, true);
+		assertTrue(rm.valid());
 
 		String dot = graph.render();
 		// FsUtil.writeResource(getClass(), XForm + "CopyRmRd.md", dot);

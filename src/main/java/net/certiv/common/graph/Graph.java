@@ -19,6 +19,10 @@ import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
 
+/**
+ * Abstract base class for a directed multigraph. Supports graphs with multiple root nodes
+ * or no root node.
+ */
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
 		implements IBuild<N, E> {
 

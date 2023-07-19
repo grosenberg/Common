@@ -27,14 +27,14 @@ public interface IAssertException {
 
 	/**
 	 * Expands the message by using the existing message as a format string against the
-	 * given arguments. Presumes the existing message is a {@link Formatter} format
-	 * string.
+	 * given arguments. Presumes the existing message is a
+	 * {@link String#format(String, Object...)} format string.
 	 *
 	 * @param args Arguments referenced by the format specifiers in the format string.
 	 * @throws IllegalFormatException if the message/format string contains invalid
 	 *                                syntax, insufficient arguments, etc.
 	 * @return the {@code GraphException}
-	 * @see Formatter
+	 * @see String#format(String, Object...)
 	 */
 	IAssertException on(Object... args);
 

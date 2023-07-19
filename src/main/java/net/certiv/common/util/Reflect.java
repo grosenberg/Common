@@ -64,7 +64,7 @@ public class Reflect {
 			Field f = target.getClass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
-			return Result.of(true);
+			return Result.OK;
 
 		} catch (Exception | Error e) {
 			return Result.of(e);
@@ -76,7 +76,7 @@ public class Reflect {
 			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
-			return Result.of(true);
+			return Result.OK;
 
 		} catch (Exception | Error e) {
 			return Result.of(e);
@@ -117,7 +117,7 @@ public class Reflect {
 	public static Result<Boolean> hasField(Object target, String name) {
 		try {
 			target.getClass().getDeclaredField(name);
-			return Result.of(true);
+			return Result.OK;
 
 		} catch (Exception | Error e) {
 			return Result.of(e);
@@ -150,11 +150,11 @@ public class Reflect {
 	 */
 	public static Result<Boolean> setField(Object target, String name, Object value) {
 		Result<Field> field = findField(target, name);
-		if (!field.valid()) return Result.of(false);
+		if (!field.present()) return Result.FAIL;
 		try {
 			field.value.setAccessible(true);
 			field.value.set(target, value);
-			return Result.of(true);
+			return Result.OK;
 
 		} catch (Exception | Error e) {
 			return Result.of(e);
@@ -165,7 +165,7 @@ public class Reflect {
 		if (params == null) params = NoParams;
 		try {
 			target.getClass().getMethod(methodName, params);
-			return Result.of(true);
+			return Result.OK;
 
 		} catch (Exception | Error e) {
 			return Result.of(e);
@@ -175,7 +175,7 @@ public class Reflect {
 	/**
 	 * Returns the class type of the first generic field parameter
 	 *
-	 * @param target    the target object
+	 * @param obj       the target object
 	 * @param fieldname the name of the target contained field
 	 * @return the class type of the first generic parameter
 	 */

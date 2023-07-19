@@ -17,6 +17,10 @@ import net.certiv.common.stores.Pair;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
+/**
+ * Graph pretty-printer. Supports both fully stylized Dot-syntax rendering and simple
+ * text-tree dump.
+ */
 public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	// simple DOT name

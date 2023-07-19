@@ -134,7 +134,6 @@ public class Status {
 	 *
 	 * @return the severity: one of {@code OK}, {@code ERROR}, {@code INFO},
 	 *         {@code WARNING}, or {@code CANCEL}
-	 * @see #matches(int)
 	 */
 	public Severity getSeverity() {
 		return severity;
@@ -160,9 +159,9 @@ public class Status {
 	}
 
 	/**
-	 * Sets the plug-in id.
+	 * Sets the source id.
 	 *
-	 * @param pluginId the unique identifier of the relevant plug-in
+	 * @param source the unique identifier of the relevant plug-in
 	 */
 	protected void setSource(String source) {
 		Assert.notEmpty(source);

@@ -46,8 +46,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param visitor the node visitor action
 	 * @param start   the node to start descending from
 	 */
-	public void descend(NodeVisitor<N> visitor, N from) {
-		walk(Sense.OUT, visited, visitor, null, from);
+	public void descend(NodeVisitor<N> visitor, N start) {
+		walk(Sense.OUT, visited, visitor, null, start);
 	}
 
 	public Walker<N, E> debug(boolean enable) {

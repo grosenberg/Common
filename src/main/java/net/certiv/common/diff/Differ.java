@@ -111,6 +111,11 @@ public class Differ {
 		System.out.println(result);
 	}
 
+	/** Print the results of {@link #sdiff} to {@code System.err} */
+	public void err() {
+		System.err.println(result);
+	}
+
 	/** @return the results of {@link #sdiff} */
 	public String str() {
 		return result;

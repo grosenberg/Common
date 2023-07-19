@@ -457,6 +457,38 @@ public final class FsUtil {
 	}
 
 	/**
+	 * Checks for the existence of a named resource file having a non-zero file size.
+	 * Attempts to read the contents of the resource file having the given name in the
+	 * package folder, defined by the package of the given class, under the project
+	 * {@code <resource>} directory.
+	 * <p>
+	 * For a {@code <resource>} directory of {@code <project>/src/test/resources},
+	 * reference class of {@code a.b.c.D.class}, and name {@code y/Z.txt}, data will be
+	 * read from {@code <project>/src/test/resources/a/b/c/y/Z.txt}.
+	 *
+	 * @param cls  a resource classloader relative class
+	 * @param name the resource filename
+	 * @return {@code true} if the resource exists with a non-zero size
+	 */
+	public static boolean checkResource(Class<?> cls, String name) {
+		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
+			int b = rs.read();
+			return b > -1;
+
+		} catch (Exception e) {
+			String pkg = slashify(cls.getPackageName());
+			String res = String.join(Strings.SLASH, pkg, name);
+			try (InputStream rs = cls.getClassLoader().getResourceAsStream(res)) {
+				int b = rs.read();
+				return b > -1;
+
+			} catch (Exception ex) {
+				return false;
+			}
+		}
+	}
+
+	/**
 	 * Reads, to a {@code String}, the contents of the resource file having the given name
 	 * in the package folder, defined by the package of the given class, under the project
 	 * {@code <resource>} directory.

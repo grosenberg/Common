@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,10 +21,11 @@ import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
+/** In-place graph transformer. */
 public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements ITransform<N, E> {
 
 	public final Graph<N, E> graph;
-	public final XfPolicy policy;
+	private XfPolicy policy;
 
 	/**
 	 * Constructs a {@link XfPolicy#REPORT} transformer for the given graph.
@@ -37,6 +39,14 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 */
 	public Transformer(Graph<N, E> graph, XfPolicy policy) {
 		this.graph = graph;
+		this.policy = policy;
+	}
+
+	public XfPolicy getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(XfPolicy policy) {
 		this.policy = policy;
 	}
 
@@ -607,11 +617,88 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> copy(Map<N, GraphPath<N, E>> subgraph, N dst, boolean remove) {
+	public Result<E> copy(E edge, N beg, N end) {
+		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, false);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	public Result<E> copy(XfPolicy policy, E edge, N beg, N end) {
+		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, false);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	@Override
+	public Result<E> copy(E edge, N beg, N end, boolean cyclic) {
+		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, cyclic);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	public Result<E> copy(XfPolicy policy, E edge, N beg, N end, boolean cyclic) {
+		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, cyclic);
+		if (res.err()) return Result.of(res.err);
+		return Result.of(res.value.get(0));
+	}
+
+	@Override
+	public Result<LinkedList<E>> copy(Collection<? extends E> edges, N beg, N end, boolean cyclic) {
+		return copy(policy, edges, beg, end, cyclic);
+	}
+
+	public Result<LinkedList<E>> copy(XfPolicy policy, Collection<? extends E> edges, N beg, N end,
+			boolean cyclic) {
+
+		graph.lock();
+		Explainer xpr = new Explainer("Copy Edges");
+		boolean ok = xpr.last();
+
+		try {
+			if (!graph.permits(COPY)) {
+				if (policy.rptByRet()) return Result.of(xpr.reason(COPY.err()));
+				throw GraphEx.of(COPY.err());
+			}
+
+			if (policy.qualify()) {
+				ok &= chkEdges(xpr, ok, edges);
+				ok &= chkNode(xpr, ok, beg, false);
+				ok &= chkNode(xpr, ok, end, false);
+
+				if (ok && policy.block()) return Result.nil();
+				if (!ok && (policy.block() || policy.condStop())) {
+					if (policy.rptByRet()) return Result.of(xpr);
+					if (policy.rptByEx()) throw GraphEx.of("Copy edges pre-condition fail: %s", edges);
+				}
+			}
+
+			if (beg == end && !cyclic) return Result.nil();
+
+			LinkedList<E> dups = new LinkedList<>();
+			for (E edge : edges) {
+				ok &= dupAndAddEdge(xpr, dups, edge, beg, end);
+			}
+
+			if (ok) return Result.of(dups);
+			if (policy.rptByRet()) return Result.of(xpr);
+			throw GraphEx.of("Copy edges fail: %s", edges);
+
+		} catch (Exception | Error e) {
+			xpr.addFirst(e);
+			throw GraphEx.of(xpr);
+
+		} finally {
+			graph.unlock();
+		}
+	}
+
+	@Override
+	public Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> subgraph, N dst, boolean remove) {
 		return copy(policy, subgraph, dst, remove);
 	}
 
-	public Result<Boolean> copy(XfPolicy policy, Map<N, GraphPath<N, E>> subgraph, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(XfPolicy policy, Map<N, GraphPath<N, E>> subgraph, N dst,
+			boolean remove) {
 		graph.lock();
 		Explainer xpr = new Explainer("Copy SubGraph");
 		boolean ok = xpr.last();
@@ -628,13 +715,14 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 					ok &= chkEdges(xpr, ok, path.edges());
 				}
 
-				if (ok && policy.block()) return Result.OK;
+				if (ok && policy.block()) return Result.nil();
 				if (!ok && (policy.block() || policy.condStop())) {
 					if (policy.rptByRet()) return Result.of(xpr);
 					if (policy.rptByEx()) throw GraphEx.of("Copy SubGraph pre-condition fail: %s", subgraph);
 				}
 			}
 
+			LinkedList<E> dups = new LinkedList<>();
 			if (!subgraph.isEmpty()) {
 				UniqueList<E> leads = dst.edges(Sense.IN);
 				UniqueList<E> tails = dst.edges(Sense.OUT);
@@ -642,7 +730,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				for (N head : subgraph.keySet()) {
 					GraphPath<N, E> path = subgraph.get(head);
 					for (E lead : leads) {
-						ok &= insertPath(xpr, lead, head, path, tails);
+						ok &= insertPath(xpr, dups, lead, head, path, tails);
 					}
 				}
 
@@ -651,7 +739,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			if (ok) return Result.OK;
+			if (ok) return Result.of(dups);
 			if (policy.rptByRet()) return Result.of(xpr);
 			throw GraphEx.of("Copy SubGraph fail: %s", subgraph);
 
@@ -664,7 +752,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		}
 	}
 
-	private final boolean insertPath(Explainer xpr, E lead, N head, GraphPath<N, E> path,
+	private final boolean insertPath(Explainer xpr, LinkedList<E> dups, E lead, N head, GraphPath<N, E> path,
 			UniqueList<E> tails) {
 		boolean ok = true;
 
@@ -680,20 +768,20 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			HashMap<Object, N> added = new HashMap<>();
 
 			// start new path
-			ok &= dupAndAddEdge(xpr, lead, lead.beg(), find(added, head, true));
+			ok &= dupAndAddEdge(xpr, dups, lead, lead.beg(), find(added, head, true));
 
 			// copy in the path edges
 			for (E edge : path.edges()) {
 				N beg = find(added, edge.beg(), true);
 				N end = find(added, edge.end(), true);
-				ok &= dupAndAddEdge(xpr, edge, beg, end);
+				ok &= dupAndAddEdge(xpr, dups, edge, beg, end);
 			}
 
 			// connect path terminals to out
 			for (N terminal : path.terminals()) {
 				N end = find(added, terminal, false);
 				for (E next : tails) {
-					ok &= dupAndAddEdge(xpr, next, end, next.end());
+					ok &= dupAndAddEdge(xpr, dups, next, end, next.end());
 				}
 			}
 		}
@@ -996,20 +1084,20 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> replicateEdges(N node, Collection<? extends N> targets) {
+	public Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets) {
 		return replicateEdges(policy, node, targets, false);
 	}
 
-	public Result<Boolean> replicateEdges(XfPolicy policy, N node, Collection<? extends N> targets) {
+	public Result<LinkedList<E>> replicateEdges(XfPolicy policy, N node, Collection<? extends N> targets) {
 		return replicateEdges(policy, node, targets, false);
 	}
 
 	@Override
-	public Result<Boolean> replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
+	public Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets, boolean remove) {
 		return replicateEdges(policy, node, targets, remove);
 	}
 
-	public Result<Boolean> replicateEdges(XfPolicy policy, N node, Collection<? extends N> targets,
+	public Result<LinkedList<E>> replicateEdges(XfPolicy policy, N node, Collection<? extends N> targets,
 			boolean remove) {
 		graph.lock();
 		Explainer xpr = new Explainer("Replicate edges");
@@ -1025,7 +1113,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				ok &= chkNode(xpr, ok, node, true);
 				ok &= chkNodes(xpr, ok, targets, false);
 
-				if (ok && policy.block()) return Result.OK;
+				if (ok && policy.block()) return Result.nil();
 				if (!ok && (policy.block() || policy.condStop())) {
 					if (policy.rptByRet()) return Result.of(xpr);
 					if (policy.rptByEx())
@@ -1044,22 +1132,23 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			UniqueList<E> leads = node.edges(Sense.IN);
 			UniqueList<E> tails = node.edges(Sense.OUT);
 
+			LinkedList<E> dups = new LinkedList<>();
 			for (N tgt : tgts) {
 				// for edges ? => node, create ? => targets
 				for (E edge : leads) {
-					ok &= dupAndAddEdge(xpr, edge, edge.beg(), tgt);
+					ok &= dupAndAddEdge(xpr, dups, edge, edge.beg(), tgt);
 				}
 
 				// for edges node => ?, create targets => ?
 				for (E edge : tails) {
-					ok &= dupAndAddEdge(xpr, edge, tgt, edge.end());
+					ok &= dupAndAddEdge(xpr, dups, edge, tgt, edge.end());
 				}
 			}
 			if (remove) {
 				ok &= rmNode(xpr, node);
 			}
 
-			if (ok) return Result.OK;
+			if (ok) return Result.of(dups);
 			if (policy.rptByRet()) return Result.of(xpr);
 			throw GraphEx.of("Replicate edges fail: %s %s", node, targets);
 
@@ -1283,12 +1372,21 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		return ok;
 	}
 
-	/** Internal: graph edge duplication and add function. */
-	final boolean dupAndAddEdge(Explainer xpr, E edge, N beg, N end) {
+	/**
+	 * Internal: graph edge duplication and add function.
+	 *
+	 * @param xpr  explainer
+	 * @param dups collector of duplicated edges
+	 * @param edge edge to duplicate
+	 * @param beg  duplicated edge begin node
+	 * @param end  duplicated edge end node
+	 * @return
+	 */
+	final boolean dupAndAddEdge(Explainer xpr, LinkedList<E> dups, E edge, N beg, N end) {
 		try {
 			E dup = graph.duplicateEdge(edge, beg, end);
 			graph.addEdge(dup);
-			// Log.debug("Dup: %s :: %s -> %s", edge, beg, end);
+			dups.add(dup);
 			return true;
 
 		} catch (Exception e) {

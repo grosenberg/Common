@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,10 +44,10 @@ class TransfutureTest extends TestBase {
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
-		Result<Boolean> res = xf.copy(sg, f, true);
-		assertTrue(res.valid());
+		Result<LinkedList<DemoEdge>> cp = xf.copy(sg, f, true);
+		assertTrue(cp.valid());
 
-		res = xf.apply();
+		Result<Boolean> res = xf.apply();
 		assertTrue(res.valid());
 
 		String dot = graph.render();

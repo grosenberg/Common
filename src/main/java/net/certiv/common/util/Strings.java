@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
-import net.certiv.common.stores.Table;
-
 public class Strings {
 
 	public static final Pattern PAT_NL = Pattern.compile("\\R");
@@ -643,40 +641,100 @@ public class Strings {
 
 	/** Returns a string containing {@code count} spaces. */
 	public static String spaces(int count) {
-		return dup(count, SPACE);
+		return SPACE.repeat(count);
 	}
 
+	/** Returns a string containing {@code count} copies of the given sequence. */
+	public static String dup(int cnt, CharSequence seq) {
+		return String.valueOf(seq).repeat(cnt);
+	}
+
+	/** Returns a string containing {@code count} copies of the given char array. */
 	public static String dup(int cnt, char... c) {
-		return dup(cnt, String.valueOf(c));
+		return String.valueOf(c).repeat(cnt);
 	}
 
-	// row=dup cnt; col=dup value; value=dup'd value
-	private static final Table<Integer, String, String> DUPS = new Table<>();
-
-	public static String dup(int cnt, String value) {
-		cnt = Math.max(0, cnt);
-		if (!DUPS.contains(cnt, value)) {
-			StringBuilder sb = new StringBuilder();
-			for (int idx = 0; idx < cnt; idx++) {
-				sb.append(value);
-			}
-			DUPS.put(cnt, value, sb.toString());
-		}
-		return DUPS.get(cnt, value);
+	/** Returns a string containing {@code count} copies of the given string. */
+	public static String dup(int cnt, String str) {
+		return str.repeat(cnt);
 	}
 
-	public static List<String> dupList(int cnt, String value) {
-		List<String> sb = new ArrayList<>();
+	/**
+	 * Returns a list containing {@code count} elements, each element a copy of the given
+	 * string.
+	 */
+	public static List<String> dupList(int cnt, String str) {
+		List<String> list = new ArrayList<>();
 		for (int idx = 0; idx < cnt; idx++) {
-			sb.add(value);
+			list.add(str);
 		}
-		return sb;
+		return list;
 	}
 
 	// -----
 
 	/**
-	 * Pad the given text with spaces to the given width.
+	 * Pad left the given text with spaces to the given total width.
+	 *
+	 * @param txt   the text to pad
+	 * @param width the total width
+	 * @return the left padded text
+	 */
+	public static String padl(String txt, int width) {
+		return padl(txt, width, Strings.SPACE);
+	}
+
+	/**
+	 * Pad left the given text with the given pad sequence to the given width.
+	 *
+	 * @param txt   the text to pad
+	 * @param width the total width
+	 * @param pad   the padding sequence
+	 * @return the left padded text
+	 */
+	public static String padl(String txt, int width, String pad) {
+		pad = pad != null ? pad : Strings.SPACE;
+		int delta = width - txt.length();
+		if (delta <= 0 || pad.isEmpty()) return txt;
+
+		int len = pad.length();
+		return pad.repeat(delta / len) + pad.substring(0, delta % len) + txt;
+	}
+
+	/**
+	 * Pad center the given text with spaces to the given total width.
+	 *
+	 * @param txt   the text to pad
+	 * @param width the total width
+	 * @return the center padded text
+	 */
+	public static String padc(String txt, int width) {
+		return padc(txt, width, Strings.SPACE);
+	}
+
+	/**
+	 * Pad center the given text with the given pad sequence to the given width.
+	 *
+	 * @param txt   the text to pad
+	 * @param width the total width
+	 * @param pad   the padding sequence
+	 * @return the center padded text
+	 */
+	public static String padc(String txt, int width, String pad) {
+		pad = pad != null ? pad : Strings.SPACE;
+		int delta = width - txt.length();
+		if (delta <= 0 || pad.isEmpty()) return txt;
+
+		int len = pad.length();
+		int left = delta / 2;
+		int right = delta - left;
+		return pad.repeat(left / len) + pad.substring(0, left % len) //
+				+ txt //
+				+ pad.repeat(right / len) + pad.substring(0, right % len);
+	}
+
+	/**
+	 * Pad right the given text with spaces to the given width.
 	 *
 	 * @param txt   the text to pad
 	 * @param width the total width
@@ -687,7 +745,7 @@ public class Strings {
 	}
 
 	/**
-	 * Pad the given text with the given pad sequence to the given width.
+	 * Pad right the given text with the given pad sequence to the given width.
 	 *
 	 * @param txt   the text to pad
 	 * @param width the total width
@@ -700,9 +758,7 @@ public class Strings {
 		if (delta <= 0) return txt;
 
 		int len = pad.length();
-		int cnt = delta / len;
-		int mod = delta % len;
-		return txt + pad.repeat(cnt) + pad.substring(0, mod);
+		return txt + pad.repeat(delta / len) + pad.substring(0, delta % len);
 	}
 
 	// -----

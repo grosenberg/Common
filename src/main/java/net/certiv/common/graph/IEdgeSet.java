@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import net.certiv.common.stores.UniqueList;
 
+/** Interface for a node edge set. */
 public interface IEdgeSet<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	void add(E edge);

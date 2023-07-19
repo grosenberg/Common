@@ -1,6 +1,7 @@
 package net.certiv.common.graph.ops;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
@@ -43,12 +44,14 @@ public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 	@Override
 	public Result<Boolean> canApply(Transformer<N, E> xf) {
-		return xf.replicateEdges(src, targets, remove);
+		Result<LinkedList<E>> res = xf.replicateEdges(src, targets, remove);
+		return res.valid() ? Result.OK : Result.FAIL;
 	}
 
 	@Override
 	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
-		return xf.replicateEdges(policy, src, targets, remove);
+		Result<LinkedList<E>> res = xf.replicateEdges(policy, src, targets, remove);
+		return res.valid() ? Result.OK : Result.FAIL;
 	}
 
 	@Override

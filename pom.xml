@@ -21,6 +21,8 @@
 
 		<comm-lang3.ver>3.12.0</comm-lang3.ver>
 		<comm-text.ver>1.10.0</comm-text.ver>
+		<eclipse-coll.ver>11.1.0</eclipse-coll.ver>
+
 		<diff.ver>4.12</diff.ver>
 		<log4j.ver>2.20.0</log4j.ver>
 
@@ -42,6 +44,22 @@
 			<artifactId>commons-text</artifactId>
 			<version>${comm-text.ver}</version>
 		</dependency>
+
+
+		<!-- 
+
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections-api</artifactId>
+			<version>${eclipse-coll.ver}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+			<version>${eclipse-coll.ver}</version>
+		</dependency>
+		
+-->
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -158,8 +176,10 @@
 				<executions>
 					<execution>
 						<id>attach-javadoc</id>
+						<phase>verify</phase>
 						<goals>
-							<goal>javadoc</goal>
+							<goal>jar</goal>
+							<!--<goal>javadoc</goal>-->
 						</goals>
 					</execution>
 				</executions>
@@ -169,6 +189,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.1.2</version>
+				<configuration>
+					<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+				</configuration>
 			</plugin>
 
 		</plugins>

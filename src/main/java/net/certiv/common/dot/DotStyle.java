@@ -157,8 +157,8 @@ public class DotStyle {
 	 * The inserted value is a concatenation of the individual {@code #toString()}
 	 * representations of the given values.
 	 *
-	 * @param key   the dot attribute key
-	 * @param value the new value(s)
+	 * @param key    the dot attribute key
+	 * @param values the new value(s)
 	 */
 	public final void put(DotAttr key, IDotStr... values) {
 		if (Dictionary.valid(key)) {
@@ -180,7 +180,7 @@ public class DotStyle {
 	 *
 	 * @param key      the dot attribute key
 	 * @param category the dot defining category
-	 * @param value    the new value(s)
+	 * @param values   the new value(s)
 	 */
 	public final void put(DotAttr key, ON category, IDotStr... values) {
 		if (Dictionary.valid(key)) {
@@ -201,8 +201,8 @@ public class DotStyle {
 	 * {@link IDotStr}, the {@code #toString()} representation of the value is, instead,
 	 * inserted.
 	 *
-	 * @param key   the dot attribute key
-	 * @param value the new value
+	 * @param key    the dot attribute key
+	 * @param values the new value
 	 * @return {@code true} if the given attribute/value mapping was added
 	 */
 	public final boolean putIfAbsent(DotAttr key, IDotStr... values) {
@@ -226,7 +226,7 @@ public class DotStyle {
 	 *
 	 * @param key      the dot attribute key
 	 * @param category the dot defining category
-	 * @param value    the new value
+	 * @param values   the new value
 	 * @return {@code true} if the given attribute/value mapping was added
 	 */
 	public final boolean putIfAbsent(DotAttr key, ON category, IDotStr... values) {
