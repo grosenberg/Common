@@ -35,7 +35,7 @@ public class Hex extends Number implements Comparable<Hex> {
 	 *                               object.
 	 */
 	public static Hex parseString(String arg) throws NumberFormatException {
-		String hex = Strings.trimQuotes(arg);
+		String hex = Strings.deQuote(arg);
 		hex = !Strings.blank(hex) ? hex : "0";
 		boolean neg = hex.charAt(0) == Chars.DASH ? true : false;
 		hex = PREFIX.matcher(hex).replaceFirst(Strings.EMPTY);

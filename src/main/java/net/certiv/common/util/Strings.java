@@ -8,7 +8,6 @@
 package net.certiv.common.util;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class Strings {
 	public static final String STAR = "*";
 	public static final String TILDE = "~";
 
-	public static final String ACCENT = "'";
+	public static final String MARK = "'";
 	public static final String TIC = "`";
 	public static final String QUOTE = "\"";
 
@@ -67,7 +66,6 @@ public class Strings {
 	public static final String CsvDELIM = ", ";
 
 	public static final String EOL = System.lineSeparator();
-	public static final char EOP = File.separatorChar;	// path
 	public static final String UDIR = System.getProperty("user.dir");
 	public static final String UHOME = System.getProperty("user.home");
 
@@ -344,33 +342,24 @@ public class Strings {
 	}
 
 	/**
-	 * Remove one level of quotes surrounding the literal. No error if quotes are not
-	 * present or are mixed.
+	 * Remove one level of well-defined pair of quote characters surrounding the given
+	 * literal. No error if quotes are not present or are mixed.
+	 *
+	 * @param literal a presumptively quoted string
+	 * @return the equivalent unquoted string
 	 */
 	public static String deQuote(String literal) {
-		int endIdx = literal.length() - 1;
-		if (endIdx < 2) return literal;
+		int last = literal.length() - 1;
+		if (last < 1) return literal;
+
 		char beg = literal.charAt(0);
-		char end = literal.charAt(endIdx);
-		for (char[] element : QuotePairs) {
-			if (beg == element[0] && end == element[1]) {
-				return literal.substring(1, endIdx);
+		char end = literal.charAt(last);
+		for (char[] quotes : QuotePairs) {
+			if (beg == quotes[0] && end == quotes[1]) {
+				return literal.substring(1, last);
 			}
 		}
 		return literal;
-	}
-
-	public static String trimQuotes(String arg) {
-		if (arg == null) return null;
-		if (arg.charAt(0) != Chars.ACCENT && arg.charAt(0) != Chars.QUOTE) {
-			return arg;
-		}
-		char c = arg.charAt(arg.length() - 1);
-		if (c != Chars.ACCENT && c != Chars.QUOTE) {
-			return arg;
-		} else {
-			return arg.substring(1, arg.length() - 1);
-		}
 	}
 
 	public static String trimLeadingPunctuation(String text) {

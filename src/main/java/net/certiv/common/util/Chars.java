@@ -39,11 +39,11 @@ public final class Chars {
 	public static final char TAB = '\t';
 	public static final char RET = '\r';
 	public static final char NL = '\n';
+
 	public static final char EOP = File.separatorChar; // path separator
 
 	/**
-	 * Returns {@code true} if the given text contains one or more whitespace
-	 * characters.
+	 * Returns {@code true} if the given text contains one or more whitespace characters.
 	 */
 	public static boolean isWhitespace(CharSequence text) {
 		return ((String) text).matches("\\s+");
@@ -77,8 +77,7 @@ public final class Chars {
 	}
 
 	/**
-	 * Returns {@code true} if a character is a control character, and false
-	 * otherwise.
+	 * Returns {@code true} if a character is a control character, and false otherwise.
 	 */
 	public static boolean isControl(char c) {
 		return Character.getType(c) == Character.CONTROL;
