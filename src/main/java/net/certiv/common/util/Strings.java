@@ -203,7 +203,7 @@ public class Strings {
 		return ELLIPSIS_MARK + input.substring(input.length() - alen + mlen);
 	}
 
-	/** Capitalize the first letter of the given phrase & lowercase remainder. */
+	/** Capitalize the first letter of the given phrase and lowercase remainder. */
 	public static String capitalize(String phrase) {
 		if (phrase == null) return EMPTY;
 		phrase = phrase.trim();

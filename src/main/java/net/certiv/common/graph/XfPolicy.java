@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
 
-import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.ex.GraphException;
 
 public class XfPolicy {
@@ -18,61 +17,33 @@ public class XfPolicy {
 		Stop,
 		/** Block execution; test-only. */
 		Block,
-		/** Report success/failure by returning a {@link Result}. */
+		/** Report success/failure by returning a {@code Result}. */
 		Report,
 		/** Report success/failure by throwing a {@link GraphException}. */
 		Exception
 	}
 
 	/**
-	 * Execute, subject to pre-condition success. Throws an exception on failure.
-	 * <p>
-	 * Returns a {@link Result#OK} on success. Throws a {@link GraphException} with an
-	 * {@link Explainer} capturing capturing pre-condition failures and any actual
-	 * execution exceptions/errors.
-	 * <p>
 	 * Flags: {@link Flg#Qualify}, {@link Flg#Stop}, {@link Flg#Exception}
 	 */
 	public static final XfPolicy ERROR = XfPolicy.of(Flg.Qualify, Flg.Stop, Flg.Exception);
 
 	/**
-	 * Execute, subject to pre-condition success. Throws an exception on failure.
-	 * <p>
-	 * Returns a {@link Result#OK} on success or a {@link Result#err} {@link Explainer}
-	 * capturing pre-condition failures and any actual execution exceptions/errors.
-	 * <p>
 	 * Flags: {@link Flg#Qualify}, {@link Flg#Stop}, {@link Flg#Exception}
 	 */
 	public static final XfPolicy REPORT = XfPolicy.of(Flg.Qualify, Flg.Stop, Flg.Report);
 
 	/**
-	 * Tests and reports pre-condition success/failure without execution.
-	 * <p>
-	 * Returns a {@link Result#OK} on success or a {@link Result#err} {@link Explainer}
-	 * capturing pre-condition failures.
-	 * <p>
 	 * Flags: {@link Flg#Qualify}, {@link Flg#Block}, {@link Flg#Report}
 	 */
 	public static final XfPolicy TEST = XfPolicy.of(Flg.Qualify, Flg.Block, Flg.Report);
 
 	/**
-	 * Execute with no pre-condition testing or parameter repair.
-	 * <p>
-	 * Returns a {@link Result#OK} on success. Throws a {@link GraphException} with an
-	 * {@link Explainer} capturing capturing pre-condition failures and any actual
-	 * execution exceptions/errors.
-	 * <p>
 	 * Flags: {@link Flg#Exception}.
 	 */
 	public static final XfPolicy EXECUTE = XfPolicy.of(Flg.Exception);
 
 	/**
-	 * Checks pre-conditions and then executes regardless of any pre-condition failure.
-	 * Both checking and execution performed subject to parameter repair.
-	 * <p>
-	 * Returns a {@link Result#OK} on success or a {@link Result#err} {@link Explainer}
-	 * capturing pre-condition failures and any actual execution exceptions/errors.
-	 * <p>
 	 * Flags: {@link Flg#Qualify}, {@link Flg#Repair}, {@link Flg#Report}
 	 */
 	public static final XfPolicy DEFAULT = XfPolicy.of(Flg.Qualify, Flg.Repair, Flg.Report);

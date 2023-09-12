@@ -24,10 +24,10 @@ public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Determine if this rule can be applied to the given {@code Graph}. Evaluates
 	 * pre-conditions; not a full simulation of the transform application.
 	 *
-	 * @param xf {@link Transformer} for the target graph
-	 * @return {@link Result.OK} on success, or (conditional on policy) a
-	 *         {@link Result#err} on failure
-	 * @see XfPolicy#CHECK
+	 * @param xf {@code Transformer} for the target graph
+	 * @return {@code Result#OK} on success, or (conditional on policy) a
+	 *         {@code Result#err} on failure
+	 * @see XfPolicy#TEST
 	 */
 	Result<Boolean> canApply(Transformer<N, E> xf);
 
@@ -35,13 +35,13 @@ public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Apply {@code this} transform on the given {@code Graph} subject to the given
 	 * compliance policy.
 	 *
-	 * @param xf     {@link Transformer} for the target graph
+	 * @param xf     {@code Transformer} for the target graph
 	 * @param policy execution condition compliance
-	 * @return {@link Result.OK} on success, or (conditional on policy) a
-	 *         {@link Result#err} on failure
+	 * @return {@code Result#OK} on success, or (conditional on policy) a
+	 *         {@code Result#err} on failure
 	 * @throws (conditional on policy) GraphException on failure
-	 * @see XfPolicy#PERMIT
-	 * @see XfPolicy#EXEC
+	 * @see XfPolicy#TEST
+	 * @see XfPolicy#EXECUTE
 	 */
 	Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy);
 }

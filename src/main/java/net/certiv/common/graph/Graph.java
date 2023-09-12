@@ -142,6 +142,71 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	protected abstract E createEdge(N beg, N end);
 
 	/**
+	 * Primary graph tree constuction entry point. Adds the given edge to the graph.
+	 * <p>
+	 * Internally performs all operations necessary to create the edge terminal nodes, if
+	 * not prior existing in the graph, and to incorporate the edge and terminal nodes
+	 * into the graph.
+	 * <p>
+	 * Note: discretely constucting a node or edge alone does not add it to the graph.
+	 *
+	 * <pre>
+	 * <code>
+	 * 	public DemoEdge createEdge(String parent, String child) {
+	 * 		return createEdge(createNode(parent), createNode(child));
+	 * 	}
+	 *
+	 * 	public DemoEdge createEdge(DemoNode parent, DemoNode child) {
+	 * 		DemoEdge edge = new DemoEdge(parent, child);
+	 * 		addEdge(edge);
+	 * 		return edge;
+	 * 	}
+	 *
+	 * 	public DemoNode createNode(String name) {
+	 * 		DemoNode node = getNode(name);
+	 * 		if (node != null) return node;
+	 *
+	 * 		node = new DemoNode(this, name);
+	 * 		return node;
+	 * 	}
+	 * </code>
+	 * </pre>
+	 *
+	 * @param edge a graph edge
+	 * @returns {@code true} if either terminal node was not already present in the graph
+	 */
+	public boolean addEdge(E edge) {
+		Assert.notNull(ERR_EDGE, edge, edge.beg(), edge.end());
+		edge.beg().add(edge, Sense.OUT);
+		edge.end().add(edge, Sense.IN);
+		boolean ok = install(edge.beg());
+		ok |= install(edge.end());
+		return ok;
+	}
+
+	/**
+	 * Installs the node into the graph node list. <b>Internal use only.</b>
+	 *
+	 * @param node the node to add
+	 * @return {@code true} if not already present
+	 * @see Graph#addEdge(Edge)
+	 */
+	boolean install(N node) {
+		return nodes.add(node);
+	}
+
+	/**
+	 * Deletes the node from the graph node list. <b>Internal use only.</b>
+	 *
+	 * @param node the node to remove
+	 * @return {@code true} if removed
+	 * @see Graph#addEdge(Edge)
+	 */
+	boolean delete(N node) {
+		return nodes.remove(node);
+	}
+
+	/**
 	 * Creates a new edge instance with the given terminal nodes. Adds the edge, including
 	 * the terminal nodes, to the graph.
 	 * <p>
@@ -209,6 +274,81 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		addEdge(copy);
 		return copy;
 	}
+
+	/**
+	 * Duplicates the given edge. Override, if needed, to adjust edge decorations. The
+	 * returned duplicate edge is unassociated with the graph.
+	 *
+	 * @param edge an exemplar edge
+	 * @return a duplicate edge
+	 */
+	public E duplicateEdge(E edge) {
+		lock();
+		try {
+			E dup = createEdge(edge.beg(), edge.end());
+			dup.putAllIfAbsent(edge.properties());
+			return dup;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	/**
+	 * Duplicates the given edge and changes the edge terminals to the given nodes.
+	 * Override, if needed, to adjust edge decorations that are dependent on the changed
+	 * terminals. The returned duplicate edge is unassociated with the graph.
+	 *
+	 * @param edge an exemplar edge
+	 * @param beg  duplicate begin node
+	 * @param end  duplicate end node
+	 * @return a duplicate edge
+	 */
+	public E duplicateEdge(E edge, N beg, N end) {
+		lock();
+		try {
+			E dup = duplicateEdge(edge);
+			dup.setBeg(beg);
+			dup.setEnd(end);
+			return dup;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	/**
+	 * Produce a new edge by functionally joining the given edges. Does not alter the
+	 * existing edges. Override to implement additional derived aspects to joining.
+	 * <p>
+	 * {@code join(AB, BC)} returns {@code AC}
+	 * <p>
+	 * {@code join(AB, DE)} returns {@code AD}
+	 *
+	 * @param lead a leading edge
+	 * @param tail a tailing edge
+	 * @return a new edge otherwise unassociated with the graph
+	 */
+	public E join(E lead, E tail) {
+		lock();
+		try {
+			E edge;
+			if (lead.end().equals(tail.beg())) {
+				edge = createEdge(lead.beg(), tail.end());
+				edge.putAllIfAbsent(lead.properties());
+				edge.putAllIfAbsent(tail.properties());
+			} else {
+				edge = createEdge(lead.beg(), tail.beg());
+				edge.putAllIfAbsent(lead.properties());
+			}
+			return edge;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	// --------------------------------
 
 	/**
 	 * Returns an immutable list of the current graph root nodes. Dynamically collected by
@@ -328,113 +468,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	// --------------------------------------
 
 	/**
-	 * Primary graph tree constuction entry point. Adds the given edge to the graph.
-	 * <p>
-	 * Internally performs all operations necessary to create the edge terminal nodes, if
-	 * not prior existing in the graph, and to incorporate the edge and terminal nodes
-	 * into the graph.
-	 * <p>
-	 * Note: discretely constucting a node or edge alone does not add it to the graph.
-	 *
-	 * <pre>
-	 * <code>
-	 * 	public DemoEdge createEdge(String parent, String child) {
-	 * 		return createEdge(createNode(parent), createNode(child));
-	 * 	}
-	 *
-	 * 	public DemoEdge createEdge(DemoNode parent, DemoNode child) {
-	 * 		DemoEdge edge = new DemoEdge(parent, child);
-	 * 		addEdge(edge);
-	 * 		return edge;
-	 * 	}
-	 *
-	 * 	public DemoNode createNode(String name) {
-	 * 		DemoNode node = getNode(name);
-	 * 		if (node != null) return node;
-	 *
-	 * 		node = new DemoNode(this, name);
-	 * 		return node;
-	 * 	}
-	 * </code>
-	 * </pre>
-	 *
-	 * @param edge a graph edge
-	 * @returns {@code true} if either terminal node was not already present in the graph
-	 */
-	public boolean addEdge(E edge) {
-		Assert.notNull(ERR_EDGE, edge, edge.beg(), edge.end());
-		edge.beg().add(edge, Sense.OUT);
-		edge.end().add(edge, Sense.IN);
-		boolean ok = _add(edge.beg());
-		ok |= _add(edge.end());
-		return ok;
-	}
-
-	/**
-	 * Internal use only. Adds the node to the graph node list.
-	 *
-	 * @param node the node to add
-	 * @return {@code true} if not already present
-	 * @see Graph#addEdge(Edge)
-	 */
-	boolean _add(N node) {
-		return nodes.add(node);
-	}
-
-	/**
-	 * Internal use only. Removes the node from the graph node list.
-	 *
-	 * @param node the node to remove
-	 * @return {@code true} if removed
-	 * @see Graph#addEdge(Edge)
-	 */
-	boolean _remove(N node) {
-		return nodes.remove(node);
-	}
-
-	/**
-	 * Duplicates the given edge. Override, if needed, to adjust edge decorations. The
-	 * returned duplicate edge is unassociated with the graph.
-	 *
-	 * @param edge an exemplar edge
-	 * @return a duplicate edge
-	 */
-	public E duplicateEdge(E edge) {
-		lock();
-		try {
-			E dup = createEdge(edge.beg(), edge.end());
-			dup.putAllIfAbsent(edge.properties());
-			return dup;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	/**
-	 * Duplicates the given edge and changes the edge terminals to the given nodes.
-	 * Override, if needed, to adjust edge decorations that are dependent on the changed
-	 * terminals. The returned duplicate edge is unassociated with the graph.
-	 *
-	 * @param edge an exemplar edge
-	 * @param beg  duplicate begin node
-	 * @param end  duplicate end node
-	 * @return a duplicate edge
-	 */
-	public E duplicateEdge(E edge, N beg, N end) {
-		lock();
-		try {
-			E dup = duplicateEdge(edge);
-			dup.setBeg(beg);
-			dup.setEnd(end);
-			return dup;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	/**
 	 * Defines whether this graph permits a graph manipulation/transform operation of the
 	 * given type.
 	 * <p>
@@ -442,7 +475,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 *
 	 * @param type a manipulation/transform operation type
 	 * @return {@code true} if the operation is permitted
-	 * @see ITransformOp#canApply(Graph)
+	 * @see ITransformOp#canApply(Transformer)
 	 */
 	public boolean permits(XfPermits type) {
 		return true;

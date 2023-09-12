@@ -33,8 +33,8 @@ public class Numeric {
 	 * {@code Number}.
 	 * <p>
 	 * Hex should be prefixed with {@code 0x}; others suffixed with {@code d, f, or l} for
-	 * double, float, & long. Otherwise, resolves to hex if the number contains a high hex
-	 * digit or to double if a decimal is present. Defaults to integer.
+	 * double, float, or long. Otherwise, resolves to hex if the number contains a high
+	 * hex digit or to double if a decimal is present. Defaults to integer.
 	 */
 	public static Number resolve(String num) {
 		if (Hex.PREFIX.matcher(num).lookingAt()) return Hex.parseString(num);

@@ -558,12 +558,26 @@ public final class FsUtil {
 		}
 	}
 
-	private static URI append(URI uri, String name) {
+	/**
+	 * Create a URI from the given URI extended by the given name.
+	 *
+	 * @param uri  a base URI
+	 * @param name nominally a file name
+	 * @return the extended URI
+	 */
+	public static URI append(URI uri, String name) {
 		String basepath = uri.toString();
 		return append(basepath, name);
 	}
 
-	private static URI append(String basepath, String name) {
+	/**
+	 * Create a URI from the given basepath and name.
+	 *
+	 * @param basepath a base path
+	 * @param name     nominally a file name
+	 * @return the extended URI
+	 */
+	public static URI append(String basepath, String name) {
 		if (basepath.matches(WIN_PREFIX)) {
 			basepath = "file:/" + basepath;
 		}

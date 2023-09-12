@@ -165,7 +165,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * the same as the given node -- the edge is removed from the graph.
 	 * <p>
 	 * If the given edge begin node becomes unconnected in the graph, except by
-	 * self-cyclic edges, that terminal node is removed from the graph. *
+	 * self-cyclic edges, that terminal node is removed from the graph.
 	 *
 	 * <pre>
 	 * A -> B -> C -> D -> E
@@ -257,6 +257,70 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *         the failure
 	 */
 	Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove);
+
+	/**
+	 * Copies the given individual source node into the graph. The source node is
+	 * replicated. The destination node defines the inbound and outbound edges that are
+	 * copied and connected to the replicated node. Removes the destination node from the
+	 * graph if {@code remove} is {@code true}.
+	 *
+	 * <pre>
+	 * Given:
+	 * A => B => C
+	 * X => D => Y
+	 * </pre>
+	 *
+	 * <pre>
+	 * copy(b, d, false);
+	 * A => B => C
+	 * X => [B',D] => Y
+	 * </pre>
+	 *
+	 * <pre>
+	 * copy(b, d, true);
+	 * A => B => C
+	 * X => B' => Y
+	 * </pre>
+	 *
+	 * @param src    source node
+	 * @param dst    destination node
+	 * @param remove {@code true} to remove the destination node
+	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
+	 *         the failure
+	 */
+	Result<LinkedList<E>> copy(N src, N dst, boolean remove);
+
+	/**
+	 * Copies the given individual source nodes into the graph. Each source node is
+	 * replicated. The destination node defines the inbound and outbound edges that are
+	 * copied and connected to the replicated nodes. Removes the destination node from the
+	 * graph if {@code remove} is {@code true}.
+	 *
+	 * <pre>
+	 * Given:
+	 * A => B => C
+	 * X => D => Y
+	 * </pre>
+	 *
+	 * <pre>
+	 * copy(b, d, false);
+	 * A => B => C
+	 * X => [B',D] => Y
+	 * </pre>
+	 *
+	 * <pre>
+	 * copy(b, d, true);
+	 * A => B => C
+	 * X => B' => Y
+	 * </pre>
+	 *
+	 * @param src    source nodes
+	 * @param dst    destination node
+	 * @param remove {@code true} to remove the destination node
+	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
+	 *         the failure
+	 */
+	Result<LinkedList<E>> copy(Collection<? extends N> src, N dst, boolean remove);
 
 	/**
 	 * Moves the given edge to connect between the given nodes.
@@ -452,17 +516,12 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	Result<LinkedList<E>> replicateEdges(N node, Collection<? extends N> targets, boolean remove);
 
 	/**
-	 * Reduce the graph by removing the given node while retaining the connectivity
-	 * between the inbound and outbound nodes.
+	 * Reduce the graph relative to the given node by joining each of the inbound edges to
+	 * each of the outbound edges and then removing the given node.
+	 * <p>
+	 * {@code [X] => N => [Y]} becomes {@code [X] => [Y]}
 	 *
-	 * <pre>
-	 * reduce(B)
-	 * A => B => C
-	 * becomes
-	 * A => C
-	 * </pre>
-	 *
-	 * @param node the term to remove from the graph
+	 * @param node the node to be reduced
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */

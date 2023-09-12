@@ -4,6 +4,7 @@ public class DotChar {
 
 	/**
 	 * <pre>
+	 * <code>
 	 *   space  -> \0230 small tilde
 	 * , comma  -> \0202 low single quote mark
 	 * . period -> \0225 bullet
@@ -22,6 +23,7 @@ public class DotChar {
 	 *
 	 * ? -> \0227 em dash
 	 * ? -> \0255 soft hyphen
+	 * </code>
 	 * </pre>
 	 */
 	public static String fix(String name) {

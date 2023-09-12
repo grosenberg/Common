@@ -693,6 +693,69 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
+	public Result<LinkedList<E>> copy(N src, N dst, boolean remove) {
+		return copy(policy, List.of(src), dst, remove);
+	}
+
+	@Override
+	public Result<LinkedList<E>> copy(Collection<? extends N> nodes, N dst, boolean remove) {
+		return copy(policy, nodes, dst, remove);
+	}
+
+	public Result<LinkedList<E>> copy(XfPolicy policy, Collection<? extends N> nodes, N dst, boolean remove) {
+		graph.lock();
+		Explainer xpr = new Explainer("Copy Nodes");
+		boolean ok = xpr.last();
+
+		try {
+			if (!graph.permits(COPY)) {
+				if (policy.rptByRet()) return Result.of(xpr.reason(COPY.err()));
+				throw GraphEx.of(COPY.err());
+			}
+
+			if (policy.qualify()) {
+				ok &= chkNodes(xpr, ok, nodes, false);
+				ok &= chkNode(xpr, ok, dst, true);
+
+				if (ok && policy.block()) return Result.nil();
+				if (!ok && (policy.block() || policy.condStop())) {
+					if (policy.rptByRet()) return Result.of(xpr);
+					if (policy.rptByEx()) throw GraphEx.of("Copy nodes pre-condition fail: %s", nodes);
+				}
+			}
+
+			UniqueList<E> leads = dst.edges(Sense.IN);
+			UniqueList<E> tails = dst.edges(Sense.OUT);
+
+			LinkedList<E> dupEdges = new LinkedList<>();
+			for (N node : nodes) {
+				N dupNode = graph.copyNode(node);
+				for (E lead : leads) {
+					ok &= dupAndAddEdge(xpr, dupEdges, lead, lead.beg(), dupNode);
+				}
+				for (E tail : tails) {
+					ok &= dupAndAddEdge(xpr, dupEdges, tail, dupNode, tail.end());
+				}
+			}
+
+			if (remove) {
+				ok &= rmNode(xpr, dst);
+			}
+
+			if (ok) return Result.of(dupEdges);
+			if (policy.rptByRet()) return Result.of(xpr);
+			throw GraphEx.of("Copy nodes fail: %s", nodes);
+
+		} catch (Exception | Error e) {
+			xpr.addFirst(e);
+			throw GraphEx.of(xpr);
+
+		} finally {
+			graph.unlock();
+		}
+	}
+
+	@Override
 	public Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> subgraph, N dst, boolean remove) {
 		return copy(policy, subgraph, dst, remove);
 	}
@@ -1193,9 +1256,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 				for (E lead : leads) {
 					for (E tail : tails) {
-						ok &= reduceEdges(xpr, lead, tail);
+						E edge = graph.join(lead, tail);
+						graph.addEdge(edge);
 					}
 				}
+				ok &= rmNode(xpr, node);
 			}
 
 			if (ok) return Result.OK;
@@ -1412,8 +1477,8 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		N end = edge.end();
 
 		boolean ok = edge.remove(clear);
-		if (ok && beg.adjacent().isEmpty()) graph._remove(beg);
-		if (ok && end.adjacent().isEmpty()) graph._remove(end);
+		if (ok && beg.adjacent().isEmpty()) graph.delete(beg);
+		if (ok && end.adjacent().isEmpty()) graph.delete(end);
 		xpr.reason(!ok, "Remove edge failed: %s", edge);
 		return ok;
 	}
@@ -1431,24 +1496,12 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 	final boolean reduceEdges(Explainer xpr, E lead, E tail) {
 		boolean ok = true;
+		E edge = graph.join(lead, tail);
+		graph.addEdge(edge);
 		if (lead.end().equals(tail.beg())) {
-			// A->B, B->C to A->C
-			ok &= rmEdge(xpr, lead, false);
-			if (ok) {
-				lead.setEnd(tail.end());
-				lead.putAllIfAbsent(tail.properties());
-				graph.addEdge(lead);
-				ok &= rmEdge(xpr, tail, true);
-			}
-
-		} else {
-			// A->B, C->D to A->C->D
-			ok &= rmEdge(xpr, lead, false);
-			if (ok) {
-				lead.setEnd(tail.beg());
-				graph.addEdge(lead);
-			}
+			ok &= rmEdge(xpr, tail, false);
 		}
+		ok &= rmEdge(xpr, lead, false);
 		return ok;
 	}
 

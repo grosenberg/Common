@@ -157,15 +157,28 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	/**
 	 * Sequentially apply the recorded transforms.
 	 *
-	 * @return {@link Result.OK} on success, or (conditional on policy) a
+	 * @return {@link Result#OK} on success, or (conditional on policy) a
 	 *         {@link Result#err} on failure
 	 * @throws (conditional on policy) GraphException on failure
 	 */
 	public Result<Boolean> apply() {
+		return apply(false);
+	}
+
+	/**
+	 * Sequentially apply the recorded transforms.
+	 *
+	 * @param verbose {@code true} to log each transform immediately prior to execution
+	 * @return {@link Result#OK} on success, or (conditional on policy) a
+	 *         {@link Result#err} on failure
+	 * @throws (conditional on policy) GraphException on failure
+	 */
+	public Result<Boolean> apply(boolean verbose) {
 		xf.graph.lock();
 		Explainer xpr = new Explainer("Transfuture");
 		try {
 			for (ITransformOp<N, E> op : ops) {
+				if (verbose) Log.info("XF %s", op);
 				try {
 					xpr.add(op.apply(xf, policy));
 				} catch (Exception | Error e) {
@@ -190,7 +203,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err}
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err}
 	 *         describing the pre-condition failure
 	 */
 	@Override
@@ -213,7 +226,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -236,7 +249,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -259,7 +272,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -283,7 +296,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -307,7 +320,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -332,7 +345,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -359,7 +372,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -385,7 +398,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -410,7 +423,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -438,7 +451,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -462,7 +475,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -485,7 +498,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -503,7 +516,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -521,7 +534,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -537,6 +550,45 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	/**
+	 * Records the copying the given node into the graph.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
+	 *         a pre-condition failure explaination
+	 */
+	@Override
+	public Result<LinkedList<E>> copy(N src, N dst, boolean remove) {
+		return copy(List.of(src), dst, remove);
+	}
+
+	/**
+	 * Records the copying the given nodes into the graph.
+	 * <p>
+	 * Implementation:
+	 * <ul>
+	 * <li>{@inheritDoc}
+	 * </ul>
+	 *
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
+	 *         a pre-condition failure explaination
+	 */
+	@Override
+	public Result<LinkedList<E>> copy(Collection<? extends N> nodes, N dst, boolean remove) {
+		if (!policy.qualify()) {
+			ops.add(CopyOp.of(nodes, dst, remove));
+			return Result.nil();
+		}
+
+		Result<LinkedList<E>> res = xf.copy(nodes, dst, remove);
+		if (res.valid()) ops.add(CopyOp.of(nodes, dst, remove));
+		return report(res);
+	}
+
+	/**
 	 * Records the copying the given subgraph into the graph.
 	 * <p>
 	 * Implementation:
@@ -544,7 +596,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -567,7 +619,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -583,7 +635,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -606,7 +658,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -629,7 +681,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -645,7 +697,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -668,7 +720,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -684,7 +736,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -708,7 +760,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -732,7 +784,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -749,7 +801,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -773,7 +825,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override
@@ -797,7 +849,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * <li>{@inheritDoc}
 	 * </ul>
 	 *
-	 * @return {@code Result.OK } if the op is recorded, otherwise {@code Result.err} with
+	 * @return {@code Result#OK} if the op is recorded, otherwise {@code Result.err} with
 	 *         a pre-condition failure explaination
 	 */
 	@Override

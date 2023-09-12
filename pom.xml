@@ -7,7 +7,7 @@
 
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5</version>
 
 	<name>net.certiv :: common</name>
 	<description>Common utilities</description>
@@ -67,12 +67,13 @@
 			<version>${gson.ver}</version>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>one.microstream</groupId>
 			<artifactId>microstream-storage-embedded</artifactId>
 			<version>${microstream.ver}</version>
 		</dependency>
-
+-->
 		<dependency>
 			<groupId>io.github.java-diff-utils</groupId>
 			<artifactId>java-diff-utils</artifactId>

@@ -406,7 +406,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
-	 * Clears the edge sets and property store.
+	 * Clears the edge sets and property store. Retains the node name property.
 	 * <p>
 	 * Internal use only.
 	 */
@@ -414,7 +414,9 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public void clear() {
 		in.clear();
 		out.clear();
+		Object name = nameObj();
 		super.clear();
+		setNameObj(name);
 	}
 
 	@Override

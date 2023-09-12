@@ -25,8 +25,6 @@ import net.certiv.common.util.Strings;
  * Differ.diff(name, ori, txt).sdiff(true, 120).out();
  * Log.debug("Difference\n%s", Differ.diff(name, ori, txt).sdiff(true, 120).str());
  * </pre>
- *
- * @see org.eclipse.jdt.internal.junit.ui.CompareResultDialog
  */
 public class Differ {
 

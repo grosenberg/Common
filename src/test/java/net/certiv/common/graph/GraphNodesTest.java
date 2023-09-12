@@ -53,6 +53,13 @@ class GraphNodesTest extends TestBase {
 	}
 
 	@Test
+	void testContains() {
+		assertTrue(graph.contains(a));
+		DemoNode z = builder.createNode("Z");
+		assertFalse(graph.contains(z));
+	}
+
+	@Test
 	void testIsAdjacent() {
 		assertTrue(a.isAdjacent(b));
 		assertFalse(a.isAdjacent(c));

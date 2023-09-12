@@ -11,9 +11,9 @@ public class DemoBuilder extends Builder<String, DemoGraph, DemoNode, DemoEdge> 
 	}
 
 	@Override
-	protected DemoNode createNode(String name) {
-		return new DemoNode(graph, new EdgeSet<DemoNode, DemoEdge>(Sense.IN),
-				new EdgeSet<DemoNode, DemoEdge>(Sense.OUT), name);
+	public DemoNode createNode(String name) {
+		return new DemoNode(graph, new EdgeSet<>(Sense.IN),
+				new EdgeSet<>(Sense.OUT), name);
 	}
 
 	@Override

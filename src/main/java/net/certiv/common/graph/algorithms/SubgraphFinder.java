@@ -1,5 +1,6 @@
 package net.certiv.common.graph.algorithms;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.function.Predicate;
 
@@ -95,66 +96,70 @@ public class SubgraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Finds the subgraph paths following from the given node in this graph.
+	 * Returns the subgraph path existing under the given node.
 	 * <p>
-	 * Returns a map of: {@code head=unique head node; value=GraphPath}.
+	 * Returns a map defined as {@code head=unique begin/head node; value=GraphPath}.
 	 *
-	 * @param from an initial node
+	 * @param from graph search begin node
 	 * @return subgraph path map
-	 * @see ITransform#copy(LinkedHashMap, Node, boolean)
+	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
 	public LinkedHashMap<N, GraphPath<N, E>> subset(N from) {
 		return subset(from, n -> n.equals(from), n -> n != null, n -> n == null);
 	}
 
 	/**
-	 * Returns the subset path traversed from the given begin node and ending at the given
-	 * end node.
+	 * Returns the subgraph paths existing under the given node, subselected according to
+	 * the given filters. Each found subgraph path:
+	 * <ul>
+	 * <li>ends on the first node that matches the end predicate or fails to match the
+	 * include predicate
+	 * </ul>
 	 * <p>
-	 * Returns a map of: {@code head=unique head node; value=GraphPath}.
+	 * Returns a map defined as {@code head=unique begin/head node; value=GraphPath}.
 	 *
-	 * @param beg a beg node
-	 * @param end an ending node
+	 * @param from graph search begin node
+	 * @param end  subgraph termination node criteria
 	 * @return subgraph path map
-	 * @see ITransform#copy(LinkedHashMap, Node, boolean)
+	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N beg, N end) {
-		return subset(beg, n -> n.equals(beg), n -> n != null, n -> n.equals(end));
+	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, N end) {
+		return subset(from, n -> n.equals(from), n -> n != null, n -> n.equals(end));
 	}
 
 	/**
-	 * Returns the subgraph paths chosen following from the given node, further
-	 * subselected according to the given include. Each path:
+	 * Returns the subgraph paths existing under the given node, subselected according to
+	 * the given filters. Each found subgraph path:
 	 * <ul>
-	 * <li>starts on a unique begin include match
+	 * <li>starts on a unique begin predicate match
 	 * </ul>
 	 * <p>
-	 * Returns a map of: {@code head=unique head node; value=GraphPath}.
+	 * Returns a map defined as {@code head=unique begin/head node; value=GraphPath}.
 	 *
-	 * @param from search begin node
-	 * @param beg  subgraph collection begin selection include
+	 * @param from graph search begin node
+	 * @param beg  subgraph start node criteria
 	 * @return subgraph path map
-	 * @see ITransform#copy(LinkedHashMap, Node, boolean)
+	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
 	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg) {
 		return subset(from, beg, n -> n != null, n -> n == null);
 	}
 
 	/**
-	 * Returns the subgraph paths chosen following from the given node, further
-	 * subselected according to the given filters. Each path:
+	 * Returns the subgraph paths existing under the given node, subselected according to
+	 * the given filters. Each found subgraph path:
 	 * <ul>
-	 * <li>starts on a unique begin include match
-	 * <li>ends on an end include match
+	 * <li>starts on a unique begin predicate match
+	 * <li>ends on the first node that matches the end predicate
 	 * </ul>
 	 * <p>
-	 * Returns a map of: {@code head=unique head node; value=GraphPath}.
+	 * Returns a map defined as {@code head=unique begin/head node; value=GraphPath}.
 	 *
-	 * @param from search begin node
-	 * @param beg  subgraph collection begin selection include
-	 * @param end  subgraph collection end selection include
+	 * @param from graph search begin node
+	 * @param beg  subgraph start node criteria
+	 * @param end  subgraph termination node criteria
 	 * @return subgraph path map
-	 * @see ITransform#copy(LinkedHashMap, Node, boolean)
+	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
 	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg,
 			Predicate<? super N> end) {
@@ -162,22 +167,23 @@ public class SubgraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Returns the subgraph paths chosen following from the given node, further
-	 * subselected according to the given filters. Each path:
+	 * Returns the subgraph paths existing under the given node, subselected according to
+	 * the given filters. Each found subgraph path:
 	 * <ul>
-	 * <li>starts on a unique begin include match
-	 * <li>continues while successive nodes match the include include
-	 * <li>ends on the first of an end include match or an include include non-match
+	 * <li>starts on a unique begin predicate match
+	 * <li>continues while successive nodes match the include predicate
+	 * <li>ends on the first node that matches the end predicate or fails to match the
+	 * include predicate
 	 * </ul>
 	 * <p>
-	 * Returns a map of: {@code head=unique head node; value=GraphPath}.
+	 * Returns a map defined as {@code head=unique begin/head node; value=GraphPath}.
 	 *
-	 * @param from    search begin node
-	 * @param beg     subgraph collection begin selection include
-	 * @param include subgraph collection duration inclusion include
-	 * @param end     subgraph collection end selection include
+	 * @param from    graph search begin node
+	 * @param beg     subgraph start node criteria
+	 * @param include subgraph node inclusion criteria
+	 * @param end     subgraph termination node criteria
 	 * @return subgraph path map
-	 * @see ITransform#copy(LinkedHashMap, Node, boolean)
+	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
 	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg,
 			Predicate<? super N> include, Predicate<? super N> end) {
