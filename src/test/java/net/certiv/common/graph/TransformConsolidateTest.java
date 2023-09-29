@@ -15,7 +15,9 @@ import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-public class TransformConsolidateTest extends TestBase {
+public class TransformConsolidateTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	@BeforeEach
 	void setup() {
@@ -39,7 +41,7 @@ public class TransformConsolidateTest extends TestBase {
 		xf.consolidateEdges(List.of(g), u);	// edges =>G=> to =>U=>
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "ConsolidateEnd.md", dot);
+		writeResource(getClass(), XForm + "ConsolidateEnd.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ConsolidateEnd.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -61,7 +63,7 @@ public class TransformConsolidateTest extends TestBase {
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "ConsolidateMid.md", dot);
+		writeResource(getClass(), XForm + "ConsolidateMid.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ConsolidateMid.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -86,7 +88,7 @@ public class TransformConsolidateTest extends TestBase {
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "ConsolidateCyclic.md", dot);
+		writeResource(getClass(), XForm + "ConsolidateCyclic.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ConsolidateCyclic.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -105,7 +107,7 @@ public class TransformConsolidateTest extends TestBase {
 		xf.consolidateEdges(sources, b); // edges =>[B,E,H]=> to =>B=>
 
 		String dot = graph.render();
-		FsUtil.writeResource(getClass(), XForm + "ConsolidateComplex.md", dot);
+		writeResource(getClass(), XForm + "ConsolidateComplex.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ConsolidateComplex.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -125,7 +127,7 @@ public class TransformConsolidateTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		FsUtil.writeResource(getClass(), XForm + "ConsolidateComplexCyclic.md", dot);
+		writeResource(getClass(), XForm + "ConsolidateComplexCyclic.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ConsolidateComplexCyclic.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();

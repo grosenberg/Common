@@ -10,8 +10,8 @@ digraph Builder {
 
       "A(0)" -> "C(2)"
       "C(2)" -> "Delta(3)"
-      "Delta(3)" -> "Z(5)"
       "C(2)" -> "Eta(4)"
+      "Delta(3)" -> "Z(5)"
       "Eta(4)" -> "Z(5)"
 
   }

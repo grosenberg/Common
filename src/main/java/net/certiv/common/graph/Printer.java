@@ -1,5 +1,6 @@
 package net.certiv.common.graph;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -37,7 +38,21 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 	private static final String NODE = "%s%s";
 	private static final String EDGE = "%s%s -> %s%s";
 
-	public Printer() {}
+	private boolean debug;
+
+	public Printer() {
+		this(false);
+	}
+
+	public Printer(boolean debug) {
+		this.debug = debug;
+	}
+
+	/** Enable/disable debug logging of the graph walk(s). */
+	public Printer<N, E> debug(boolean enable) {
+		this.debug = enable;
+		return this;
+	}
 
 	/** Pretty print out a whole graph. */
 	public String dump(final Graph<N, E> graph) {
@@ -46,18 +61,18 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	/** Pretty print out a graph beginning with the given nodes. */
 	public String dump(final Graph<N, E> graph, UniqueList<N> nodes) {
+		Walker<N, E> walker = graph.walker().debug(debug);
 		TextStringBuilder sb = new TextStringBuilder();
 		for (N node : nodes) {
 			sb.appendln(String.format("// ---- %s:%s ----", graph.name(), node.name()));
-			sb.appendln(dump(node));
+			sb.appendln(dump(walker, node));
 			sb.appendNewLine();
 		}
 		return sb.toString();
 	}
 
-	private TextStringBuilder dump(final N node) {
+	private TextStringBuilder dump(Walker<N, E> walker, final N node) {
 		TextStringBuilder sb = new TextStringBuilder();
-		Walker<N, E> walker = new Walker<>();
 		walker.descend(new Dumper(sb), node);
 		return sb;
 	}
@@ -143,7 +158,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		sb.appendln(GRAPH_BEG, fix(graph.name()));
 		sb.append(graphProperties(graph, dent(1)));
 
-		Walker<N, E> walker = graph.walker();
+		Walker<N, E> walker = graph.walker().debug(debug);
 		UniqueList<N> roots = graph.getRoots();
 		switch (roots.size()) {
 			case 0:
@@ -223,7 +238,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 		// value=formatted node definition string
 		private Set<String> nodes = new LinkedHashSet<>();
-		private TextStringBuilder edges = new TextStringBuilder();
+		private UniqueList<E> edges = new UniqueList<>();
+		private TextStringBuilder sb = new TextStringBuilder();
 
 		private String dent;
 
@@ -235,6 +251,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 			this.dent = dent;
 			nodes.clear();
 			edges.clear();
+			sb.clear();
 		}
 
 		public Set<String> nodes() {
@@ -242,17 +259,15 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		public TextStringBuilder edges() {
-			return edges;
+			Collections.sort(edges);
+			edges.forEach(e -> sb.appendln(EDGE, dent, fix(e.beg().uname()), fix(e.end().uname()), style(e)));
+			return sb;
 		}
 
 		@Override
 		public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
 			nodes.add(style(node));
-			if (parent != null) {
-				for (E edge : parent.to(node)) {
-					edges.appendln(EDGE, dent, fix(parent.uname()), fix(node.uname()), style(edge));
-				}
-			}
+			if (parent != null) edges.addAll(parent.to(node));
 			return true;
 		}
 

@@ -15,7 +15,9 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class GraphNodesTest extends TestBase {
+class GraphNodesTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	DemoNode a;
 	DemoNode b;
@@ -45,11 +47,11 @@ class GraphNodesTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "node1.md", dot);
+		writeResource(getClass(), "node1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), "node1.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test

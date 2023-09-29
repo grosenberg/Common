@@ -9,8 +9,11 @@ import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoBuilder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
+import net.certiv.common.util.test.TestBase;
 
-public class TestBase {
+public class TestGraphBase extends TestBase {
+
+	static final boolean FORCE = false;
 
 	static final String XForm = "xform/";
 	static final String XFuture = "xfuture/";
@@ -20,6 +23,7 @@ public class TestBase {
 
 	@BeforeEach
 	void setupBase() {
+		global(FORCE);
 		graph = new DemoGraph("Names");
 		builder = new DemoBuilder(graph);
 	}
@@ -41,5 +45,4 @@ public class TestBase {
 			ds.put(LABEL, edge.name());
 		}
 	}
-
 }

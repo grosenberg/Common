@@ -17,7 +17,9 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.FsUtil;
 
-public class TransformCpTest extends TestBase {
+public class TransformCpTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	@BeforeEach
 	void setup() {
@@ -44,7 +46,7 @@ public class TransformCpTest extends TestBase {
 		xf.remove(sg, true);	// remove source subgraph
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "CopyEnd.md", dot);
+		writeResource(getClass(), XForm + "CopyEnd.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "CopyEnd.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -67,7 +69,7 @@ public class TransformCpTest extends TestBase {
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "CopyMid.md", dot);
+		writeResource(getClass(), XForm + "CopyMid.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "CopyMid.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -90,7 +92,7 @@ public class TransformCpTest extends TestBase {
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "CopyRm.md", dot);
+		writeResource(getClass(), XForm + "CopyRm.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "CopyRm.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -117,7 +119,7 @@ public class TransformCpTest extends TestBase {
 		assertTrue(rm.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XForm + "CopyRmRd.md", dot);
+		writeResource(getClass(), XForm + "CopyRmRd.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "CopyRmRd.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();

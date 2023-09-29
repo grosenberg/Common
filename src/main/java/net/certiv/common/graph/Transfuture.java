@@ -30,14 +30,12 @@ import net.certiv.common.stores.UniqueList;
  * Deferred graph transformer. Accumulates graph transform ops for deferred, sequential
  * application to a graph.
  *
- * <pre>
- * <code>
+ * <pre>{@code
  * Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
  * xf.reterminate(cd, b);
  * xf.removeNode(f);
  * xf.apply();
- * </code>
- * </pre>
+ * }</pre>
  */
 public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements ITransform<N, E> {
 

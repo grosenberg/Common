@@ -1,7 +1,6 @@
 package net.certiv.common.graph;
 
 import java.util.Map;
-import java.util.Objects;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
@@ -16,7 +15,8 @@ import net.certiv.common.stores.props.Props;
  * <p>
  * An edge can only exist between two existing nodes: no dangling edges permitted.
  */
-public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
+public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends Props
+		implements Comparable<E> {
 
 	private static final String ERR_INVALID = "Invalid edge %s";
 
@@ -201,8 +201,19 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	@Override
+	public int compareTo(E o) {
+		if (beg()._nid < o.beg()._nid) return -1;
+		if (beg()._nid > o.beg()._nid) return 1;
+		if (end()._nid < o.end()._nid) return -1;
+		if (end()._nid > o.end()._nid) return 1;
+		if (_eid < o._eid) return -1;
+		if (_eid > o._eid) return 1;
+		return 0;
+	}
+
+	@Override
 	public int hashCode() {
-		return Objects.hash(beg, end, _eid);
+		return Long.hashCode(_eid);
 	}
 
 	@Override
@@ -210,8 +221,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		if (this == obj) return true;
 		if (!(obj instanceof Edge)) return false;
 		Edge<?, ?> other = (Edge<?, ?>) obj;
-		return Objects.equals(beg, other.beg) && Objects.equals(end, other.end)
-				&& Objects.equals(_eid, other._eid);
+		return _eid == other._eid;
 	}
 
 	@Override

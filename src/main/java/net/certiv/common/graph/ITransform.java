@@ -533,21 +533,10 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * connectivity between the resultant distal inbound and outbound nodes. The given
 	 * destination edge is removed, potentially resulting in the shared node being
 	 * removed.
-	 *
-	 * <pre>
-	 * reduce(AB,BC)
-	 * A -> B -> C
-	 * becomes
-	 * A -> C
-	 * </pre>
-	 *
-	 * <pre>
-	 * reduce(AB,CD)
-	 * A -> B
-	 * C -> D
-	 * becomes
-	 * A -> C -> D
-	 * </pre>
+	 * <p>
+	 * {@code reduce(A->B, B->C)} yields {@code A -> C}
+	 * <p>
+	 * {@code reduce(A->B, C->D)} yields {@code A -> C -> D}
 	 *
 	 * @param src the source edge
 	 * @param dst the destination edge

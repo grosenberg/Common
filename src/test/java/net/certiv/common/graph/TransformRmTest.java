@@ -15,7 +15,9 @@ import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class TransformRmTest extends TestBase {
+class TransformRmTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	@BeforeEach
 	void testRemoveOps() {
@@ -31,11 +33,11 @@ class TransformRmTest extends TestBase {
 	@Test
 	void verifyStructure() {
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Structure.md", dot);
+		writeResource(getClass(), XForm + "Structure.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Structure.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
-		assertEquals(dot, txt);
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		assertEquals(txt, dot);
 	}
 
 	@Test

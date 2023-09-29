@@ -3,8 +3,7 @@ package net.certiv.common.dot;
 public class DotChar {
 
 	/**
-	 * <pre>
-	 * <code>
+	 * <pre>{@code
 	 *   space  -> \0230 small tilde
 	 * , comma  -> \0202 low single quote mark
 	 * . period -> \0225 bullet
@@ -23,8 +22,7 @@ public class DotChar {
 	 *
 	 * ? -> \0227 em dash
 	 * ? -> \0255 soft hyphen
-	 * </code>
-	 * </pre>
+	 * }</pre>
 	 */
 	public static String fix(String name) {
 		StringBuilder sb = new StringBuilder();

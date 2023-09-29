@@ -360,12 +360,15 @@ public class TxtUtil {
 	/**
 	 * Wraps the given text to lines of up to the given length. Uses the system newline
 	 * string as the line return terminal. Preserves existing internal returns.
+	 * <p>
+	 * If {@code len} is less than {@code 1}, returns the existing given text.
 	 *
 	 * @param len  the target maximum line length
 	 * @param text the source text
 	 * @return the resulting text
 	 */
 	public static String wrap(int len, String text) {
+		if (len < 1) return text;
 		TextStringBuilder block = new TextStringBuilder();
 		block.setNewLineText(Strings.EOL);
 		String[] lines = text.split("\\R");

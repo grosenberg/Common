@@ -21,7 +21,9 @@ import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class TransfutureTest extends TestBase {
+class TransfutureTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	@BeforeEach
 	void setUp() {
@@ -51,7 +53,7 @@ class TransfutureTest extends TestBase {
 		assertTrue(res.valid());
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Copy.md", dot);
+		writeResource(getClass(), XFuture + "Copy.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Copy.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -78,7 +80,7 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Copy1.md", dot);
+		writeResource(getClass(), XFuture + "Copy1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Copy1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -97,6 +99,8 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
+		writeResource(getClass(), XFuture + "RemoveNode.md", dot, FORCE);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "RemoveNode.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
@@ -117,6 +121,8 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
+		writeResource(getClass(), XFuture + "RemoveEdge.md", dot, FORCE);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "RemoveEdge.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
@@ -133,7 +139,8 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"ReduceNode.md", dot);
+		writeResource(getClass(), XFuture + "ReduceNode.md", dot, FORCE);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "ReduceNode.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
@@ -151,6 +158,8 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
+		writeResource(getClass(), XFuture + "Transfer.md", dot, FORCE);
+
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Transfer.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
@@ -177,7 +186,7 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Move.md", dot);
+		writeResource(getClass(), XFuture + "Move.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Move.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -196,7 +205,7 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Replicate.md", dot);
+		writeResource(getClass(), XFuture + "Replicate.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XFuture + "Replicate.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -215,7 +224,7 @@ class TransfutureTest extends TestBase {
 		xf.apply();
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"ReplicateReduce.md", dot);
+		writeResource(getClass(), XFuture + "ReplicateReduce.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XFuture + "ReplicateReduce.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();

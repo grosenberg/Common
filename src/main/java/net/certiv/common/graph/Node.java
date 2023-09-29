@@ -20,7 +20,8 @@ import net.certiv.common.stores.props.Props;
  * Abstract base class for a directed multigraph node. Edge connections are managed
  * through separate input and output edge sets.
  */
-public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props {
+public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props
+		implements Comparable<N> {
 
 	public static final String NODE_NAME = "NodeName";
 
@@ -417,6 +418,13 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		Object name = nameObj();
 		super.clear();
 		setNameObj(name);
+	}
+
+	@Override
+	public int compareTo(N o) {
+		if (_nid < o._nid) return -1;
+		if (_nid > o._nid) return 1;
+		return 0;
 	}
 
 	@Override

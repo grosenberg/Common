@@ -18,7 +18,9 @@ import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 
-class SubgraphTest extends TestBase {
+class SubgraphTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	DemoNode a;
 	DemoNode b;

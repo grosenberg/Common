@@ -14,6 +14,7 @@ import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.algorithms.GraphPath;
+import net.certiv.common.graph.algorithms.SubgraphFinder;
 import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
@@ -142,6 +143,24 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	protected abstract E createEdge(N beg, N end);
 
 	/**
+	 * Creates a new edge instance with the given terminal nodes. Adds the edge, including
+	 * the terminal nodes, to the graph.
+	 * <p>
+	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
+	 * for manipulation.
+	 *
+	 * @param beg the begin terminal node
+	 * @param end the end terminal node
+	 * @return a new edge newly associated with the graph
+	 */
+	public E addEdge(N beg, N end) {
+		Assert.notNull(beg, end);
+		E edge = createEdge(beg, end);
+		addEdge(edge);
+		return edge;
+	}
+
+	/**
 	 * Primary graph tree constuction entry point. Adds the given edge to the graph.
 	 * <p>
 	 * Internally performs all operations necessary to create the edge terminal nodes, if
@@ -207,24 +226,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Creates a new edge instance with the given terminal nodes. Adds the edge, including
-	 * the terminal nodes, to the graph.
-	 * <p>
-	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
-	 * for manipulation.
-	 *
-	 * @param beg the begin terminal node
-	 * @param end the end terminal node
-	 * @return a new edge newly associated with the graph
-	 */
-	public E createAndAddEdge(N beg, N end) {
-		Assert.notNull(beg, end);
-		E edge = createEdge(beg, end);
-		addEdge(edge);
-		return edge;
-	}
-
-	/**
 	 * Copy the given node to create a new node instance.
 	 * <p>
 	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
@@ -234,13 +235,26 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return a new node otherwise unassociated with the graph
 	 */
 	public N copyNode(N node) {
-		N repl = createNode(node.nameObj());
-		repl.putAll(node.properties());
-		return repl;
+		N n = createNode(node.nameObj());
+		n.putAll(node.properties());
+		return n;
+	}
+
+	/**
+	 * Copy the given edge. Conditionally adds the edge, including the terminal nodes, to
+	 * the graph.
+	 *
+	 * @param edge the reference edge
+	 * @param add  {@code true} to add edge to the graph
+	 * @return a new edge
+	 */
+	public E copyEdge(E edge, boolean add) {
+		return copyEdge(edge, edge.beg(), edge.end(), add);
 	}
 
 	/**
 	 * Copy the given edge to create a new edge instance with the given terminal nodes.
+	 * Conditionally adds the edge, including the terminal nodes, to the graph.
 	 * <p>
 	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
 	 * for manipulation.
@@ -248,46 +262,16 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param edge the reference edge
 	 * @param beg  the begin terminal node
 	 * @param end  the end terminal node
-	 * @return a new edge otherwise unassociated with the graph
+	 * @param add  {@code true} to add edge to the graph
+	 * @return a new edge
 	 */
-	public E copyEdge(E edge, N beg, N end) {
-		E repl = createEdge(beg, end);
-		repl.putAll(edge.properties());
-		return repl;
-	}
-
-	/**
-	 * Copy the given edge to create a new edge instance with the given terminal nodes.
-	 * Adds the edge, including the terminal nodes, to the graph.
-	 * <p>
-	 * Nominally, use the {@link Builder} for graph construction and {@link ITransform}
-	 * for manipulation.
-	 *
-	 * @param edge the reference edge
-	 * @param beg  the begin terminal node
-	 * @param end  the end terminal node
-	 * @return a new edge newly associated with the graph
-	 */
-	public E copyAndAddEdge(E edge, N beg, N end) {
-		Assert.notNull(edge, beg, end);
-		E copy = copyEdge(edge, beg, end);
-		addEdge(copy);
-		return copy;
-	}
-
-	/**
-	 * Duplicates the given edge. Override, if needed, to adjust edge decorations. The
-	 * returned duplicate edge is unassociated with the graph.
-	 *
-	 * @param edge an exemplar edge
-	 * @return a duplicate edge
-	 */
-	public E duplicateEdge(E edge) {
+	public E copyEdge(E edge, N beg, N end, boolean add) {
 		lock();
 		try {
-			E dup = createEdge(edge.beg(), edge.end());
-			dup.putAllIfAbsent(edge.properties());
-			return dup;
+			E e = createEdge(beg, end);
+			e.putAll(edge.properties());
+			if (add) addEdge(e);
+			return e;
 
 		} finally {
 			unlock();
@@ -295,41 +279,21 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/**
-	 * Duplicates the given edge and changes the edge terminals to the given nodes.
-	 * Override, if needed, to adjust edge decorations that are dependent on the changed
-	 * terminals. The returned duplicate edge is unassociated with the graph.
-	 *
-	 * @param edge an exemplar edge
-	 * @param beg  duplicate begin node
-	 * @param end  duplicate end node
-	 * @return a duplicate edge
-	 */
-	public E duplicateEdge(E edge, N beg, N end) {
-		lock();
-		try {
-			E dup = duplicateEdge(edge);
-			dup.setBeg(beg);
-			dup.setEnd(end);
-			return dup;
-
-		} finally {
-			unlock();
-		}
-	}
-
-	/**
-	 * Produce a new edge by functionally joining the given edges. Does not alter the
-	 * existing edges. Override to implement additional derived aspects to joining.
+	 * Produce a new edge by functionally joining the given edges. Conditionally adds the
+	 * new edge to the graph. Does not alter the existing edges.
 	 * <p>
-	 * {@code join(AB, BC)} returns {@code AC}
+	 * {@code joinEdges(A->B, B->C, true)} returns new edge {@code A->C}
 	 * <p>
-	 * {@code join(AB, DE)} returns {@code AD}
+	 * {@code joinEdges(A->B, D->E, true)} returns new edge {@code A->D}
+	 * <p>
+	 * Override to implement additional derived aspects to joining.
 	 *
 	 * @param lead a leading edge
 	 * @param tail a tailing edge
-	 * @return a new edge otherwise unassociated with the graph
+	 * @param add  {@code true} to add edge to the graph
+	 * @return a new edge
 	 */
-	public E join(E lead, E tail) {
+	public E joinEdges(E lead, E tail, boolean add) {
 		lock();
 		try {
 			E edge;
@@ -341,6 +305,65 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 				edge = createEdge(lead.beg(), tail.beg());
 				edge.putAllIfAbsent(lead.properties());
 			}
+			if (add) addEdge(edge);
+			return edge;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	/**
+	 * Moves the given edge by changing the edge terminals to the given target nodes.
+	 * <p>
+	 * Conditionally permits self-cyclic loops to be created. In all events, the original
+	 * edge is effectively removed.
+	 *
+	 * @param edge   edge to move
+	 * @param beg    target begin node
+	 * @param end    target end node
+	 * @param cyclic {@code true} to permit addition of a self-cyclic loop to the graph
+	 * @return the moved edge
+	 */
+	public E moveEdge(E edge, N beg, N end, boolean cyclic) {
+		lock();
+		try {
+			removeEdge(edge, false);
+			edge.setBeg(beg);
+			edge.setEnd(end);
+			if (!edge.cyclic() || cyclic) addEdge(edge);
+			return edge;
+
+		} finally {
+			unlock();
+		}
+	}
+
+	public N removeNode(N node) {
+		for (E edge : node.edges()) {
+			removeEdge(edge, true);
+		}
+		node.clear();
+		return node;
+	}
+
+	/**
+	 * Removes the given edge from the graph. If an edge terminal has no edge connections
+	 * after this edge is removed, the terminal is also removed from the graph.
+	 *
+	 * @param edge  the edge to remove
+	 * @param clear {@code true} to clear the edge when removed
+	 * @return the removed edge
+	 */
+	public E removeEdge(E edge, boolean clear) {
+		lock();
+		try {
+			N beg = edge.beg();
+			N end = edge.end();
+
+			boolean ok = edge.remove(clear);
+			if (ok && beg.adjacent().isEmpty()) delete(beg);
+			if (ok && end.adjacent().isEmpty()) delete(end);
 			return edge;
 
 		} finally {
@@ -351,50 +374,50 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	// --------------------------------
 
 	/**
-	 * Returns an immutable list of the current graph root nodes. Dynamically collected by
-	 * examining all nodes currently in the graph.
+	 * Returns an immutable list of the current graph real and implicit root nodes.
+	 * Dynamically collected by examining all nodes currently in the graph.
 	 * <p>
-	 * Roots are nominally defined as all graph nodes having no inbound edges
-	 * ({@code Sense.IN}). Where no such node exists, the first constructed node in the
-	 * graph is somewhat arbitrarily chosen as the single root node.
+	 * A real root is a graph node having no inbound edges ({@code Sense.IN}).
+	 * <p>
+	 * An implicit root is the first constructed node in the graph within an isolated
+	 * cyclic connected group of nodes.
+	 *
+	 * @return unmodifiable list of real and implicit roots
 	 */
 	public UniqueList<N> getRoots() {
+		SubgraphFinder<N, E> finder = new SubgraphFinder<>(this);
 		UniqueList<N> roots = new UniqueList<>();
+		LinkedHashSet<N> remainder = new LinkedHashSet<>(nodes);
+
+		// gather real roots
 		for (N node : nodes) {
 			if (node.isRoot()) {
 				roots.add(node);
+				remainder.remove(node);
 			}
 		}
-		if (roots.isEmpty() && !nodes.isEmpty()) roots.add(nodes.iterator().next());
+
+		// exclude real root subgraphs
+		for (N root : roots) {
+			Collection<GraphPath<N, E>> sg = finder.subset(root).values();
+			for (GraphPath<N, E> path : sg) {
+				UniqueList<N> pathNodes = path.nodes();
+				remainder.removeAll(pathNodes);
+			}
+		}
+
+		while (!remainder.isEmpty()) {
+			N node = remainder.iterator().next();
+			roots.add(node);
+			remainder.remove(node);
+			Collection<GraphPath<N, E>> sg = finder.subset(node).values();
+			for (GraphPath<N, E> path : sg) {
+				UniqueList<N> pathNodes = path.nodes();
+				remainder.removeAll(pathNodes);
+			}
+		}
+
 		return roots.unmodifiable();
-	}
-
-	/** Returns {@code true} if the graph contains the given node. */
-	public boolean contains(N node) {
-		return nodes.contains(node);
-	}
-
-	/** Returns {@code true} if the graph contains the given edge. */
-	public boolean contains(E edge) {
-		if (!edge.valid()) return false;
-		return getEdges(edge.beg(), edge.end()).stream().anyMatch(e -> e.equals(edge));
-	}
-
-	/** Returns {@code true} if the graph contains the given path. */
-	public boolean contains(GraphPath<N, E> path) {
-		if (path == null) return false;
-		return getEdges(true).containsAll(path.edges());
-	}
-
-	/** Returns {@code true} if the graph contains the given paths. */
-	public boolean containsAll(Collection<GraphPath<N, E>> paths) {
-		if (paths == null) return false;
-		return paths.stream().allMatch(p -> contains(p));
-	}
-
-	/** Returns the size of the graph. Equivalent to the node count. */
-	public int size() {
-		return nodes.size();
 	}
 
 	/**
@@ -434,6 +457,29 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 				.unmodifiable();
 	}
 
+	/** Returns {@code true} if the graph contains the given node. */
+	public boolean contains(N node) {
+		return nodes.contains(node);
+	}
+
+	/** Returns {@code true} if the graph contains the given edge. */
+	public boolean contains(E edge) {
+		if (!edge.valid()) return false;
+		return getEdges(edge.beg(), edge.end()).stream().anyMatch(e -> e.equals(edge));
+	}
+
+	/** Returns {@code true} if the graph contains the given path. */
+	public boolean contains(GraphPath<N, E> path) {
+		if (path == null) return false;
+		return getEdges(true).containsAll(path.edges());
+	}
+
+	/** Returns {@code true} if the graph contains the given paths. */
+	public boolean containsAll(Collection<GraphPath<N, E>> paths) {
+		if (paths == null) return false;
+		return paths.stream().allMatch(p -> contains(p));
+	}
+
 	@Override
 	public boolean hasEdge(N src, N dst) {
 		Assert.notNull(src, dst);
@@ -463,6 +509,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	public UniqueList<E> getEdges(Sense dir, N src, N dst) {
 		Assert.notNull(dir, src, dst);
 		return src.edges(dir, e -> e.between(src, dst));
+	}
+
+	/** Returns the size of the graph. Equivalent to the node count. */
+	public int size() {
+		return nodes.size();
 	}
 
 	// --------------------------------------
@@ -517,19 +568,19 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		return ds;
 	}
 
-	@Override
-	public void clear() {
-		getEdges(true).forEach(e -> e.remove(true));
-		nodes.forEach(n -> n.clear());
-		super.clear();
-	}
-
 	/** Required for testing. */
 	@VisibleForTesting
 	public void reset() {
 		Graph.CTR.set(0);
 		Node.CTR.set(0);
 		Edge.CTR.set(0);
+	}
+
+	@Override
+	public void clear() {
+		getEdges(true).forEach(e -> e.remove(true));
+		nodes.forEach(n -> n.clear());
+		super.clear();
 	}
 
 	@Override

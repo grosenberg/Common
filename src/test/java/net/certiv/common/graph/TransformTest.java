@@ -14,7 +14,9 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
 
-class TransformTest extends TestBase {
+class TransformTest extends TestGraphBase {
+
+	static final boolean FORCE = false;
 
 	@Test
 	void testReduceNode() {
@@ -32,7 +34,7 @@ class TransformTest extends TestBase {
 		assertNull(b);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Reduce1.md", dot);
+		writeResource(getClass(), XForm + "Reduce1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Reduce1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -58,7 +60,7 @@ class TransformTest extends TestBase {
 		assertNull(b);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"ReduceEdge1.md", dot);
+		writeResource(getClass(), XForm + "ReduceEdge1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "ReduceEdge1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -84,7 +86,7 @@ class TransformTest extends TestBase {
 		xf.transfer(cf, b); // cf becomes bf
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Transfer1.md", dot);
+		writeResource(getClass(), XForm + "Transfer1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Transfer1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -109,7 +111,7 @@ class TransformTest extends TestBase {
 		xf.move(ce, b, d);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Move1.md", dot);
+		writeResource(getClass(), XForm + "Move1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Move1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -129,7 +131,7 @@ class TransformTest extends TestBase {
 		xf.replicateEdges(b, targets); // replicate =>B=> to =>[targets-B]=>
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Replicate1.md", dot);
+		writeResource(getClass(), XForm + "Replicate1.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate1.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
@@ -149,7 +151,7 @@ class TransformTest extends TestBase {
 		xf.replicateEdges(b, targets, true);
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), XFuture+"Replicate2.md", dot);
+		writeResource(getClass(), XForm + "Replicate2.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate2.md").value;
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();

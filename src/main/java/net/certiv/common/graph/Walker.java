@@ -63,11 +63,11 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		visited.clear();
 	}
 
-	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent, N node) {
-		boolean ok = enter(dir, visited, visitor, parent, node);
+	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
+		boolean ok = enter(dir, visited, visitor, prev, node);
 		if (debug) {
 			Integer cnt = node != null ? node.size(dir, e -> !e.cyclic()) : null;
-			Log.debug("[enter=%s] %s -> %s (%s)", ok, parent, node, cnt);
+			Log.debug("[enter=%s] %s -> %s (%s)", ok, prev, node, cnt);
 		}
 
 		if (ok) {
@@ -76,7 +76,7 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 				walk(dir, visited, visitor, node, child);
 			}
 		}
-		exit(dir, visited, visitor, parent, node);
+		exit(dir, visited, visitor, prev, node);
 	}
 
 	/**
@@ -89,23 +89,21 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param dir     the walk traversal direction
 	 * @param visited collection of previously visited parent/node combinations
 	 * @param visitor the delegate visitor
-	 * @param parent  the parent node
+	 * @param prev    the previously visited, nominally parent, node
 	 * @param node    the current node
 	 * @return {@code true} to walk the children of the current node
 	 */
-	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent,
-			N node) {
-		if (parent == null && node == null) return false;
-		if (visited.containsEntry(parent, node)) return false;
+	protected boolean enter(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
+		if (prev == null && node == null) return false;
+		if (visited.containsEntry(prev, node)) return false;
 
-		boolean ok = node.enter(dir, visited, visitor, parent);
-		visited.put(parent, node);
+		boolean ok = node.enter(dir, visited, visitor, prev);
+		visited.put(prev, node);
 		return ok;
 	}
 
-	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N parent,
-			N node) {
-		return node.exit(dir, visited, visitor, parent);
+	protected boolean exit(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
+		return node.exit(dir, visited, visitor, prev);
 	}
 
 	public static abstract class NodeVisitor<T> {
@@ -116,15 +114,18 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 * the given node.
 		 * <p>
 		 * Descent walks are identified by a {@code Sense.OUT} direction. Ascent walks are
-		 * identified by {@code Sense.OUT} direction.
+		 * identified by {@code Sense.IN} direction.
+		 * <p>
+		 * When beginning a walk, regardless of direction, the {@code prev} node will be
+		 * {@code null} and the {@code node} value will be the starting node.
 		 *
 		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations
-		 * @param parent  the parent node
+		 * @param prev    the previously visited, nominally parent, node
 		 * @param node    the current node
 		 * @return {@code true} to walk the children of the current node
 		 */
-		public boolean enter(Sense dir, LinkedHashList<T, T> visited, T parent, T node) {
+		public boolean enter(Sense dir, LinkedHashList<T, T> visited, T prev, T node) {
 			return true;
 		}
 
@@ -133,15 +134,18 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 * given node. Return {@code true} on success (not currently used).
 		 * <p>
 		 * Descent walks are identified by a {@code Sense.OUT} direction. Ascent walks are
-		 * identified by {@code Sense.OUT} direction.
+		 * identified by {@code Sense.IN} direction.
+		 * <p>
+		 * When beginning a walk, regardless of direction, the {@code prev} node will be
+		 * {@code null} and the {@code node} value will be the starting node.
 		 *
 		 * @param dir     the walk traversal direction
 		 * @param visited collection of previously visited parent/node combinations
-		 * @param parent  the parent node
+		 * @param prev    the previously visited, nominally parent, node
 		 * @param node    the current node
 		 * @return {@code true} on success
 		 */
-		public boolean exit(Sense dir, LinkedHashList<T, T> visited, T parent, T node) {
+		public boolean exit(Sense dir, LinkedHashList<T, T> visited, T prev, T node) {
 			return true;
 		}
 	}

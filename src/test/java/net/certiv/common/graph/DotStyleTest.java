@@ -6,13 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
-import net.certiv.common.dot.LineStyle;
 import net.certiv.common.dot.DotStyle;
+import net.certiv.common.dot.LineStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.util.FsUtil;
 
-class DotStyleTest extends TestBase {
+class DotStyleTest extends TestGraphBase {
+
+	static final boolean FORCE = true;
 
 	@Test
 	void testStyles() {
@@ -41,13 +43,13 @@ class DotStyleTest extends TestBase {
 
 		DemoNode c = builder.findOrCreateNode("C");
 
-		DemoEdge ab = graph.createAndAddEdge(a, b);
+		DemoEdge ab = graph.addEdge(a, b);
 		ds = ab.getDotStyle();
 		ds.put(LABEL, "Edge " + ab.name());
 		ds.put(COLOR, "blue");
 		ds.put(PENWIDTH, 2);
 
-		DemoEdge bc = graph.createAndAddEdge(b, c);
+		DemoEdge bc = graph.addEdge(b, c);
 		ds = bc.getDotStyle();
 		ds.put(LABEL, "Edge " + bc.name());
 		ds.put(ARROWHEAD, "vee");
@@ -59,11 +61,11 @@ class DotStyleTest extends TestBase {
 		ds.put(STYLE, "dashed");
 
 		String dot = graph.render();
-		// FsUtil.writeResource(getClass(), "dotStyle.md", dot);
+		writeResource(getClass(), "dotStyle.md", dot, FORCE);
 
 		String txt = FsUtil.loadResource(getClass(), "dotStyle.md").value;
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), dot, txt).sdiff(true, 120).out();
+		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 
-		assertEquals(dot, txt);
+		assertEquals(txt, dot);
 	}
 }

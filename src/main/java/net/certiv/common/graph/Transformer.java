@@ -77,7 +77,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			if (!(policy.repair() && !graph.contains(node))) {
-				ok &= rmNode(xpr, node);
+				graph.removeNode(node);
 			}
 
 			if (ok) return Result.OK;
@@ -125,7 +125,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (N node : nodes) {
-				ok &= rmNode(xpr, node);
+				graph.removeNode(node);
 			}
 
 			if (ok) return Result.OK;
@@ -166,8 +166,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 					if (policy.rptByEx()) throw GraphEx.of("Remove edge pre-condition fail: %s", edge);
 				}
 			}
-
-			ok &= rmEdge(xpr, edge, clear);
+			graph.removeEdge(edge, clear);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -207,10 +206,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 					if (policy.rptByEx()) throw GraphEx.of("Remove edge 'if' pre-condition fail: %s", edge);
 				}
 			}
-
-			if (filter == null || filter.test(edge)) {
-				ok &= rmEdge(xpr, edge, clear);
-			}
+			if (filter == null || filter.test(edge)) graph.removeEdge(edge, clear);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -257,7 +253,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (E edge : edges) {
-				ok &= rmEdge(xpr, edge, clear);
+				graph.removeEdge(edge, clear);
 			}
 
 			if (ok) return Result.OK;
@@ -308,7 +304,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (E edge : edges) {
-				ok &= rmEdge(xpr, edge, clear);
+				graph.removeEdge(edge, clear);
 			}
 
 			if (ok) return Result.OK;
@@ -363,7 +359,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			for (E edge : edges) {
 				if (filter == null || filter.test(edge)) {
-					ok &= rmEdge(xpr, edge, clear);
+					graph.removeEdge(edge, clear);
 				}
 			}
 
@@ -417,7 +413,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			for (E edge : edges) {
 				if (filter == null || filter.test(edge)) {
-					ok &= rmEdge(xpr, edge, clear);
+					graph.removeEdge(edge, clear);
 				}
 			}
 
@@ -551,7 +547,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			ok &= mvEdge(xpr, edge, beg, edge.end(), true);
+			graph.moveEdge(edge, beg, edge.end(), true);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -600,7 +596,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (E edge : edges) {
-				ok &= mvEdge(xpr, edge, beg, edge.end(), true);
+				graph.moveEdge(edge, beg, edge.end(), true);
 			}
 
 			if (ok) return Result.OK;
@@ -738,9 +734,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			if (remove) {
-				ok &= rmNode(xpr, dst);
-			}
+			if (remove) graph.removeNode(dst);
 
 			if (ok) return Result.of(dupEdges);
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -797,9 +791,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 					}
 				}
 
-				if (remove) {
-					ok &= rmNode(xpr, dst);
-				}
+				if (remove) graph.removeNode(dst);
 			}
 
 			if (ok) return Result.of(dups);
@@ -899,7 +891,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			ok &= mvEdge(xpr, edge, beg, end, cyclic);
+			graph.moveEdge(edge, beg, end, cyclic);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -949,7 +941,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (E edge : edges) {
-				ok &= mvEdge(xpr, edge, beg, end, cyclic);
+				graph.moveEdge(edge, beg, end, cyclic);
 			}
 
 			if (ok) return Result.OK;
@@ -1002,7 +994,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			ok &= mvEdge(xpr, edge, edge.beg(), end, cyclic);
+			graph.moveEdge(edge, edge.beg(), end, cyclic);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -1061,7 +1053,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 			}
 
 			for (E edge : edges) {
-				ok &= mvEdge(xpr, edge, edge.beg(), end, cyclic);
+				graph.moveEdge(edge, edge.beg(), end, cyclic);
 			}
 
 			if (ok) return Result.OK;
@@ -1122,15 +1114,15 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			// lead edges [D,G] => [X,Y] to [D,G] => B
 			for (E edge : leads) {
-				ok &= mvEdge(xpr, edge, edge.beg(), target, true);
+				graph.moveEdge(edge, edge.beg(), target, true);
 			}
 			// tail edges [X,Y] => [F,I] to B => [F,I]
 			for (E edge : tails) {
-				ok &= mvEdge(xpr, edge, target, edge.end(), true);
+				graph.moveEdge(edge, target, edge.end(), true);
 			}
 			// cyclic edges [X,Y] => [X,Y] to B => B
 			for (E edge : cycles) {
-				ok &= mvEdge(xpr, edge, target, target, true);
+				graph.moveEdge(edge, target, target, true);
 			}
 
 			if (ok) return Result.OK;
@@ -1207,9 +1199,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 					ok &= dupAndAddEdge(xpr, dups, edge, tgt, edge.end());
 				}
 			}
-			if (remove) {
-				ok &= rmNode(xpr, node);
-			}
+			if (remove) graph.removeNode(node);
 
 			if (ok) return Result.of(dups);
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -1256,11 +1246,10 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 				for (E lead : leads) {
 					for (E tail : tails) {
-						E edge = graph.join(lead, tail);
-						graph.addEdge(edge);
+						graph.joinEdges(lead, tail, true);
 					}
 				}
-				ok &= rmNode(xpr, node);
+				graph.removeNode(node);
 			}
 
 			if (ok) return Result.OK;
@@ -1304,7 +1293,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			ok &= reduceEdges(xpr, src, dst);
+			graph.joinEdges(src, dst, true);
+			if (src.end().equals(dst.beg())) {
+				graph.removeEdge(dst, false);
+			}
+			graph.removeEdge(src, false);
 
 			if (ok) return Result.OK;
 			if (policy.rptByRet()) return Result.of(xpr);
@@ -1335,7 +1328,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param edge edge to check
 	 * @return {@code true} on valid/success
 	 */
-	public final boolean chkEdge(Explainer xpr, boolean ok, E edge) {
+	final boolean chkEdge(Explainer xpr, boolean ok, E edge) {
 		return chkEdge(xpr, ok, Strings.EMPTY, edge);
 	}
 
@@ -1349,7 +1342,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param edge edge to check
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkEdge(Explainer xpr, boolean ok, Object idx, E edge) {
+	final boolean chkEdge(Explainer xpr, boolean ok, Object idx, E edge) {
 		return chkEdgeIf(xpr, ok, idx, edge, null);
 	}
 
@@ -1365,8 +1358,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param filter predicate filter
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkEdgeIf(Explainer xpr, boolean ok, Object idx, E edge,
-			Predicate<? super E> filter) {
+	final boolean chkEdgeIf(Explainer xpr, boolean ok, Object idx, E edge, Predicate<? super E> filter) {
 		ok &= xpr.notNull(ok, edge, EDGE_NULL, idx);
 		ok &= xpr.is(ok, filter == null || filter.test(edge), EDGE_FILTER_FAIL, idx, edge);
 		ok &= xpr.notNull(ok, edge.beg(), EDGE_NODE_NULL, idx, BEGIN);
@@ -1376,7 +1368,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		return ok;
 	}
 
-	public final boolean chkEdges(Explainer xpr, boolean ok, Collection<? extends E> edges) {
+	final boolean chkEdges(Explainer xpr, boolean ok, Collection<? extends E> edges) {
 		return chkEdgesIf(xpr, ok, edges, null);
 	}
 
@@ -1391,7 +1383,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param filter predicate filter
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkEdgesIf(Explainer xpr, boolean ok, Collection<? extends E> edges,
+	final boolean chkEdgesIf(Explainer xpr, boolean ok, Collection<? extends E> edges,
 			Predicate<? super E> filter) {
 
 		ok &= xpr.notNull(ok, edges, EDGE_LIST_NULL);
@@ -1414,7 +1406,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param exists {@code true} to test for existence in graph
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkNode(Explainer xpr, boolean ok, N node, boolean exists) {
+	final boolean chkNode(Explainer xpr, boolean ok, N node, boolean exists) {
 		ok &= xpr.notNull(ok, node, NODE_NULL);
 		if (exists) ok &= xpr.is(ok, graph.contains(node), NO_GRAPH_NODE);
 		return ok;
@@ -1430,7 +1422,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param exists {@code true} to test for existence in graph
 	 * @return {@code true} on valid
 	 */
-	public final boolean chkNodes(Explainer xpr, boolean ok, Collection<? extends N> nodes, boolean exists) {
+	final boolean chkNodes(Explainer xpr, boolean ok, Collection<? extends N> nodes, boolean exists) {
 		ok &= xpr.notNull(ok, nodes, NODE_LIST_NULL);
 		ok &= xpr.any(ok, nodes, n -> n != null, NODE_NULL);
 		if (exists) ok &= xpr.any(ok, nodes, n -> graph.contains(n), NO_GRAPH_NODE);
@@ -1449,8 +1441,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 */
 	final boolean dupAndAddEdge(Explainer xpr, LinkedList<E> dups, E edge, N beg, N end) {
 		try {
-			E dup = graph.duplicateEdge(edge, beg, end);
-			graph.addEdge(dup);
+			E dup = graph.copyEdge(edge, beg, end, true);
 			dups.add(dup);
 			return true;
 
@@ -1461,62 +1452,28 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		}
 	}
 
-	/** Internal: remove node function. */
-	final boolean rmNode(Explainer xpr, N node) {
-		boolean ok = true;
-		for (E edge : node.edges()) {
-			ok &= rmEdge(xpr, edge, true);
-		}
-		node.clear();
-		return ok;
-	}
-
-	/** Internal: remove edge function. */
-	final boolean rmEdge(Explainer xpr, E edge, boolean clear) {
-		N beg = edge.beg();
-		N end = edge.end();
-
-		boolean ok = edge.remove(clear);
-		if (ok && beg.adjacent().isEmpty()) graph.delete(beg);
-		if (ok && end.adjacent().isEmpty()) graph.delete(end);
-		xpr.reason(!ok, "Remove edge failed: %s", edge);
-		return ok;
-	}
-
-	final boolean mvEdge(Explainer xpr, E edge, N beg, N end, boolean cyclic) {
-		if (beg.equals(end) && !cyclic) return true; // skip cycle
-		if (edge.beg().equals(beg) && edge.end().equals(end)) return true; // skip no-op
-
-		boolean ok = rmEdge(xpr, edge, false);
-		if (ok) edge.setBeg(beg);
-		if (ok) edge.setEnd(end);
-		if (ok) graph.addEdge(edge);
-		return ok;
-	}
-
-	final boolean reduceEdges(Explainer xpr, E lead, E tail) {
-		boolean ok = true;
-		E edge = graph.join(lead, tail);
-		graph.addEdge(edge);
-		if (lead.end().equals(tail.beg())) {
-			ok &= rmEdge(xpr, tail, false);
-		}
-		ok &= rmEdge(xpr, lead, false);
-		return ok;
-	}
+	// final boolean mvEdge(Explainer xpr, E edge, N beg, N end, boolean cyclic) {
+	// if (beg.equals(end) && !cyclic) return true; // skip cycle
+	// if (edge.beg().equals(beg) && edge.end().equals(end)) return true; // skip no-op
+	//
+	// boolean ok = rmEdge(xpr, edge, false);
+	// if (ok) edge.setBeg(beg);
+	// if (ok) edge.setEnd(end);
+	// if (ok) graph.addEdge(edge);
+	// return ok;
+	// }
 
 	/** Internal: remove graph path */
 	final boolean rmGraphPath(Explainer xpr, GraphPath<N, E> path, boolean clear) {
-		boolean ok = true;
 		UniqueList<E> edges = findSubGraphEdges(List.of(path), clear);
 		for (E edge : edges) {
-			ok &= rmEdge(xpr, edge, clear);
+			graph.removeEdge(edge, clear);
 		}
-		return ok;
+		return true;
 	}
 
 	/** Internal: find connections between the graph and given paths */
-	public final UniqueList<E> findSubGraphEdges(Collection<GraphPath<N, E>> paths, boolean clear) {
+	final UniqueList<E> findSubGraphEdges(Collection<GraphPath<N, E>> paths, boolean clear) {
 		UniqueList<E> edges = new UniqueList<>();
 		if (paths != null) {
 			// collect all edges
