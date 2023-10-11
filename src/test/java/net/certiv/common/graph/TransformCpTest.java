@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.algorithms.GraphPath;
-import net.certiv.common.graph.algorithms.SubgraphFinder;
+import net.certiv.common.graph.algorithms.PathFinder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.Result;
@@ -38,7 +38,7 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode g = builder.getNode("G");
 		DemoNode u = builder.getNode("U");
 
-		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
+		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
@@ -61,7 +61,7 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
+		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
@@ -83,7 +83,7 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
+		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
@@ -106,7 +106,7 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		SubgraphFinder<DemoNode, DemoEdge> finder = new SubgraphFinder<>(graph);
+		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
 		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);

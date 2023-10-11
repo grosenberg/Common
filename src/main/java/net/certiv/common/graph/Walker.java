@@ -17,13 +17,23 @@ import net.certiv.common.stores.LinkedHashList;
  */
 public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	private static class StopEx extends RuntimeException {}
+
+	private static final StopEx EX_STOP = new StopEx();
+
 	private final LinkedHashList<N, N> visited = new LinkedHashList<>();
 	private boolean debug;
 
+	/** Construct a walker instance. */
 	public Walker() {
 		this(false);
 	}
 
+	/**
+	 * Construct a walker instance.
+	 *
+	 * @param debug {@code true} to log walker steps
+	 */
 	public Walker(boolean debug) {
 		this.debug = debug;
 	}
@@ -36,7 +46,9 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param start   the node to start ascending from
 	 */
 	public void ascend(NodeVisitor<N> visitor, N start) {
-		walk(Sense.IN, visited, visitor, null, start);
+		try {
+			walk(Sense.IN, visited, visitor, null, start);
+		} catch (StopEx flag) {}
 	}
 
 	/**
@@ -47,36 +59,59 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param start   the node to start descending from
 	 */
 	public void descend(NodeVisitor<N> visitor, N start) {
-		walk(Sense.OUT, visited, visitor, null, start);
+		try {
+			walk(Sense.OUT, visited, visitor, null, start);
+		} catch (StopEx flag) {}
 	}
 
+	/** Set the walker to to log walker steps. */
+	public Walker<N, E> debug() {
+		this.debug = true;
+		return this;
+	}
+
+	/**
+	 * Set the walker to to log walker ops.
+	 *
+	 * @param enable {@code true} to log walker steps
+	 * @return the walker
+	 */
 	public Walker<N, E> debug(boolean enable) {
 		this.debug = enable;
 		return this;
 	}
 
 	/**
-	 * Clears the internal record of visited paths (represented as a collection of node
-	 * pairings).
+	 * Clears the internal record of visited node associations.
 	 */
 	public void reset() {
 		visited.clear();
 	}
 
-	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
-		boolean ok = enter(dir, visited, visitor, prev, node);
-		if (debug) {
-			Integer cnt = node != null ? node.size(dir, e -> !e.cyclic()) : null;
-			Log.debug("[enter=%s] %s -> %s (%s)", ok, prev, node, cnt);
-		}
+	/**
+	 * Returns a copy of the visited node associations.
+	 *
+	 * @return list of prev -> node(s) visited
+	 */
+	public LinkedHashList<N, N> visited() {
+		return new LinkedHashList<>(visited);
+	}
 
-		if (ok) {
-			// walk including cycles, relying on visit check to terminate branch
-			for (N child : node.adjacent(dir, true)) {
-				walk(dir, visited, visitor, node, child);
+	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
+		if (!visitor.done) {
+			boolean ok = enter(dir, visited, visitor, prev, node);
+			if (debug) Log.debug("[enter=%s] %s --> %s", ok ? "Ok" : "Fail", prev, node);
+
+			if (ok) {
+				for (N child : node.adjacent(dir, true)) {
+					if (!visitor.done) {
+						walk(dir, visited, visitor, node, child);
+					}
+				}
 			}
 		}
-		exit(dir, visited, visitor, prev, node);
+		boolean ok = exit(dir, visited, visitor, prev, node);
+		if (debug) Log.debug("[exit =%s] %s <-- %s", ok ? "Ok" : "Fail", prev, node);
 	}
 
 	/**
@@ -108,6 +143,9 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public static abstract class NodeVisitor<T> {
 
+		/** Flag to block visitor from entering previously unvisited nodes. */
+		private boolean done = false;
+
 		/**
 		 * Evaluate given parameters on {@code entry} -- before walking the children of
 		 * the given node. Return {@code true} if the walker should walk the children of
@@ -123,7 +161,8 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 * @param visited collection of previously visited parent/node combinations
 		 * @param prev    the previously visited, nominally parent, node
 		 * @param node    the current node
-		 * @return {@code true} to walk the children of the current node
+		 * @return {@code true} to walk the children, if any, of the current node, or
+		 *         {@code false} to skip waling any childref of the current node
 		 */
 		public boolean enter(Sense dir, LinkedHashList<T, T> visited, T prev, T node) {
 			return true;
@@ -147,6 +186,27 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		 */
 		public boolean exit(Sense dir, LinkedHashList<T, T> visited, T prev, T node) {
 			return true;
+		}
+
+		/**
+		 * Mark the walk as complete. The walker will not enter any previously unvisited
+		 * nodes. The walker will continue to exit any previously entered/not yet exited
+		 * nodes.
+		 */
+		public void done() {
+			done = true;
+		}
+
+		/**
+		 * Force an immediate walk termination. The walker will neither enter any
+		 * previously unvisited nodes nor will it exit any previously entered/not yet
+		 * exited nodes.
+		 *
+		 * @implNote throws an internal runtime exception that is silently caught at the
+		 *           top level of the walker
+		 */
+		public void stop() {
+			throw EX_STOP;
 		}
 	}
 }

@@ -14,7 +14,7 @@ import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.algorithms.GraphPath;
-import net.certiv.common.graph.algorithms.SubgraphFinder;
+import net.certiv.common.graph.algorithms.PathFinder;
 import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
@@ -299,11 +299,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			E edge;
 			if (lead.end().equals(tail.beg())) {
 				edge = createEdge(lead.beg(), tail.end());
-				edge.putAllIfAbsent(lead.properties());
-				edge.putAllIfAbsent(tail.properties());
+				edge.putAll(tail.properties());
+				edge.putAll(lead.properties());
 			} else {
 				edge = createEdge(lead.beg(), tail.beg());
-				edge.putAllIfAbsent(lead.properties());
+				edge.putAll(lead.properties());
 			}
 			if (add) addEdge(edge);
 			return edge;
@@ -385,7 +385,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return unmodifiable list of real and implicit roots
 	 */
 	public UniqueList<N> getRoots() {
-		SubgraphFinder<N, E> finder = new SubgraphFinder<>(this);
+		PathFinder<N, E> finder = new PathFinder<>(this);
 		UniqueList<N> roots = new UniqueList<>();
 		LinkedHashSet<N> remainder = new LinkedHashSet<>(nodes);
 

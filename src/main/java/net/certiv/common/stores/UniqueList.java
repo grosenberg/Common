@@ -1,7 +1,9 @@
 package net.certiv.common.stores;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -103,15 +105,19 @@ public class UniqueList<E> extends LinkedList<E> {
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		if (nomod) throw new UnsupportedOperationException();
-		removeAll(c);
-		return super.addAll(c);
+		if (c == null) return false;
+		Set<E> in = new LinkedHashSet<>(c);
+		in.removeAll(this);
+		return super.addAll(in);
 	}
 
 	@Override
 	public boolean addAll(int idx, Collection<? extends E> c) {
 		if (nomod) throw new UnsupportedOperationException();
-		removeAll(c);
-		return super.addAll(Math.min(idx, size()), c);
+		if (c == null) return false;
+		Set<E> in = new LinkedHashSet<>(c);
+		in.removeAll(this);
+		return super.addAll(Math.min(idx, size()), in);
 	}
 
 	@Override

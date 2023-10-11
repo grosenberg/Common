@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.algorithms.GraphPath;
-import net.certiv.common.graph.algorithms.SubgraphFinder;
+import net.certiv.common.graph.algorithms.PathFinder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
@@ -30,7 +30,7 @@ class SubgraphTest extends TestGraphBase {
 	DemoNode f;
 	DemoNode g;
 
-	SubgraphFinder<DemoNode, DemoEdge> finder;
+	PathFinder<DemoNode, DemoEdge> finder;
 
 	@BeforeEach
 	void setUp() {
@@ -46,7 +46,7 @@ class SubgraphTest extends TestGraphBase {
 		f = builder.getNode("F");
 		g = builder.getNode("G");
 
-		finder = new SubgraphFinder<>(graph);
+		finder = new PathFinder<>(graph);
 	}
 
 	@AfterEach

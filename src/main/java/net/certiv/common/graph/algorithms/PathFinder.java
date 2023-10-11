@@ -17,7 +17,7 @@ import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Maths;
 
-public class SubgraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
+public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	private static final String DKEY_PREFIX = "DKEY-";
 	private static final GraphException ERR_DKEY = GraphEx.of("No weighted distance key/value for edge: %s");
@@ -33,7 +33,7 @@ public class SubgraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param graph the search target
 	 */
-	public SubgraphFinder(Graph<N, E> graph) {
+	public PathFinder(Graph<N, E> graph) {
 		this.graph = graph;
 		this.key = makeDKey(999, 4);
 	}
@@ -43,9 +43,9 @@ public class SubgraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param graph the search target
 	 * @param key   weighted distance property key
-	 * @see SubgraphFinder#makeDKey(int, int)
+	 * @see PathFinder#makeDKey(int, int)
 	 */
-	public SubgraphFinder(Graph<N, E> graph, String key) {
+	public PathFinder(Graph<N, E> graph, String key) {
 		Assert.notEmpty(key);
 		this.graph = graph;
 		this.key = key;
