@@ -10,59 +10,107 @@ import net.certiv.common.stores.UniqueList;
 
 public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	private final Predicate<N> TRUE = n -> true;
+	private final Predicate<N> FALSE = n -> false;
+
 	private final Graph<N, E> graph;
 
-	public Finder(Graph<N, E> graph) {
+	private Predicate<? super N> include = TRUE;
+	private Predicate<? super N> exclude = FALSE;
+	private Predicate<? super N> whilst = TRUE;
+	private boolean debug = false;
+
+	public static <N extends Node<N, E>, E extends Edge<N, E>> Finder<N, E> in(Graph<N, E> graph) {
+		return new Finder<>(graph);
+	}
+
+	private Finder(Graph<N, E> graph) {
 		this.graph = graph;
 	}
 
 	/**
-	 * Find all nodes in the graph that satisfy the given include criteria.
+	 * Set the finder to to log finder steps.
 	 *
-	 * @param include an inclusion predicate
-	 * @return the selected nodes in encounter order
+	 * @return the finder
 	 */
-	public UniqueList<N> all(Predicate<? super N> include) {
-		return all(include, null);
+	public Finder<N, E> debug() {
+		this.debug = true;
+		return this;
 	}
 
 	/**
-	 * Find all nodes in the graph that satisfy the given include and exclude criteria. A
-	 * {@code null} exclusion criteria excludes none.
+	 * Set the finder to to log finder steps.
 	 *
-	 * @param include an inclusion predicate
-	 * @param exclude an exclusion predicate
+	 * @param enable {@code true} to log finder steps
+	 * @return the finder
+	 */
+	public Finder<N, E> debug(boolean enable) {
+		this.debug = enable;
+		return this;
+	}
+
+	public Finder<N, E> include() {
+		this.include = TRUE;
+		return this;
+	}
+
+	public Finder<N, E> include(Predicate<? super N> include) {
+		this.include = include != null ? include : TRUE;
+		return this;
+	}
+
+	public Finder<N, E> exclude() {
+		this.exclude = FALSE;
+		return this;
+	}
+
+	public Finder<N, E> exclude(Predicate<? super N> exclude) {
+		this.exclude = exclude != null ? exclude : FALSE;
+		return this;
+	}
+
+	public Finder<N, E> whilst() {
+		this.whilst = TRUE;
+		return this;
+	}
+
+	public Finder<N, E> whilst(Predicate<? super N> whilst) {
+		this.whilst = whilst != null ? whilst : TRUE;
+		return this;
+	}
+
+	/**
+	 * Find all nodes in the graph that satisfy the {@link #include} and {@link #exclude}
+	 * criteria during the {@link #whilst} criteria.
+	 *
 	 * @return the selected nodes in encounter order
 	 */
-	public UniqueList<N> all(Predicate<? super N> include, Predicate<? super N> exclude) {
+	public UniqueList<N> all() {
 		UniqueList<N> all = new UniqueList<>();
 		for (N root : graph.getRoots()) {
-			all.addAll(all(root, include, exclude));
+			all.addAll(all(root));
 		}
 		return all;
 	}
 
 	/**
-	 * Find all nodes in the graph, under the given start node, that satisfy the given
-	 * include and exclude criteria. A {@code null} exclusion criteria excludes none.
+	 * Find all nodes in the graph, beginning from the given start node, that satisfy the
+	 * {@link #include} and {@link #exclude} criteria during the {@link #whilst} criteria.
 	 *
-	 * @param start   a start node
-	 * @param include an inclusion predicate
-	 * @param exclude an exclusion predicate
+	 * @param start graph walk start node
 	 * @return the selected nodes in encounter order
 	 */
-	public UniqueList<N> all(N start, Predicate<? super N> include, Predicate<? super N> exclude) {
+	public UniqueList<N> all(N start) {
 		UniqueList<N> all = new UniqueList<>();
 		if (start != null) {
-			Walker<N, E> walker = graph.walker();
+			Walker<N, E> walker = graph.walker().debug(debug);
 			walker.descend(new NodeVisitor<N>() {
 
 				@Override
 				public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
-					if (include.test(node)) {
-						if (exclude == null || !exclude.test(node)) {
-							all.add(node);
-						}
+					if (!whilst.test(node)) return false;
+					if (include.test(node) && !exclude.test(node)) {
+						all.add(node);
 					}
 					return true;
 				}
@@ -74,63 +122,86 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Finds the first node in the graph that satisfies the given include criteria.
+	 * Find the first node in the graph that satisfies the {@link #include} and
+	 * {@link #exclude} criteria during the {@link #whilst} criteria.
+	 * <p>
+	 * This is a short-circuiting terminal operation.
 	 *
-	 * @param include an inclusion predicate
 	 * @return the first selected node, or {@code null} if none found
 	 */
-	public N first(Predicate<? super N> include) {
-		return first(include, null);
-	}
-
-	/**
-	 * Finds the first node in the graph that satisfies the given include and exclude
-	 * criteria. A {@code null} exclusion criteria excludes none.
-	 *
-	 * @param include an inclusion predicate
-	 * @param exclude an exclusion predicate
-	 * @return the first selected node, or {@code null} if none found
-	 */
-	public N first(Predicate<? super N> include, Predicate<? super N> exclude) {
+	public N first() {
 		for (N root : graph.getRoots()) {
-			N found = first(root, include, exclude);
+			N found = first(root);
 			if (found != null) return found;
 		}
 		return null;
 	}
 
 	/**
-	 * Finds the first node in the graph, under the given start node, that satisfies the
-	 * given include and exclude criteria. A {@code null} exclusion criteria excludes
-	 * none.
+	 * Find the first node in the graph, beginning from the given start node, that
+	 * satisfies the {@link #include} and {@link #exclude} criteria during the
+	 * {@link #whilst} criteria.
+	 * <p>
+	 * This is a short-circuiting terminal operation.
 	 *
-	 * @param start   a start node
-	 * @param include an inclusion predicate
-	 * @param exclude an exclusion predicate
+	 * @param start graph walk start node
 	 * @return the first selected node, or {@code null} if none found
 	 */
-	public N first(N start, Predicate<? super N> include, Predicate<? super N> exclude) {
+	public N first(N start) {
 		Holder<N> found = new Holder<>();
 		if (start != null) {
-			Walker<N, E> walker = graph.walker();
+			Walker<N, E> walker = graph.walker().debug(debug);
 			walker.descend(new NodeVisitor<N>() {
-
-				boolean ok = true;
 
 				@Override
 				public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
-					if (ok && include.test(node)) {
-						if (exclude == null || !exclude.test(node)) {
-							found.value = node;
-							ok = false;
-						}
+					if (!whilst.test(node)) return false;
+					if (include.test(node) && !exclude.test(node)) {
+						found.set(node);
+						stop();
 					}
-					return ok;
+					return true;
 				}
 
 			}, start);
 		}
 
-		return found.value;
+		return found.get();
+	}
+
+	/**
+	 * Returns whether any node in the graph satisfies the {@link #include} and
+	 * {@link #exclude} criteria during the {@link #whilst} criteria.
+	 * <p>
+	 * This is a short-circuiting terminal operation.
+	 *
+	 * @return {@code true} if any criterial qualified node exists in the graph
+	 */
+	public boolean any() {
+		return first() != null;
+	}
+
+	/**
+	 * Returns whether any node in the graph, beginning from the given start node,
+	 * satisfies the {@link #include} and {@link #exclude} criteria during the
+	 * {@link #whilst} criteria.
+	 * <p>
+	 * This is a short-circuiting terminal operation.
+	 *
+	 * @return {@code true} if any criterial qualified node exists in the graph
+	 */
+	public boolean any(N start) {
+		return first(start) != null;
+	}
+
+	/**
+	 * Reset the the {@link #include} ,{@link #exclude}, and {@link #whilst} criteria to
+	 * always return {@code true}. Sets {@code debug} to {@code false}.
+	 */
+	public void reset() {
+		include = TRUE;
+		exclude = FALSE;
+		whilst = TRUE;
+		debug = false;
 	}
 }

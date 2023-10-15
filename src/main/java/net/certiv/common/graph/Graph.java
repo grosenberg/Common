@@ -13,9 +13,9 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.algorithms.GraphPath;
-import net.certiv.common.graph.algorithms.PathFinder;
 import net.certiv.common.graph.ops.ITransformOp;
+import net.certiv.common.graph.paths.GraphPath;
+import net.certiv.common.graph.paths.PathFinder;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.stores.props.Props;
@@ -385,7 +385,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return unmodifiable list of real and implicit roots
 	 */
 	public UniqueList<N> getRoots() {
-		PathFinder<N, E> finder = new PathFinder<>(this);
+		PathFinder<N, E> finder = PathFinder.in(this);
 		UniqueList<N> roots = new UniqueList<>();
 		LinkedHashSet<N> remainder = new LinkedHashSet<>(nodes);
 
@@ -399,8 +399,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 		// exclude real root subgraphs
 		for (N root : roots) {
-			Collection<GraphPath<N, E>> sg = finder.subset(root).values();
-			for (GraphPath<N, E> path : sg) {
+			for (GraphPath<N, E> path : finder.subset(root)) {
 				UniqueList<N> pathNodes = path.nodes();
 				remainder.removeAll(pathNodes);
 			}
@@ -410,8 +409,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			N node = remainder.iterator().next();
 			roots.add(node);
 			remainder.remove(node);
-			Collection<GraphPath<N, E>> sg = finder.subset(node).values();
-			for (GraphPath<N, E> path : sg) {
+			for (GraphPath<N, E> path : finder.subset(node)) {
 				UniqueList<N> pathNodes = path.nodes();
 				remainder.removeAll(pathNodes);
 			}

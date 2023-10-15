@@ -4,13 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.XfPolicy.Flg;
-import net.certiv.common.graph.algorithms.GraphPath;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ops.ConsolidateOp;
 import net.certiv.common.graph.ops.CopyOp;
@@ -22,6 +20,8 @@ import net.certiv.common.graph.ops.RemoveEdgeOp;
 import net.certiv.common.graph.ops.RemoveEdgesIfOp;
 import net.certiv.common.graph.ops.RemoveNodeOp;
 import net.certiv.common.graph.ops.ReplicateOp;
+import net.certiv.common.graph.paths.GraphPath;
+import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
@@ -425,16 +425,16 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> remove(Map<N, GraphPath<N, E>> subgraph, boolean clear) {
+	public Result<Boolean> remove(SubGraph<N, E> subgraph, boolean clear) {
 		if (!policy.qualify()) {
-			UniqueList<E> edges = xf.findSubGraphEdges(subgraph.values(), clear);
+			UniqueList<E> edges = xf.findSubGraphEdges(subgraph.paths(), clear);
 			ops.add(RemoveEdgeOp.of(edges, clear));
 			return Result.OK;
 		}
 
 		Result<Boolean> res = xf.remove(subgraph, clear);
 		if (res.valid()) {
-			UniqueList<E> edges = xf.findSubGraphEdges(subgraph.values(), clear);
+			UniqueList<E> edges = xf.findSubGraphEdges(subgraph.paths(), clear);
 			ops.add(RemoveEdgeOp.of(edges, clear));
 		}
 		return report(res);
@@ -598,7 +598,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(SubGraph<N, E> sg, N dst, boolean remove) {
 		if (!policy.qualify()) {
 			ops.add(CopyOp.of(sg, dst, remove));
 			return Result.nil();

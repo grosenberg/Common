@@ -1,7 +1,6 @@
-package net.certiv.common.graph.algorithms;
+package net.certiv.common.graph.paths;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.function.Predicate;
 
 import net.certiv.common.check.Assert;
@@ -25,15 +24,36 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	private final Graph<N, E> graph;
 	/** property key for min total weighted distance */
 	private String key;
-	/** entire subgraph last found by this finder */
-	private LinkedHashMap<N, GraphPath<N, E>> subgraph;
+	/** entire subgraph path set last found by this finder */
+	private SubGraph<N, E> subgraph;
 
 	/**
 	 * Construct a finder instance.
 	 *
 	 * @param graph the search target
 	 */
-	public PathFinder(Graph<N, E> graph) {
+	public static <N extends Node<N, E>, E extends Edge<N, E>> PathFinder<N, E> in(Graph<N, E> graph) {
+		return new PathFinder<>(graph);
+	}
+
+	/**
+	 * Construct a finder instance with the given {@code key} instance value.
+	 *
+	 * @param graph the search target
+	 * @param key   weighted distance property key
+	 * @see PathFinder#makeDKey(int, int)
+	 */
+	public static <N extends Node<N, E>, E extends Edge<N, E>> PathFinder<N, E> in(Graph<N, E> graph,
+			String key) {
+		return new PathFinder<>(graph, key);
+	}
+
+	/**
+	 * Construct a finder instance.
+	 *
+	 * @param graph the search target
+	 */
+	private PathFinder(Graph<N, E> graph) {
 		this.graph = graph;
 		this.key = makeDKey(999, 4);
 	}
@@ -45,7 +65,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param key   weighted distance property key
 	 * @see PathFinder#makeDKey(int, int)
 	 */
-	public PathFinder(Graph<N, E> graph, String key) {
+	private PathFinder(Graph<N, E> graph, String key) {
 		Assert.notEmpty(key);
 		this.graph = graph;
 		this.key = key;
@@ -85,9 +105,9 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param subgraph a subgraph path map
 	 */
-	public void clear(LinkedHashMap<N, GraphPath<N, E>> subgraph) {
+	public void clear(SubGraph<N, E> subgraph) {
 		if (subgraph != null && !subgraph.isEmpty()) {
-			for (GraphPath<N, E> path : subgraph.values()) {
+			for (GraphPath<N, E> path : subgraph.paths()) {
 				path.clear();
 			}
 			subgraph.clear();
@@ -104,7 +124,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph path map
 	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N from) {
+	public SubGraph<N, E> subset(N from) {
 		return subset(from, n -> n.equals(from), n -> n != null, n -> n == null);
 	}
 
@@ -123,7 +143,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph path map
 	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, N end) {
+	public SubGraph<N, E> subset(N from, N end) {
 		return subset(from, n -> n.equals(from), n -> n != null, n -> n.equals(end));
 	}
 
@@ -141,7 +161,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph path map
 	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg) {
+	public SubGraph<N, E> subset(N from, Predicate<? super N> beg) {
 		return subset(from, beg, n -> n != null, n -> n == null);
 	}
 
@@ -161,8 +181,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph path map
 	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg,
-			Predicate<? super N> end) {
+	public SubGraph<N, E> subset(N from, Predicate<? super N> beg, Predicate<? super N> end) {
 		return subset(from, beg, n -> n != null, end);
 	}
 
@@ -185,8 +204,8 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph path map
 	 * @see ITransform#copy(Collection, Node, Node, boolean)
 	 */
-	public LinkedHashMap<N, GraphPath<N, E>> subset(N from, Predicate<? super N> beg,
-			Predicate<? super N> include, Predicate<? super N> end) {
+	public SubGraph<N, E> subset(N from, Predicate<? super N> beg, Predicate<? super N> include,
+			Predicate<? super N> end) {
 		Tracer tracer = new Tracer(beg, include, end);
 		graph.walker().descend(tracer, from);
 		subgraph = tracer.found();
@@ -197,8 +216,10 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	private class Tracer extends NodeVisitor<N> {
 
-		/** current subgraph: {@code key=head node; value=graphpath} */
-		private final LinkedHashMap<N, GraphPath<N, E>> paths = new LinkedHashMap<>();
+		// /** current subgraph: {@code key=head node; value=graphpath} */
+		// private final LinkedHashMap<N, GraphPath<N, E>> paths = new LinkedHashMap<>();
+		/** Subgraphs */
+		private final SubGraph<N, E> paths = new SubGraph<>();
 
 		private final Predicate<? super N> beg;
 		private final Predicate<? super N> include;
@@ -222,7 +243,7 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 			this.end = end;
 		}
 
-		public LinkedHashMap<N, GraphPath<N, E>> found() {
+		public SubGraph<N, E> found() {
 			return paths;
 		}
 
@@ -235,21 +256,21 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 			if (parent != null && beg.test(parent)) {
 				active = true;
 				head = parent; // beg new path
-				if (!paths.containsKey(head)) {
-					paths.put(head, new GraphPath<>(key));
+				if (!paths.hasPath(head)) {
+					paths.startPath(head, key);
 					// Log.debug("New: %s->%s[%s]", parent, node, key);
 					// } else {
 					// Log.debug("Beg: %s->%s", parent, node);
 				}
-				path = paths.get(head);
+				path = paths.getPath(head);
 			}
 
 			// handle walk inflection: resume an existing path
-			if (!active && exiting && !end.test(parent) && inPath(parent)) {
+			if (!active && exiting && !end.test(parent) && paths.contains(parent)) {
 				// Log.debug("Res: %s->%s", parent, node);
 				active = true; // resume path
-				path = containingPath(parent);
-				head = path.peekFirst().beg();
+				path = paths.containing(parent);
+				head = path.head();
 			}
 
 			// handle active path
@@ -291,14 +312,15 @@ public class PathFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 			return true;
 		}
 
-		private boolean inPath(N node) {
-			if (paths.containsKey(node)) return true;
-			return paths.values().stream().anyMatch(p -> p.contains(node));
-		}
-
-		private GraphPath<N, E> containingPath(N node) {
-			return paths.values().stream().filter(p -> p.contains(node)).findFirst().orElse(null);
-		}
+		// private boolean inPath(N node) {
+		// if (paths.hasPath(node)) return true;
+		// return paths.values().stream().anyMatch(p -> p.contains(node));
+		// }
+		//
+		// private GraphPath<N, E> containingPath(N node) {
+		// return paths.values().stream().filter(p ->
+		// p.contains(node)).findFirst().orElse(null);
+		// }
 
 		private void addEdges(N parent, N node) {
 			for (E edge : parent.to(node)) {

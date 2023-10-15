@@ -1,10 +1,8 @@
 package net.certiv.common.graph.ops;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import net.certiv.common.graph.Edge;
@@ -12,7 +10,7 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.algorithms.GraphPath;
+import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Strings;
 
@@ -28,8 +26,8 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 		return new CopyOp<>(edges, beg, end, cyclic);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> CopyOp<N, E> of(Map<N, GraphPath<N, E>> sg,
-			N dst, boolean remove) {
+	public static <N extends Node<N, E>, E extends Edge<N, E>> CopyOp<N, E> of(SubGraph<N, E> sg, N dst,
+			boolean remove) {
 		return new CopyOp<>(sg, dst, remove);
 	}
 
@@ -43,7 +41,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 
 	private List<N> nodes;
 	private List<E> edges;
-	private LinkedHashMap<N, GraphPath<N, E>> sg = new LinkedHashMap<>();
+	private SubGraph<N, E> sg = new SubGraph<>();
 
 	private N beg;
 	private N end;
@@ -68,8 +66,8 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 		this.kind = C.EDGES;
 	}
 
-	private CopyOp(Map<N, GraphPath<N, E>> sg, N dst, boolean remove) {
-		this.sg.putAll(sg);
+	private CopyOp(SubGraph<N, E> sg, N dst, boolean remove) {
+		this.sg.addPaths(sg);
 		this.dst = dst;
 		this.remove = remove;
 		this.kind = C.PATHS;

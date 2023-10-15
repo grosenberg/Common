@@ -2,14 +2,14 @@ package net.certiv.common.graph;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.algorithms.GraphPath;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.graph.paths.GraphPath;
+import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 
 public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
@@ -148,13 +148,13 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Removes all edges connecting the given subgraph to the graph and conditionally
 	 * removes the nodes contained within the subgraph from the graph.
 	 *
-	 * @param subgraph a map of graph paths
-	 * @param clear    {@code true} to remove and clear the properties of the nodes and
-	 *                 edges contained within this subgraph
+	 * @param sg    subgraph set of GraphPaths
+	 * @param clear {@code true} to remove and clear the properties of the nodes and edges
+	 *              contained within this subgraph
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
-	Result<Boolean> remove(Map<N, GraphPath<N, E>> subgraph, boolean clear);
+	Result<Boolean> remove(SubGraph<N, E> sg, boolean clear);
 
 	/**
 	 * Transfers the subgraph represented by the given edge to depend from the given node.
@@ -250,13 +250,13 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * copied subgraph. The destination node is effectively replaced by the subgraph when
 	 * {@code remove} is {@code true}.
 	 *
-	 * @param sg     subgraph of {@code key=head node; value=GraphPath}
+	 * @param sg     subgraph set of GraphPaths
 	 * @param dst    destination node
 	 * @param remove {@code true} to remove the destination node
 	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
 	 *         the failure
 	 */
-	Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> sg, N dst, boolean remove);
+	Result<LinkedList<E>> copy(SubGraph<N, E> sg, N dst, boolean remove);
 
 	/**
 	 * Copies the given individual source node into the graph. The source node is

@@ -8,15 +8,15 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.algorithms.GraphPath;
 import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.paths.GraphPath;
+import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
@@ -473,11 +473,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> remove(Map<N, GraphPath<N, E>> subgraph, boolean clear) {
+	public Result<Boolean> remove(SubGraph<N, E> subgraph, boolean clear) {
 		return remove(policy, subgraph, clear);
 	}
 
-	public Result<Boolean> remove(XfPolicy policy, Map<N, GraphPath<N, E>> subgraph, boolean clear) {
+	public Result<Boolean> remove(XfPolicy policy, SubGraph<N, E> subgraph, boolean clear) {
 		graph.lock();
 		Explainer xpr = new Explainer("Remove SubGraph");
 		boolean ok = xpr.last();
@@ -490,7 +490,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, subgraph, "SubGraph is null");
-				for (GraphPath<N, E> path : subgraph.values()) {
+				for (GraphPath<N, E> path : subgraph) {
 					ok &= chkEdges(xpr, ok, path.edges());
 				}
 
@@ -502,7 +502,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			for (GraphPath<N, E> path : subgraph.values()) {
+			for (GraphPath<N, E> path : subgraph) {
 				ok &= rmGraphPath(xpr, path, clear);
 			}
 
@@ -750,12 +750,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<LinkedList<E>> copy(Map<N, GraphPath<N, E>> subgraph, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(SubGraph<N, E> subgraph, N dst, boolean remove) {
 		return copy(policy, subgraph, dst, remove);
 	}
 
-	public Result<LinkedList<E>> copy(XfPolicy policy, Map<N, GraphPath<N, E>> subgraph, N dst,
-			boolean remove) {
+	public Result<LinkedList<E>> copy(XfPolicy policy, SubGraph<N, E> subgraph, N dst, boolean remove) {
 		graph.lock();
 		Explainer xpr = new Explainer("Copy SubGraph");
 		boolean ok = xpr.last();
@@ -768,7 +767,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, subgraph, "SubGraph is null");
-				for (GraphPath<N, E> path : subgraph.values()) {
+				for (GraphPath<N, E> path : subgraph) {
 					ok &= chkEdges(xpr, ok, path.edges());
 				}
 
@@ -784,8 +783,8 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				UniqueList<E> leads = dst.edges(Sense.IN);
 				UniqueList<E> tails = dst.edges(Sense.OUT);
 
-				for (N head : subgraph.keySet()) {
-					GraphPath<N, E> path = subgraph.get(head);
+				for (N head : subgraph.heads()) {
+					GraphPath<N, E> path = subgraph.getPath(head);
 					for (E lead : leads) {
 						ok &= insertPath(xpr, dups, lead, head, path, tails);
 					}

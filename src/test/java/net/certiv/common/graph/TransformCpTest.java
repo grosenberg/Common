@@ -3,17 +3,16 @@ package net.certiv.common.graph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
-import net.certiv.common.graph.algorithms.GraphPath;
-import net.certiv.common.graph.algorithms.PathFinder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.paths.PathFinder;
+import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.FsUtil;
 
@@ -38,8 +37,8 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode g = builder.getNode("G");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
-		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
+		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
 		xf.copy(sg, g, true);	// copy in like =>G=>, removing G
@@ -61,8 +60,8 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
-		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
+		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, false); // copy in like =>F=>
@@ -83,8 +82,8 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
-		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
+		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
 		// copy in like =>F=>, removing F
@@ -106,8 +105,8 @@ public class TransformCpTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = new PathFinder<>(graph);
-		LinkedHashMap<DemoNode, GraphPath<DemoNode, DemoEdge>> sg = finder.subset(u);
+		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
 
 		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
 		// copy in like =>F=>, removing F

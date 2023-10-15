@@ -1,4 +1,4 @@
-package net.certiv.common.graph.algorithms;
+package net.certiv.common.graph.paths;
 
 import java.util.ArrayList;
 import java.util.Collection;

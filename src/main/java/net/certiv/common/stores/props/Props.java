@@ -13,16 +13,47 @@ public class Props {
 		return propMap.containsKey(key);
 	}
 
+	/**
+	 * Returns the property value mapped to the given key, or {@code null} if the given
+	 * key has no property value.
+	 * <p>
+	 * Use the {@link #has} method to distinguish between no property value or a
+	 * {@code null} property value.
+	 *
+	 * @param key a property key
+	 * @return the value corresponding to the property key or {@code null}
+	 */
 	@SuppressWarnings("unchecked")
 	public <K, V> V get(K key) {
 		return (V) propMap.get(key);
 	}
 
+	/**
+	 * Returns the property value mapped to the given key, or the given default value if
+	 * the given key has no property value.
+	 * <p>
+	 * Use the {@link #has} method to distinguish between no property value or the given
+	 * default property value.
+	 *
+	 * @param key a property key
+	 * @param def a default property value
+	 * @return the value corresponding to the property key or the default value
+	 */
 	public <K, V> V get(K key, V def) {
 		V val = get(key);
 		return val != null ? val : def;
 	}
 
+	/**
+	 * Returns the property value mapped to the given key, or throws the given exception
+	 * if the given key has no property value.
+	 * <p>
+	 * Use the {@link #has} method to check if a property value exists for the given key.
+	 *
+	 * @param key a property key
+	 * @param ex  exception to throw if no value is mapped to the property key
+	 * @return the value corresponding to the property key or throws the given exception
+	 */
 	public <K, V> V get(K key, RuntimeException ex) {
 		V val = get(key);
 		if (val == null) throw ex;

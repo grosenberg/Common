@@ -64,14 +64,18 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 		} catch (StopEx flag) {}
 	}
 
-	/** Set the walker to to log walker steps. */
+	/**
+	 * Set the walker to to log walker steps.
+	 *
+	 * @return the walker
+	 */
 	public Walker<N, E> debug() {
 		this.debug = true;
 		return this;
 	}
 
 	/**
-	 * Set the walker to to log walker ops.
+	 * Set the walker to to log walker steps.
 	 *
 	 * @param enable {@code true} to log walker steps
 	 * @return the walker
