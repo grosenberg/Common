@@ -73,4 +73,25 @@ public enum Shape implements IDotStr {
 		}
 		return valArray;
 	}
+
+	// --------------------------------
+
+	public enum Style implements IDotStr {
+		bold,
+		dashed,
+		diagonals,
+		dottted,
+		invisible,
+		rounded,
+		solid;
+
+		private static String[] valArray;
+
+		public static String[] toArray() {
+			if (valArray == null) {
+				valArray = Stream.of(values()).map(Style::name).toArray(String[]::new);
+			}
+			return valArray;
+		}
+	}
 }

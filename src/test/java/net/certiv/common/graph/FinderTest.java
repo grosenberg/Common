@@ -9,11 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.stores.context.Key;
 
 class FinderTest extends TestGraphBase {
-
-	private static final Key<String> MARK = Key.of("mark");
 
 	private DemoNode c;
 	private DemoNode d;

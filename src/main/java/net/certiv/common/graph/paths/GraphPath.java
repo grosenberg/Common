@@ -1,13 +1,11 @@
 package net.certiv.common.graph.paths;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -15,8 +13,12 @@ import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Node;
+import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.ex.GraphException;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.util.Maths;
+import net.certiv.common.util.Strings;
 
 /**
  * Collects a path of edges tracing from a head node to some set of terminal nodes.
@@ -31,6 +33,9 @@ import net.certiv.common.stores.UniqueList;
  */
 public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	public static final String DKEY_PREFIX = "DKEY-";
+	public static final GraphException ERR_DKEY = GraphEx.of("No weighted distance key/value for edge: %s");
+
 	/** path edges */
 	private final UniqueList<E> edges = new UniqueList<>();
 	/** path terminals */
@@ -43,9 +48,29 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	/** Index key=end node; value=edges */
 	private final LinkedHashList<N, E> idxEnd = new LinkedHashList<>();
 
-	/** Path weight property key */
+	/** Path weight property key: for min total weighted distance */
 	private final String key;
 
+	/**
+	 * Make a pseudo random property key for use in storing the min total weighted
+	 * distance on each edge in this path.
+	 *
+	 * @param bound the positive upper bound
+	 * @param width the resultant string width
+	 * @return a next positive pseudorandom number
+	 * @throws IllegalArgumentException if parameters are not positive
+	 * @see Maths#nextRandomFilled(int, int)
+	 */
+	public static String makeDKey(int bound, int width) {
+		return DKEY_PREFIX + Maths.nextRandomFilled(bound, width);
+	}
+
+	/** Construct an instance with a random path weight property key. */
+	public GraphPath() {
+		this(makeDKey(999, 4));
+	}
+
+	/** Construct an instance with the given path weight property key. */
 	public GraphPath(String key) {
 		this.key = key;
 	}
@@ -73,23 +98,13 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Reduces the contained path by:
+	 * Reduces this path by:
 	 * <ol>
-	 * <li>remove self-cycles
+	 * <li>removing all self-cycles
 	 * </ol>
 	 */
 	public void reduce() {
 		edges().forEach(e -> { if (e.cyclic()) remove(e); });
-	}
-
-	/**
-	 * Determine if the given path shares any edges in common with this path.
-	 *
-	 * @param path another path
-	 * @return {@code true} if the paths intersect
-	 */
-	public boolean intersect(GraphPath<N, E> path) {
-		return edges().dup().removeAll(path.edges());
 	}
 
 	/**
@@ -99,7 +114,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param node the target node
 	 * @return the connecting edges
 	 */
-	public UniqueList<E> query(Sense dir, N node) {
+	public UniqueList<E> adjacent(Sense dir, N node) {
 		switch (dir) {
 			case IN:
 				return new UniqueList<>(idxBeg.get(node)).unmodifiable();
@@ -152,7 +167,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * Shortest-Path Distance Queries on Large Networks
 	 * by Pruned Landmark Labeling", Akiba et al.}
 	 *
-	 * @return fist shortest path edges, ordered head to target
+	 * @return first shortest path edge list, ordered head to target
 	 */
 	public LinkedList<E> shortestPathTo(N target) {
 		LinkedList<E> minPath = new LinkedList<>();
@@ -198,50 +213,83 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	// ---- Delegates -----------------
 
-	public void add(int idx, E e) {
-		if (!index.contains(e)) {
-			edges.add(idx, e);
-			index.add(e);
-			idxBeg.put(e.beg(), e);
-			idxEnd.put(e.end(), e);
+	/**
+	 * Add the given edge to the beginning of this path.
+	 *
+	 * @param edge the edge to add
+	 */
+	public void addFirst(E edge) {
+		if (!index.contains(edge)) {
+			edges.addFirst(edge);
+			index.add(edge);
+			idxBeg.put(edge.beg(), edge);
+			idxEnd.put(edge.end(), edge);
+			updateMinWeight(edge);
+			adjTerminals(edge.end());
 		}
 	}
 
-	public void addFirst(E e) {
-		if (!index.contains(e)) {
-			edges.addFirst(e);
-			index.add(e);
-			idxBeg.put(e.beg(), e);
-			idxEnd.put(e.end(), e);
+	/**
+	 * Add the given edge to the end of this path.
+	 *
+	 * @param edge the edge to add
+	 */
+	public void addLast(E edge) {
+		if (!index.contains(edge)) {
+			edges.addLast(edge);
+			index.add(edge);
+			idxBeg.put(edge.beg(), edge);
+			idxEnd.put(edge.end(), edge);
+			updateMinWeight(edge);
+			adjTerminals(edge.end());
 		}
 	}
 
-	public void addLast(E e) {
-		if (!index.contains(e)) {
-			edges.addLast(e);
-			index.add(e);
-			idxBeg.put(e.beg(), e);
-			idxEnd.put(e.end(), e);
+	/**
+	 * Add all of the edges between the given nodes to the end of this path.
+	 *
+	 * @param beg a begin node
+	 * @param end an end node
+	 */
+	public void addAll(N beg, N end) {
+		for (E edge : beg.to(end)) {
+			addLast(edge);
 		}
 	}
 
-	public void addAll(Collection<? extends E> c) {
-		c.forEach(e -> addLast(e));
+	/**
+	 * Add all of the given edges to the end of this path.
+	 *
+	 * @param edges the edges to add
+	 */
+	public void addAll(Collection<? extends E> edges) {
+		edges.forEach(e -> addLast(e));
 	}
 
-	public void addAll(int idx, Collection<? extends E> c) {
-		if (idx == edges.size()) {
-			addAll(c);
-		} else {
-			List<E> l = new ArrayList<>(c);
-			for (int x = 0; x < c.size() + idx; x++) {
-				add(x + idx, l.get(idx));
-			}
+	private void adjTerminals(N node) {
+		node.adjacent(Sense.IN, n -> contains(n)).forEach(n -> removeTerminal(n));
+		if (!hasNextInPath(node)) addTerminal(node);
+	}
+
+	private double updateMinWeight(E edge) {
+		double w = edge.weight();
+		w = supra(edge.beg()) + w;
+		edge.put(key, w);
+		return w;
+	}
+
+	/** @return the min edge weight of any in-path parent edge, or 0 */
+	private double supra(N beg) {
+		UniqueList<E> edges = beg.edges(Sense.IN, e -> !e.cyclic() && contains(e));
+		if (edges.isEmpty()) return 0.0;
+
+		double min = Double.POSITIVE_INFINITY;
+		for (E edge : edges) {
+			Double val = edge.get(key);
+			Assert.notNull(ERR_DKEY.on(edge), val);
+			min = Math.min(min, val);
 		}
-	}
-
-	public E get(int idx) {
-		return edges.get(idx);
+		return min;
 	}
 
 	public E peekFirst() {
@@ -252,85 +300,132 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 		return edges.peekLast();
 	}
 
-	public List<E> subList(int from, int to) {
-		return edges().subList(from, to);
-	}
+	public boolean remove(E edge) {
+		if (!index.contains(edge)) return false;
+		edges.remove(edge);
+		index.remove(edge);
+		idxBeg.remove(edge.beg(), edge);
+		idxEnd.remove(edge.end(), edge);
 
-	public E set(int idx, E e) {
-		E prior = edges.set(idx, e);
-		if (prior != null && !prior.equals(e)) {
-			index.remove(prior);
-			idxBeg.remove(prior.beg(), prior);
-			idxEnd.remove(prior.end(), prior);
+		terminals.remove(edge.beg());
+		terminals.remove(edge.end());
+		edges.forEach(e -> { if (!hasNextInPath(e.end())) addTerminal(e.end()); });
 
-			index.add(e);
-			idxBeg.put(e.beg(), e);
-			idxEnd.put(e.end(), e);
-		}
-		return prior;
-	}
-
-	public boolean remove(E e) {
-		if (!index.contains(e)) return false;
-		edges.remove(e);
-		index.remove(e);
-		idxBeg.remove(e.beg(), e);
-		idxEnd.remove(e.end(), e);
 		return true;
 	}
 
-	public E remove(int idx) {
-		E e = edges.get(idx);
-		remove(e);
-		return e;
+	public boolean remove(Collection<? extends E> edges) {
+		return edges.stream().allMatch(e -> remove(e));
 	}
 
 	public E removeFirst() {
-		return remove(0);
+		E e = edges.get(0);
+		if (e != null) remove(e);
+		return e;
 	}
 
 	public E removeLast() {
-		return remove(edges.size() - 1);
+		E e = edges.get(edges.size() - 1);
+		if (e != null) remove(e);
+		return e;
 	}
 
-	public boolean removeAll(Collection<? extends E> c) {
-		return c.stream().allMatch(e -> remove(e));
+	/**
+	 * Determine whether the given node has a next node in this path. Nominally used to
+	 * determine if the given node should be recorded as a terminal or to verify if a
+	 * terminal is correctly identified.
+	 *
+	 * @param node the node to check
+	 * @return {@code true} if this path has any in-path next node
+	 */
+	public boolean hasNextInPath(N node) {
+		return !node.adjacent(Sense.OUT, nxt -> contains(nxt)).isEmpty();
 	}
 
-	public boolean contains(E e) {
-		return index.contains(e);
+	/**
+	 * Returns whether this path contains the given edge.
+	 *
+	 * @param edge the edge to check
+	 * @return {@code true} if this path contains the given edge
+	 */
+	public boolean contains(E edge) {
+		return index.contains(edge);
 	}
 
-	public boolean contains(N n) {
-		return containsBeg(n) || containsEnd(n);
+	/**
+	 * Returns whether this path contains the given node.
+	 *
+	 * @param node the node to check
+	 * @return {@code true} if this path contains the given node
+	 */
+	public boolean contains(N node) {
+		return containsBeg(node) || containsEnd(node);
 	}
 
-	public boolean containsBeg(N n) {
-		return idxBeg.containsKey(n);
+	/**
+	 * Returns whether this path contains an edge that begins with the given node.
+	 *
+	 * @param node the node to check
+	 * @return {@code true} if this path contains an edge that begins with the given node
+	 */
+	public boolean containsBeg(N node) {
+		return idxBeg.containsKey(node);
 	}
 
-	public boolean containsEnd(N n) {
-		return idxEnd.containsKey(n);
+	/**
+	 * Returns whether this path contains an edge that ends with the given node.
+	 *
+	 * @param node the node to check
+	 * @return {@code true} if this path contains an edge that ends with the given node
+	 */
+	public boolean containsEnd(N node) {
+		return idxEnd.containsKey(node);
 	}
 
-	public boolean containsTerminal(N n) {
-		return terminals.contains(n);
+	/**
+	 * Returns whether the given node is a path terminal node.
+	 *
+	 * @param node the node to check
+	 * @return {@code true} if the given node is a path terminal node
+	 */
+
+	public boolean containsTerminal(N node) {
+		return terminals.contains(node);
 	}
 
-	public boolean containsAll(Collection<? extends E> c) {
-		return index.containsAll(c);
+	/**
+	 * Returns whether this path contains all of the given nodes.
+	 *
+	 * @param edges the edges to check
+	 * @return {@code true} if this path contains the given nodes
+	 */
+	public boolean contains(Collection<? extends E> edges) {
+		return index.containsAll(edges);
 	}
 
-	public boolean retainAll(Collection<? extends E> c) {
-		return edges.retainAll(c);
+	/**
+	 * Determine if this path shares any edges in common with the given path.
+	 *
+	 * @param path another path
+	 * @return {@code true} if the paths intersect
+	 */
+	public boolean intersects(GraphPath<N, E> path) {
+		return edges.stream().anyMatch(e -> path.contains(e));
 	}
 
-	public int indexOf(E e) {
-		return edges.indexOf(e);
-	}
-
-	public int lastIndexOf(E e) {
-		return edges.lastIndexOf(e);
+	/**
+	 * Retains only the edges in this path that are contained in the given edge
+	 * collection.
+	 *
+	 * @param edges the edges to be retained
+	 * @return {@code true} if this path changed
+	 */
+	public boolean retainAll(Collection<? extends E> edges) {
+		UniqueList<E> delta = edges().dup();
+		delta.removeAll(edges);
+		if (delta.isEmpty()) return false;
+		delta.forEach(e -> remove(e));
+		return true;
 	}
 
 	public boolean valid() {
@@ -398,6 +493,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	@Override
 	public String toString() {
-		return edges.toString();
+		N head = head();
+		return String.format("%s %s", head != null ? head : Strings.EMPTY, edges);
 	}
 }

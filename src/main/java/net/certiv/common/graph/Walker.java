@@ -104,7 +104,7 @@ public class Walker<N extends Node<N, E>, E extends Edge<N, E>> {
 	private void walk(Sense dir, LinkedHashList<N, N> visited, NodeVisitor<N> visitor, N prev, N node) {
 		if (!visitor.done) {
 			boolean ok = enter(dir, visited, visitor, prev, node);
-			if (debug) Log.debug("[enter=%s] %s --> %s", ok ? "Ok" : "Fail", prev, node);
+			if (debug) Log.debug("[enter=%s] %s --> %s", ok ? "Ok" : "Xx", prev, node);
 
 			if (ok) {
 				for (N child : node.adjacent(dir, true)) {

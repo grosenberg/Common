@@ -828,6 +828,12 @@ public class Strings {
 	/**
 	 * Returns the string representation of the given objects joined using the given
 	 * delimiter.
+	 *
+	 * @param delimiter a sequence of characters
+	 * @param elements  an Iterable that will have the string representation of its
+	 *                  elements joined together
+	 * @return a new string composed from the elements
+	 * @throws {@link NullPointerException} if delimiter or elements is {@code null}
 	 */
 	public static String join(CharSequence delimiter, Collection<?> objs) {
 		List<String> list = new ArrayList<>();

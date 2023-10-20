@@ -28,27 +28,6 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 		this.graph = graph;
 	}
 
-	/**
-	 * Set the finder to to log finder steps.
-	 *
-	 * @return the finder
-	 */
-	public Finder<N, E> debug() {
-		this.debug = true;
-		return this;
-	}
-
-	/**
-	 * Set the finder to to log finder steps.
-	 *
-	 * @param enable {@code true} to log finder steps
-	 * @return the finder
-	 */
-	public Finder<N, E> debug(boolean enable) {
-		this.debug = enable;
-		return this;
-	}
-
 	public Finder<N, E> include() {
 		this.include = TRUE;
 		return this;
@@ -170,6 +149,28 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
+	 * Find the last node in the graph that satisfies the {@link #include} and
+	 * {@link #exclude} criteria during the {@link #whilst} criteria.
+	 *
+	 * @return the first selected node, or {@code null} if none found
+	 */
+	public N last() {
+		return all().peekLast();
+	}
+
+	/**
+	 * Find the last node in the graph, beginning from the given start node, that
+	 * satisfies the {@link #include} and {@link #exclude} criteria during the
+	 * {@link #whilst} criteria.
+	 *
+	 * @param start graph walk start node
+	 * @return the first selected node, or {@code null} if none found
+	 */
+	public N last(N start) {
+		return all(start).peekLast();
+	}
+
+	/**
 	 * Returns whether any node in the graph satisfies the {@link #include} and
 	 * {@link #exclude} criteria during the {@link #whilst} criteria.
 	 * <p>
@@ -195,9 +196,27 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Reset the the {@link #include} ,{@link #exclude}, and {@link #whilst} criteria to
-	 * always return {@code true}. Sets {@code debug} to {@code false}.
+	 * Set this finder to log visitor steps.
+	 *
+	 * @return the finder
 	 */
+	public Finder<N, E> debug() {
+		this.debug = true;
+		return this;
+	}
+
+	/**
+	 * Set this finder to log visitor steps.
+	 *
+	 * @param enable {@code true} to log visitor steps
+	 * @return the finder
+	 */
+	public Finder<N, E> debug(boolean enable) {
+		this.debug = enable;
+		return this;
+	}
+
+	/** Defaults the finder criteria and {@code debug} state. */
 	public void reset() {
 		include = TRUE;
 		exclude = FALSE;

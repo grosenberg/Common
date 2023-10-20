@@ -104,18 +104,18 @@ public class ClassUtil {
 
 		return sb.toString();
 	}
-
-	/** Returns the class name of the given object. */
-	@Deprecated
-	public static String name(Object obj) {
-		if (obj == null) return null;
-		return obj.getClass().getName();
-	}
-
-	/** Returns the class simple name of the given object. */
-	@Deprecated
-	public static String simple(Object obj) {
-		if (obj == null) return null;
-		return obj.getClass().getSimpleName();
-	}
+	//
+	// /** Returns the class name of the given object. */
+	// @Deprecated
+	// public static String name(Object obj) {
+	// if (obj == null) return null;
+	// return obj.getClass().getName();
+	// }
+	//
+	// /** Returns the class simple name of the given object. */
+	// @Deprecated
+	// public static String simple(Object obj) {
+	// if (obj == null) return null;
+	// return obj.getClass().getSimpleName();
+	// }
 }

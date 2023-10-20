@@ -14,8 +14,8 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.graph.paths.PathFinder;
 import net.certiv.common.graph.paths.SubGraph;
+import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.FsUtil;
@@ -41,8 +41,8 @@ class TransfutureTest extends TestGraphBase {
 		DemoNode f = builder.getNode("F");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
-		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		Result<LinkedList<DemoEdge>> cp = xf.copy(sg, f, true);
@@ -70,8 +70,8 @@ class TransfutureTest extends TestGraphBase {
 		DemoNode g = builder.getNode("G");
 		DemoNode u = builder.getNode("U");
 
-		PathFinder<DemoNode, DemoEdge> finder = PathFinder.in(graph);
-		SubGraph<DemoNode, DemoEdge> sg = finder.subset(u);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
 		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(graph);
 		xf.copy(sg, g, true);

@@ -3,10 +3,12 @@ package net.certiv.common.graph.paths;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Node;
+import net.certiv.common.stores.UniqueList;
 
 /**
  * Sub-graph of a graph represented by a set of graph paths.
@@ -63,18 +65,32 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 
 	/**
 	 * Create a new graph path defined by the given head node and path weight property
-	 * key.
+	 * key. Discards any prior existing path associated with the given head node.
 	 *
 	 * @param head path head node
 	 * @param key  path weight property key
-	 * @return any previous path associated with the given head node
+	 * @return a new path associated with the given head node
 	 */
 	public GraphPath<N, E> startPath(N head, String key) {
-		return paths.put(head, new GraphPath<>(key));
+		GraphPath<N, E> path = new GraphPath<>(key);
+		paths.put(head, path);
+		return path;
 	}
 
-	public Set<N> heads() {
-		return paths.keySet();
+	public N head(GraphPath<N, E> path) {
+		return heads().stream().filter(h -> getPath(h).equals(path)).findFirst().orElse(null);
+	}
+
+	public UniqueList<N> heads() {
+		return new UniqueList<>(paths.keySet()).unmodifiable();
+	}
+
+	public UniqueList<N> terminals() {
+		return paths.values().stream() //
+				.map(p -> p.terminals()) //
+				.flatMap(t -> t.stream()) //
+				.collect(Collectors.toCollection(UniqueList::new)) //
+				.unmodifiable();
 	}
 
 	public List<GraphPath<N, E>> paths() {
@@ -119,6 +135,10 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 
 	public void clear() {
 		paths.clear();
+	}
+
+	public Stream<GraphPath<N, E>> stream() {
+		return paths.values().stream();
 	}
 
 	@Override

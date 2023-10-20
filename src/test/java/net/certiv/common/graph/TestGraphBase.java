@@ -9,11 +9,13 @@ import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoBuilder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
+import net.certiv.common.stores.context.Key;
 import net.certiv.common.util.test.TestBase;
 
 public class TestGraphBase extends TestBase {
 
 	static final boolean FORCE = false;
+	static final Key<String> MARK = Key.of("mark");
 
 	static final String XForm = "xform/";
 	static final String XFuture = "xfuture/";
@@ -23,6 +25,7 @@ public class TestGraphBase extends TestBase {
 
 	@BeforeEach
 	void setupBase() {
+		// Log.setTestMode(true);
 		global(FORCE);
 		graph = new DemoGraph("Names");
 		builder = new DemoBuilder(graph);

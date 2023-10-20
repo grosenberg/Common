@@ -1,25 +1,22 @@
 package net.certiv.common.graph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.graph.paths.PathFinder;
 import net.certiv.common.graph.paths.SubGraph;
+import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.UniqueList;
 
 class SubgraphTest extends TestGraphBase {
-
-	static final boolean FORCE = false;
 
 	DemoNode a;
 	DemoNode b;
@@ -28,14 +25,31 @@ class SubgraphTest extends TestGraphBase {
 	DemoNode e;
 	DemoNode f;
 	DemoNode g;
+	DemoNode h;
+	DemoNode j;
 
-	PathFinder<DemoNode, DemoEdge> finder;
+	DemoNode m;
+	DemoNode n;
+	DemoNode o;
+	DemoNode q;
+	DemoNode r;
+	DemoNode s;
+	DemoNode t;
+	DemoNode v;
+
+	SubGraphFinder<DemoNode, DemoEdge> sgf;
+	// String dot;
 
 	@BeforeEach
 	void setUp() {
 		builder.createAndAddEdges("A->B->C->D->E");
 		builder.createAndAddEdges("C->F->G");
 		builder.createAndAddEdges("C->[B,C,E]");
+		builder.createAndAddEdges("D->H->I->J");
+
+		builder.createAndAddEdges("M->N->O->P->Q");
+		builder.createAndAddEdges("O->R->S");
+		builder.createAndAddEdges("P->T->U->V");
 
 		a = builder.getNode("A");
 		b = builder.getNode("B");
@@ -44,92 +58,130 @@ class SubgraphTest extends TestGraphBase {
 		e = builder.getNode("E");
 		f = builder.getNode("F");
 		g = builder.getNode("G");
+		h = builder.getNode("H");
+		j = builder.getNode("J");
 
-		finder = PathFinder.in(graph);
-	}
+		m = builder.getNode("M");
+		n = builder.getNode("N");
+		o = builder.getNode("O");
+		q = builder.getNode("Q");
+		r = builder.getNode("S");
+		s = builder.getNode("S");
+		t = builder.getNode("T");
+		v = builder.getNode("V");
 
-	@AfterEach
-	void tearDown() {
-		finder.clear();
-		finder = null;
-	}
+		f.put(MARK, "M");
+		h.put(MARK, "M");
 
-	@Test
-	void testSubsetA() {
-		SubGraph<DemoNode, DemoEdge> subgraph = finder.subset(a);
+		r.put(MARK, "M");
+		t.put(MARK, "M");
 
-		assertEquals(subgraph.size(), 1);
-		assertEquals(subgraph.getPath(a).size(), 9);
-	}
-
-	@Test
-	void testSubsetB() {
-		SubGraph<DemoNode, DemoEdge> subgraph = finder.subset(c);
-
-		assertEquals(subgraph.size(), 1);
-		assertEquals(subgraph.getPath(c).size(), 8);
+		sgf = SubGraphFinder.in(graph);
+		// dot = graph.render();
 	}
 
 	@Test
-	void testSubsetC() {
+	void testFind() {
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find();
+
+		assertEquals(2, sg.size());
+		assertEquals(21, sg.stream().mapToInt(p -> p.size()).sum());
+		assertEquals(Set.of(e, g, j), Set.copyOf(sg.getPath(a).terminals()));
+		assertEquals(Set.of(e, g, j, q, s, v), Set.copyOf(sg.terminals()));
+	}
+
+	@Test
+	void testFindA() {
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(a);
+
+		assertEquals(1, sg.size());
+		assertEquals(12, sg.getPath(a).size());
+		assertEquals(Set.of(e, g, j), Set.copyOf(sg.getPath(a).terminals()));
+		assertEquals(Set.of(e, g, j), Set.copyOf(sg.terminals()));
+	}
+
+	@Test
+	void testFindC() {
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(c);
+
+		assertEquals(11, sg.getPath(c).size());
+	}
+
+	@Test
+	void testFindD() {
 		builder.createAndAddEdges("D->[X,Y]->Z");
 
-		SubGraph<DemoNode, DemoEdge> subgraph = finder.subset(d);
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(d);
 
-		assertEquals(subgraph.size(), 1);
-		assertEquals(subgraph.getPath(d).size(), 5);
+		assertEquals(8, sg.getPath(d).size());
 	}
 
 	@Test
-	void testSubsetEndPredicate() {
+	void testFindEndPredicate() {
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> subgraph = finder //
-				.subset(a, n -> n.equals(b), n -> stops.contains(n));
+		SubGraph<DemoNode, DemoEdge> sg = sgf //
+				.begin(n -> n.equals(b)) //
+				.end(n -> stops.contains(n)) //
+				.find(a);
 
-		assertEquals(subgraph.size(), 1);
-		assertEquals(subgraph.getPath(b).size(), 6);
+		assertEquals(1, sg.size());
+		assertEquals(6, sg.getPath(b).size());
 	}
 
 	@Test
-	void testSubsetTerminals() {
+	void testFindPredicates() {
+		List<DemoNode> starts = List.of(b, n);
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> subgraph = finder //
-				.subset(a, n -> n.equals(b), n -> stops.contains(n));
+		SubGraph<DemoNode, DemoEdge> sg = sgf //
+				.begin(n -> starts.contains(n)) //
+				.include(n -> n.get(MARK, "").isEmpty()) //
+				.end(n -> stops.contains(n)) //
+				.whilst(n -> n.name().matches("[A-N]")) //
+				.find();
 
-		List<DemoNode> terminals = subgraph.getPath(b).terminals().dup();
-		assertEquals(terminals.size(), 3);
-
-		terminals.removeAll(List.of(d, e, f));
-		assertTrue(terminals.isEmpty());
+		assertEquals(1, sg.size());
+		assertEquals(5, sg.getPath(b).size());
 	}
 
 	@Test
-	void testSubsetShortestBE() {
+	void testFindTerminals() {
+		List<DemoNode> stops = List.of(d, f);
+
+		SubGraph<DemoNode, DemoEdge> sg = sgf.debug() //
+				.begin(n -> n.equals(b)) //
+				.end(n -> stops.contains(n)) //
+				.find();
+
+		assertEquals(2, sg.terminals().size());
+
+		Set<DemoNode> terminals = Set.copyOf(sg.getPath(b).terminals());
+		assertEquals(2, terminals.size());
+		assertEquals(Set.of(e, f), terminals);
+	}
+
+	@Test
+	void testFindShortestBE() {
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(b);
+		LinkedList<DemoEdge> shortest = sg.getPath(b).shortestPathTo(e);
+		assertEquals(shortest.size(), 2);
+
 		UniqueList<DemoEdge> actual = graph.getEdges(Sense.OUT, b, c).dup();
 		actual.addAll(graph.getEdges(Sense.OUT, c, e));
-
-		SubGraph<DemoNode, DemoEdge> subgraph = finder.subset(b);
-		LinkedList<DemoEdge> shortest = subgraph.getPath(b).shortestPathTo(e);
-
-		assertEquals(shortest.size(), 2);
-		shortest.removeAll(actual);
-		assertTrue(shortest.isEmpty());
+		assertEquals(actual, shortest);
 	}
 
 	@Test
-	void testSubsetShortestAE() {
+	void testFindShortestAE() {
+		SubGraph<DemoNode, DemoEdge> sg = sgf.find(a);
+		LinkedList<DemoEdge> shortest = sg.getPath(a).shortestPathTo(e);
+		assertEquals(shortest.size(), 3);
+
 		UniqueList<DemoEdge> actual = graph.getEdges(Sense.OUT, a, b).dup();
 		actual.addAll(graph.getEdges(Sense.OUT, b, c));
 		actual.addAll(graph.getEdges(Sense.OUT, c, e));
-
-		SubGraph<DemoNode, DemoEdge> subgraph = finder.subset(a);
-		LinkedList<DemoEdge> shortest = subgraph.getPath(a).shortestPathTo(e);
-
-		assertEquals(shortest.size(), 3);
-		shortest.removeAll(actual);
-		assertTrue(shortest.isEmpty());
+		assertEquals(actual, shortest);
 	}
 
 }

@@ -2,8 +2,6 @@ package net.certiv.common.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -48,36 +46,65 @@ public class ExceptUtil {
 		return Strings.EMPTY;
 	}
 
-	public static String rootCause(Throwable t, boolean full) {
+	/**
+	 * Returns a root cause stack trace of the given {@link Throwable}.
+	 *
+	 * @param t throwable to introspect
+	 * @return a root cause stack trace of the given throwable
+	 */
+	public static String rootTrace(Throwable t) {
+		return stacktrace(ExceptionUtils.getRootCause(t));
+	}
+
+	/**
+	 * Returns a root cause description of the given {@link Throwable}.
+	 *
+	 * @param t throwable to introspect
+	 * @return a root cause summary description of the given throwable
+	 */
+	public static String rootCause(Throwable t) {
+		MsgBuilder mb = new MsgBuilder();
+
 		Throwable cause = ExceptionUtils.getRootCause(t);
-		if (full) return stacktrace(cause);
-		return msg(cause);
-	}
+		String msg = cause.getMessage();
+		mb.append("%s: %s", cause.getClass().getSimpleName(), msg != null ? msg : Strings.UNKNOWN);
 
-	public static List<String> causes(Throwable t) {
-		return ExceptionUtils.getThrowableList(t).stream() //
-				.map(e -> msg(e)) //
-				.collect(Collectors.toList());
-	}
-
-	private static String msg(Throwable t) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(t.getClass().getSimpleName());
-		sb.append(": ");
-
-		String msg = t.getMessage();
-		msg = msg != null ? msg : "<no detail>";
-		sb.append(msg);
-
-		StackTraceElement[] traces = t.getStackTrace();
+		StackTraceElement[] traces = cause.getStackTrace();
 		if (traces.length > 0) {
 			StackTraceElement elem = traces[0];
-			sb.append(String.format(" @%s.%s line: %s", //
-					elem.getClassName(), elem.getMethodName(), elem.getLineNumber()));
+			mb.append(" :: %s.%s @%s", //
+					elem.getClassName(), elem.getMethodName(), elem.getLineNumber());
 		}
-		return sb.toString();
+		return mb.toString();
 	}
 
+	/**
+	 * Returns a cause chain description of the given {@link Throwable}.
+	 *
+	 * @param t throwable to introspect
+	 * @return a cause chain summary description of the given throwable
+	 */
+	public static String causes(Throwable t) {
+		MsgBuilder mb = new MsgBuilder();
+		for (Throwable cause : ExceptionUtils.getThrowableList(t)) {
+			String msg = cause.getMessage();
+			mb.nl().append("%s: %s", cause.getClass().getSimpleName(), msg != null ? msg : Strings.UNKNOWN);
+			StackTraceElement[] traces = cause.getStackTrace();
+			if (traces.length > 0) {
+				StackTraceElement elem = traces[0];
+				mb.nl().indent().append("%s.%s @%s", //
+						elem.getClassName(), elem.getMethodName(), elem.getLineNumber());
+			}
+		}
+		return mb.toString();
+	}
+
+	/**
+	 * Return a stack trace of the given {@link Throwable}.
+	 *
+	 * @param t throwable to introspect
+	 * @return a stack trace of the given throwable
+	 */
 	public static String stacktrace(Throwable t) {
 		StringWriter sw = new StringWriter();
 		t.printStackTrace(new PrintWriter(sw));
