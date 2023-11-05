@@ -100,14 +100,15 @@ public class ExceptUtil {
 	}
 
 	/**
-	 * Return a stack trace of the given {@link Throwable}.
+	 * Return a printable stack trace of the given {@link Throwable}.
 	 *
-	 * @param t throwable to introspect
-	 * @return a stack trace of the given throwable
+	 * @param e throwable to introspect
+	 * @return a string representation of the stack trace of the given throwable
 	 */
-	public static String stacktrace(Throwable t) {
+	public static String stacktrace(Throwable e) {
+		if (e == null) return Strings.EMPTY;
 		StringWriter sw = new StringWriter();
-		t.printStackTrace(new PrintWriter(sw));
+		e.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
 	}
 }

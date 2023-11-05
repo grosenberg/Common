@@ -1,6 +1,7 @@
 package net.certiv.common.stores;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -55,6 +56,12 @@ public class UniqueList<E> extends LinkedList<E> {
 	 */
 	public UniqueList<E> dup() {
 		return new UniqueList<>(this);
+	}
+
+	@Override
+	public void sort(Comparator<? super E> comp) {
+		if (nomod) throw new UnsupportedOperationException();
+		super.sort(comp);
 	}
 
 	/**

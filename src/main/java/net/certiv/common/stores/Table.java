@@ -69,11 +69,11 @@ public class Table<R, C, V> {
 	 *
 	 * @throws NullPointerException if the row or map is {@code null}
 	 */
-	public void putRow(R key, Map<C, V> map) {
-		LinkedHashMap<C, V> values = table.get(key);
+	public void putRow(R row, Map<C, V> map) {
+		LinkedHashMap<C, V> values = table.get(row);
 		if (values == null) {
 			values = new LinkedHashMap<>();
-			table.put(key, values);
+			table.put(row, values);
 		}
 		values.putAll(map);
 	}

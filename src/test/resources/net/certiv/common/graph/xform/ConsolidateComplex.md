@@ -6,9 +6,9 @@ digraph "Consolidate Complex" {
       "B(1)"
       "C(2)"
       "D(3)"
-      "I(8)"
       "F(5)"
       "G(6)"
+      "I(8)"
 
       "A(0)" -> "B(1)" [label="0"]
       "B(1)" -> "C(2)" [label="1"]

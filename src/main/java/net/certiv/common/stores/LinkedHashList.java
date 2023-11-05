@@ -28,21 +28,34 @@ import java.util.function.BiConsumer;
  */
 public class LinkedHashList<K, V> {
 
-	private final LinkedHashMap<K, LinkedList<V>> map = new LinkedHashMap<>();
+	private final LinkedHashMap<K, LinkedList<V>> map;
 	private boolean unique = false;
 
-	public LinkedHashList() {}
+	public LinkedHashList() {
+		this(false);
+	}
+
+	public LinkedHashList(boolean unique) {
+		map = new LinkedHashMap<>();
+		setUniqueValued(unique);
+	}
 
 	public LinkedHashList(LinkedHashList<K, V> data) {
-		for (K key : data.keys()) {
-			put(key, data.get(key));
-		}
+		this(data, false);
 	}
 
 	public LinkedHashList(Map<K, List<? extends V>> data) {
-		for (Entry<K, List<? extends V>> entry : data.entrySet()) {
-			put(entry.getKey(), entry.getValue());
-		}
+		this(data, false);
+	}
+
+	public LinkedHashList(LinkedHashList<K, V> data, boolean unique) {
+		this(false);
+		putAll(data);
+	}
+
+	public LinkedHashList(Map<K, List<? extends V>> data, boolean unique) {
+		this(false);
+		putAll(data);
 	}
 
 	/**
@@ -86,6 +99,18 @@ public class LinkedHashList<K, V> {
 			put(key, value);
 		}
 		return new LinkedList<>(map.get(key));
+	}
+
+	public void putAll(LinkedHashList<K, V> data) {
+		for (K key : data.keys()) {
+			put(key, data.get(key));
+		}
+	}
+
+	public void putAll(Map<K, List<? extends V>> data) {
+		for (Entry<K, List<? extends V>> entry : data.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	/**

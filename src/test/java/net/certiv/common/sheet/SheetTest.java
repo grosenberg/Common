@@ -7,9 +7,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.diff.Differ;
-import net.certiv.common.util.FsUtil;
+import net.certiv.common.util.test.CommonTestBase;
 
-class SheetTest {
+class SheetTest extends CommonTestBase {
 
 	@Test
 	void testSheet() {
@@ -23,7 +23,7 @@ class SheetTest {
 		String sheet = s.print();
 		// FsUtil.writeResource(getClass(), name + ".txt", sheet);
 
-		String txt = FsUtil.loadResource(getClass(), name + ".txt").value;
+		String txt = loadResource(getClass(), name + ".txt");
 		Differ.diff(s.name(), txt, sheet).sdiff(true, 120).out();
 
 		assertEquals(txt, sheet);
@@ -45,7 +45,7 @@ class SheetTest {
 		String sheet = s.print();
 		// FsUtil.writeResource(getClass(), name + ".txt", sheet);
 
-		String txt = FsUtil.loadResource(getClass(), name + ".txt").value;
+		String txt = loadResource(getClass(), name + ".txt");
 		Differ.diff(s.name(), txt, sheet).sdiff(true, 120).out();
 
 		assertEquals(txt, sheet);
@@ -67,7 +67,7 @@ class SheetTest {
 		String sheet = s.print();
 		// FsUtil.writeResource(getClass(), name + ".txt", sheet);
 
-		String txt = FsUtil.loadResource(getClass(), name + ".txt").value;
+		String txt = loadResource(getClass(), name + ".txt");
 		Differ.diff(s.name(), txt, sheet).sdiff(true, 120).out();
 
 		assertEquals(txt, sheet);
@@ -89,7 +89,7 @@ class SheetTest {
 		String sheet = s.print();
 		// FsUtil.writeResource(getClass(), name + ".txt", sheet);
 
-		String txt = FsUtil.loadResource(getClass(), name + ".txt").value;
+		String txt = loadResource(getClass(), name + ".txt");
 		Differ.diff(s.name(), txt, sheet).sdiff(true, 120).out();
 
 		assertEquals(txt, sheet);
@@ -117,7 +117,7 @@ class SheetTest {
 		String sheet = s.print();
 		// FsUtil.writeResource(getClass(), name + ".txt", sheet);
 
-		String txt = FsUtil.loadResource(getClass(), name + ".txt").value;
+		String txt = loadResource(getClass(), name + ".txt");
 		Differ.diff(s.name(), txt, sheet).sdiff(true, 120).out();
 
 		assertEquals(txt, sheet);

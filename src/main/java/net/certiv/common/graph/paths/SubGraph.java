@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.certiv.common.graph.Edge;
+import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
 import net.certiv.common.stores.UniqueList;
 
@@ -17,6 +18,20 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 
 	/** {@code key=head node; value=graph path} */
 	private final LinkedHashMap<N, GraphPath<N, E>> paths = new LinkedHashMap<>();
+	private final Graph<N, E> graph;
+
+	public SubGraph(Graph<N, E> graph) {
+		this.graph = graph;
+	}
+
+	/**
+	 * Returns the graph this subgraph is defined on.
+	 *
+	 * @return the owning graph
+	 */
+	public Graph<N, E> graph() {
+		return graph;
+	}
 
 	/**
 	 * Return whether a path is associated with the given head node.
@@ -72,7 +87,7 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @return a new path associated with the given head node
 	 */
 	public GraphPath<N, E> startPath(N head, String key) {
-		GraphPath<N, E> path = new GraphPath<>(key);
+		GraphPath<N, E> path = new GraphPath<>(graph, key);
 		paths.put(head, path);
 		return path;
 	}
@@ -135,6 +150,12 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 
 	public void clear() {
 		paths.clear();
+	}
+
+	public SubGraph<N, E> dup() {
+		SubGraph<N, E> dup = new SubGraph<>(graph);
+		dup.addPaths(this);
+		return dup;
 	}
 
 	public Stream<GraphPath<N, E>> stream() {

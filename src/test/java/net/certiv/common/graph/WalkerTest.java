@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.graph.demo.DemoEdge;
@@ -14,7 +15,7 @@ import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 
-class WalkerTest extends TestGraphBase {
+class WalkerTest extends TestCommon {
 
 	static final boolean FORCE = true;
 	private DemoNode root;

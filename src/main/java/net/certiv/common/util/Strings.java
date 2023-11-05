@@ -805,18 +805,6 @@ public class Strings {
 		}
 	}
 
-	// @Deprecated
-	// public static String csvList(List<String> strs) {
-	// if (strs == null) return EMPTY;
-	// StringBuilder sb = new StringBuilder();
-	// for (String str : strs) {
-	// sb.append(str + CsvDELIM);
-	// }
-	// int len = sb.length();
-	// sb.delete(len - 2, len);
-	// return sb.toString();
-	// }
-
 	/**
 	 * Returns the string representation of the given objects joined using the CSV
 	 * delimiter.
@@ -835,10 +823,10 @@ public class Strings {
 	 * @return a new string composed from the elements
 	 * @throws {@link NullPointerException} if delimiter or elements is {@code null}
 	 */
-	public static String join(CharSequence delimiter, Collection<?> objs) {
+	public static String join(CharSequence delimiter, Collection<?> elements) {
 		List<String> list = new ArrayList<>();
-		for (Object obj : objs) {
-			list.add(obj.toString());
+		for (Object elem : elements) {
+			list.add(elem.toString());
 		}
 		return String.join(delimiter, list);
 	}

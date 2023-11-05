@@ -8,15 +8,17 @@ import java.util.LinkedList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;
-import net.certiv.common.util.FsUtil;
 
-public class TransformCpTest extends TestGraphBase {
+public class TransformCpTest extends TestCommon {
+
+	static final boolean FORCE = true;
 
 	@BeforeEach
 	void setup() {
@@ -45,7 +47,7 @@ public class TransformCpTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "CopyEnd.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "CopyEnd.md").value;
+		String txt = loadResource(getClass(), XForm + "CopyEnd.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
@@ -68,7 +70,7 @@ public class TransformCpTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "CopyMid.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "CopyMid.md").value;
+		String txt = loadResource(getClass(), XForm + "CopyMid.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -91,7 +93,7 @@ public class TransformCpTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "CopyRm.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "CopyRm.md").value;
+		String txt = loadResource(getClass(), XForm + "CopyRm.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -118,7 +120,7 @@ public class TransformCpTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "CopyRmRd.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "CopyRmRd.md").value;
+		String txt = loadResource(getClass(), XForm + "CopyRmRd.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

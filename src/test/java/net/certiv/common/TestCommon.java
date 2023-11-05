@@ -1,4 +1,4 @@
-package net.certiv.common.graph;
+package net.certiv.common;
 
 import static net.certiv.common.dot.DotAttr.LABEL;
 
@@ -10,21 +10,21 @@ import net.certiv.common.graph.demo.DemoBuilder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
 import net.certiv.common.stores.context.Key;
-import net.certiv.common.util.test.TestBase;
+import net.certiv.common.util.test.CommonTestBase;
 
-public class TestGraphBase extends TestBase {
+public class TestCommon extends CommonTestBase {
 
-	static final boolean FORCE = false;
-	static final Key<String> MARK = Key.of("mark");
+	protected static final boolean FORCE = false;
+	protected static final Key<String> MARK = Key.of("mark");
 
-	static final String XForm = "xform/";
-	static final String XFuture = "xfuture/";
+	protected static final String XForm = "xform/";
+	protected static final String XFuture = "xfuture/";
 
-	DemoGraph graph;
-	DemoBuilder builder;
+	protected DemoGraph graph;
+	protected DemoBuilder builder;
 
 	@BeforeEach
-	void setupBase() {
+	public void setupBase() {
 		// Log.setTestMode(true);
 		global(FORCE);
 		graph = new DemoGraph("Names");
@@ -32,7 +32,7 @@ public class TestGraphBase extends TestBase {
 	}
 
 	@AfterEach
-	void teardownBase() {
+	public void teardownBase() {
 		reset();
 	}
 

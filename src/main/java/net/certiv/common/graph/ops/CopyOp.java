@@ -41,7 +41,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 
 	private List<N> nodes;
 	private List<E> edges;
-	private SubGraph<N, E> sg = new SubGraph<>();
+	private SubGraph<N, E> sg;
 
 	private N beg;
 	private N end;
@@ -67,7 +67,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 	}
 
 	private CopyOp(SubGraph<N, E> sg, N dst, boolean remove) {
-		this.sg.addPaths(sg);
+		this.sg = sg.dup();
 		this.dst = dst;
 		this.remove = remove;
 		this.kind = C.PATHS;

@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.util.FsUtil;
 
-class TransformTest extends TestGraphBase {
+class TransformTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -36,7 +36,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Reduce1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Reduce1.md").value;
+		String txt = loadResource(getClass(), XForm + "Reduce1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -62,7 +62,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "ReduceEdge1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "ReduceEdge1.md").value;
+		String txt = loadResource(getClass(), XForm + "ReduceEdge1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -88,7 +88,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Transfer1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Transfer1.md").value;
+		String txt = loadResource(getClass(), XForm + "Transfer1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -113,7 +113,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Move1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Move1.md").value;
+		String txt = loadResource(getClass(), XForm + "Move1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -133,7 +133,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Replicate1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate1.md").value;
+		String txt = loadResource(getClass(), XForm + "Replicate1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -153,7 +153,7 @@ class TransformTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Replicate2.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Replicate2.md").value;
+		String txt = loadResource(getClass(), XForm + "Replicate2.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

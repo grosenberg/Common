@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.dot.LineStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.util.FsUtil;
 
-class DotStyleTest extends TestGraphBase {
+class DotStyleTest extends TestCommon {
 
 	static final boolean FORCE = true;
 
@@ -63,7 +63,7 @@ class DotStyleTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "dotStyle.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "dotStyle.md").value;
+		String txt = loadResource(getClass(), "dotStyle.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);

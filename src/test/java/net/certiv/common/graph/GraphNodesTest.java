@@ -8,14 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.util.FsUtil;
 
-class GraphNodesTest extends TestGraphBase {
+class GraphNodesTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -49,7 +49,7 @@ class GraphNodesTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "node1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "node1.md").value;
+		String txt = loadResource(getClass(), "node1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

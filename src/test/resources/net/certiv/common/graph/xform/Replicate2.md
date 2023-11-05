@@ -1,8 +1,8 @@
 digraph "Replicate Remove" {
 
     "A(0)"
-    "X(3)"
     "C(2)"
+    "X(3)"
     "Y(4)"
     "Z(5)"
 

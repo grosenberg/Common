@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
@@ -48,6 +49,8 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	/** Index key=end node; value=edges */
 	private final LinkedHashList<N, E> idxEnd = new LinkedHashList<>();
 
+	/** Owning graph */
+	private final Graph<N, E> graph;
 	/** Path weight property key: for min total weighted distance */
 	private final String key;
 
@@ -66,13 +69,23 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/** Construct an instance with a random path weight property key. */
-	public GraphPath() {
-		this(makeDKey(999, 4));
+	public GraphPath(Graph<N, E> graph) {
+		this(graph, makeDKey(999, 4));
 	}
 
 	/** Construct an instance with the given path weight property key. */
-	public GraphPath(String key) {
+	public GraphPath(Graph<N, E> graph, String key) {
+		this.graph = graph;
 		this.key = key;
+	}
+
+	/**
+	 * Returns the graph this subgraph is defined on.
+	 *
+	 * @return the owning graph
+	 */
+	public Graph<N, E> graph() {
+		return graph;
 	}
 
 	/** @return the weighted distance property key */
@@ -471,7 +484,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	public GraphPath<N, E> dup() {
-		GraphPath<N, E> cp = new GraphPath<>(key);
+		GraphPath<N, E> cp = new GraphPath<>(graph, key);
 		cp.addAll(edges);
 		terminals.forEach(t -> cp.addTerminal(t));
 		return cp;

@@ -22,8 +22,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -34,7 +36,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import org.apache.commons.io.FileUtils;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.ex.IllegalArgsEx;
@@ -623,6 +630,72 @@ public final class FsUtil {
 			}
 		}
 	}
+
+	/**
+	 * Copies a resource file with the given pathname, located relative to the bundle root
+	 * of the bundle identified by the given ref, to the given destination directory.
+	 *
+	 * @param ref      object reference that identifies a bundle
+	 * @param pathname bundle root relative resource name
+	 * @param dst      filesystem destination directory
+	 * @return the copied out File
+	 */
+	public static Result<File> fromBundle(Object ref, String pathname, File dst) {
+		try {
+			URL url = ref.getClass().getResource(pathname);
+			if (url == null) {
+				return Result.of(new NoSuchFileException(String.format("'%s:%s' not found.", ref, pathname)));
+			}
+			dst = new File(dst, new File(pathname).getName());
+			dst.getParentFile().mkdirs();
+			FileUtils.copyURLToFile(url, dst);
+			return Result.of(dst);
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Copies the content from the given archive to the given destination directory. The
+	 * hierarchical structure of the content is maintained.
+	 *
+	 * @param archive the zip archive on the filesystem
+	 * @param dst     filesystem destination directory
+	 * @return the root directory of the copied content
+	 */
+	public static Result<File> fromArchive(File archive, Path dst) {
+		try (ZipFile zip = new ZipFile(archive)) {
+			Path root = Files.createDirectories(dst);
+
+			// sort entries by name to always create folders first
+			List<? extends ZipEntry> entries = zip.stream().sorted(Comparator.comparing(ZipEntry::getName))
+					.collect(Collectors.toList());
+
+			// copy each entry in the dest path
+			for (ZipEntry entry : entries) {
+				Path dstPath = dst.resolve(entry.getName());
+				if (entry.isDirectory()) {
+					Files.createDirectory(dstPath);
+					continue;
+				}
+				Files.copy(zip.getInputStream(entry), dstPath);
+			}
+
+			return Result.of(root.toFile());
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	// @Deprecated
+	// public static void copyToFile(InputStream inputStream, File file) throws
+	// IOException {
+	// try (OutputStream outputStream = new FileOutputStream(file)) {
+	// IOUtils.copy(inputStream, outputStream);
+	// }
+	// }
 
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {

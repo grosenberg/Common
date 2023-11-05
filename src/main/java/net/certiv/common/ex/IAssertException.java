@@ -8,7 +8,7 @@ public interface IAssertException {
 	String NULL_ARG = "Null argument(s)"; //$NON-NLS-1$
 	String EMPTY_ARG = "Empty argument(s)"; //$NON-NLS-1$
 
-	enum Test implements IType {
+	enum Test implements IGraphExType {
 		OTHER,
 		IS_TRUE,
 		IS_NULL,
@@ -18,9 +18,9 @@ public interface IAssertException {
 		NOT_EMPTY;
 	}
 
-	IType type();
+	IGraphExType graphExType();
 
-	IAssertException setType(IType type);
+	IAssertException setType(IGraphExType graphExType);
 
 	// IAssertException msg(String msg);
 	// IAssertException msg(String fmt, Object... args);

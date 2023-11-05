@@ -19,6 +19,7 @@
 		<maven.compiler.source>${jdk.ver}</maven.compiler.source>
 		<maven.compiler.target>${jdk.ver}</maven.compiler.target>
 
+		<comm-io.ver>2.11.0</comm-io.ver>
 		<comm-lang3.ver>3.12.0</comm-lang3.ver>
 		<comm-text.ver>1.10.0</comm-text.ver>
 		<eclipse-coll.ver>11.1.0</eclipse-coll.ver>
@@ -38,6 +39,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${comm-lang3.ver}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${comm-io.ver}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

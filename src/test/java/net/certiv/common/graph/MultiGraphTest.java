@@ -7,11 +7,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.util.FsUtil;
 
-class MultiGraphTest extends TestGraphBase {
+class MultiGraphTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -32,7 +32,7 @@ class MultiGraphTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "multi1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "multi1.md").value;
+		String txt = loadResource(getClass(), "multi1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -52,7 +52,7 @@ class MultiGraphTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "multi2.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "multi2.md").value;
+		String txt = loadResource(getClass(), "multi2.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

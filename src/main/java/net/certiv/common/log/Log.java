@@ -4,6 +4,7 @@ import java.lang.StackWalker.Option;
 import java.lang.StackWalker.StackFrame;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.core.LoggerContext;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.apache.logging.log4j.spi.ExtendedLogger;
+import org.apache.logging.log4j.util.StackLocator;
 
 public class Log {
 
@@ -107,7 +109,7 @@ public class Log {
 		Class<?> origin = caller();
 		if (loggable(origin, level)) {
 			ExtendedLogger logger = LogManager.getLogger(origin, ctx_);
-			logger.logMessage(FQCN, cvt(level), null, msg, null);
+			logger.logMessage(FQCN, convert(level), null, msg, null);
 		}
 	}
 
@@ -123,15 +125,38 @@ public class Log {
 		Class<?> origin = caller != null ? caller : caller();
 		if (loggable(origin, level)) {
 			ExtendedLogger log = LogManager.getLogger(origin, ctx_);
-			log.logIfEnabled(FQCN, cvt(level), null, msg, e);
+			log.logIfEnabled(FQCN, convert(level), null, msg, e);
 		}
 	}
 
-	private static org.apache.logging.log4j.Level cvt(Level level) {
+	/**
+	 * Converts the given level to the corresponding
+	 * {@link org.apache.logging.log4j.Level}.
+	 *
+	 * @param level a common level
+	 * @return a Log4j level
+	 */
+	public static org.apache.logging.log4j.Level convert(Level level) {
 		return org.apache.logging.log4j.Level.toLevel(level.name());
 	}
 
 	// ==========================================
+
+	/**
+	 * Returns a location descriptor for the caller on the given class. Defined as the
+	 * stack trace entry immediatly prior to the first entry containing the FQCN of the
+	 * given class.
+	 *
+	 * @param cls class that defines the relative caller
+	 * @return caller {@link StackTraceElement}, or {@code null} if not found
+	 */
+	public static StackTraceElement callerLocation(Class<?> cls) {
+		try {
+			return StackLocator.getInstance().calcLocation(cls.getName());
+		} catch (NoSuchElementException ex) {
+			return null;
+		}
+	}
 
 	/** @return the the class that called Log, or {@code Log.class} */
 	private static Class<?> caller() {

@@ -104,6 +104,15 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return beg != null && end != null;
 	}
 
+	/**
+	 * Checks whether the edge is connected to the edge sets of its endpoint nodes.
+	 *
+	 * @return {@code true} if this edge is connected
+	 */
+	public boolean isConnected() {
+		return beg().edges(Sense.OUT).contains(this) && end().edges(Sense.IN).contains(this);
+	}
+
 	/** Returns the node at the 'other' end of this edge. */
 	public N other(N node) {
 		Assert.isTrue(valid(), ERR_INVALID, this);
@@ -163,17 +172,17 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * 	A -> Beg    End -> D
 	 * </pre>
 	 *
-	 * @param delete {@code true} to clear the edge
-	 * @return {@code true} if this edge is fully removed.
+	 * @param clear {@code true} to clear the edge properties
+	 * @return {@code true} if this edge is fully removed
 	 */
-	boolean remove(boolean delete) {
+	boolean remove(boolean clear) {
 		Assert.isTrue(valid(), ERR_INVALID, this);
 
 		@SuppressWarnings("unchecked")
 		E edge = (E) this;
 		boolean rmvd = beg.remove(edge, Sense.OUT);
 		rmvd |= end.remove(edge, Sense.IN);
-		if (delete) {
+		if (clear) {
 			beg = end = null;
 			clear();
 		}

@@ -17,12 +17,12 @@ class ContextTest {
 
 	Context context;
 
-	IKVStore a;
-	IKVStore b;
-	IKVStore c;
-	IKVStore d;
-	IKVStore e;
-	IKVStore f;
+	IKVScope a;
+	IKVScope b;
+	IKVScope c;
+	IKVScope d;
+	IKVScope e;
+	IKVScope f;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -39,16 +39,16 @@ class ContextTest {
 
 	@Test
 	void testOf() {
-		context = Context.of();
-		assertEquals(context.depth(), 1);
-		assertEquals(context.maxDepth(), 1);
+		context = Context.of(1);
+		assertEquals(1, context.depth());
+		assertEquals(1, context.maxDepth());
 	}
 
 	@Test
 	void testMaxDepth() {
 		context = Context.of(3);
-		assertEquals(context.depth(), 1);
-		assertEquals(context.maxDepth(), 3);
+		assertEquals(1, context.depth());
+		assertEquals(3, context.maxDepth());
 
 		context.mergeFirst(a);
 		context.mergeFirst(b);
@@ -57,8 +57,8 @@ class ContextTest {
 		context.mergeFirst(e);
 		context.mergeFirst(f);
 
-		assertEquals(context.depth(), 7);
-		assertEquals(context.maxDepth(), 7);
+		assertEquals(7, context.depth());
+		assertEquals(7, context.maxDepth());
 
 	}
 
@@ -72,14 +72,14 @@ class ContextTest {
 		context.mergeFirst(e);
 		context.mergeFirst(f);
 
-		assertEquals(context.depth(), 7);
-		assertEquals(context.maxDepth(), 7);
+		assertEquals(7, context.depth());
+		assertEquals(7, context.maxDepth());
 
 		context.adjustMaxDepth(10, false);
 
-		assertEquals(context.depth(), 7);
-		assertEquals(context.maxDepth(), 10);
-		assertEquals(context.size(), 9);
+		assertEquals(7, context.depth());
+		assertEquals(10, context.maxDepth());
+		assertEquals(8, context.size());
 	}
 
 	@Test
@@ -94,9 +94,9 @@ class ContextTest {
 
 		context.adjustMaxDepth(3, true); // trim [4,5,6,7]
 
-		assertEquals(context.depth(), 3);
-		assertEquals(context.maxDepth(), 3);
-		assertEquals(context.size(), 6);
+		assertEquals(3, context.depth());
+		assertEquals(3, context.maxDepth());
+		assertEquals(5, context.size());
 	}
 
 	@Test
@@ -111,21 +111,22 @@ class ContextTest {
 
 		context.adjustMaxDepth(3, false); // flatten [4,5,6,7] into 3
 
-		assertEquals(context.depth(), 3);
-		assertEquals(context.maxDepth(), 3);
-		assertEquals(context.size(), 9);
+		assertEquals(3, context.depth());
+		assertEquals(3, context.maxDepth());
+		assertEquals(8, context.size());
 	}
 
 	@Test
 	void testDelta() {
-		context = Context.of();
-		assertEquals(context.size(), 1);
+		context = Context.of(1);
+		assertEquals(0, context.size());
+		assertEquals(1, context.depth());
 
 		context.mergeFirst(a);
-		assertEquals(context.delta(), a);
+		assertEquals(a, context.delta());
 
 		context.mergeFirst(b);
-		assertEquals(context.delta(), b);
+		assertEquals(b, context.delta());
 	}
 
 	@Test
@@ -133,22 +134,22 @@ class ContextTest {
 		context = Context.of(3);
 		context.mergeFirst(a);
 
-		assertEquals(context.delta(), a);
+		assertEquals(a, context.delta());
 
-		assertEquals(context.depth(), 2);
-		assertEquals(context.maxDepth(), 3);
+		assertEquals(2, context.depth());
+		assertEquals(3, context.maxDepth());
 
 		context.mergeFirst(b);
-		assertEquals(context.depth(), 3);
-		assertEquals(context.maxDepth(), 3);
+		assertEquals(3, context.depth());
+		assertEquals(3, context.maxDepth());
 
 		context.mergeFirst(c);
-		assertEquals(context.depth(), 4);
-		assertEquals(context.maxDepth(), 4);
+		assertEquals(4, context.depth());
+		assertEquals(4, context.maxDepth());
 	}
 
 	@Test
-	void textMerge2() {
+	void testMerge2() {
 		context = Context.of(2, false);
 		context.mergeFirst(a);
 		context.mergeFirst(b);
@@ -159,17 +160,17 @@ class ContextTest {
 
 		context.mergeFirst(other);
 
-		assertEquals(context.depth(), 4);	// scopes
-		assertEquals(context.size(), 7);	// keys
+		assertEquals(4, context.depth());	// scopes
+		assertEquals(6, context.size());	// keys
 
 		String existing = context.keys().toString();
-		String expected = "[kvstore.uuid, " //
+		String expected = "[" //
 				+ "context.text.name, context.text.data, " //
 				+ "context.text.name.layer[3], " //
 				+ "context.text.name.layer[2], " //
 				+ "context.text.name.layer[1], " //
 				+ "context.text.name.layer[0]]"; //
-		assertEquals(existing, expected);
+		assertEquals(expected, existing);
 	}
 
 	@Test
@@ -180,9 +181,10 @@ class ContextTest {
 		context.mergeFirst(c);
 		context.mergeFirst(d);
 
-		assertEquals(context.size(), 7);
+		assertEquals(6, context.size());
+		assertEquals(5, context.depth());
 
-		String visible = "[kvstore.uuid, " //
+		String visible = "[" //
 				+ "context.text.name, context.text.data, " //
 				+ "context.text.name.layer[3], " //
 				+ "context.text.name.layer[2], " //
@@ -200,16 +202,16 @@ class ContextTest {
 
 		UUID mark = context.mergeFirst(c);
 		context.mergeFirst(d);
-		assertNotEquals(context.get(NAME), nameB);
+		assertNotEquals(nameB, context.get(NAME));
 
 		boolean ok = context.restore(mark);
 
 		assertTrue(ok);
-		assertEquals(context.get(NAME), nameB);
+		assertEquals(nameB, context.get(NAME));
 	}
 
-	IKVStore createStore(String name, Integer data) {
-		IKVStore store = new KVStore();
+	IKVScope createStore(String name, Integer data) {
+		IKVScope store = new KVStore();
 
 		// will shadow
 		store.put(NAME, name);

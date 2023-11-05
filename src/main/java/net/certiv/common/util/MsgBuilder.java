@@ -22,65 +22,66 @@ public class MsgBuilder {
 		sb = new StringBuilder();
 	}
 
-	public MsgBuilder(String format, Object... args) {
+	public MsgBuilder(String fmt, Object... args) {
 		this();
-		if (args != null && args.length > 0) {
-			sb.append(String.format(format, args));
-		} else {
-			sb.append(format);
-		}
+		sb.append(format(fmt, args));
+	}
+
+	private String format(String fmt, Object... args) {
+		if (args == null) return fmt;
+		return String.format(fmt, args);
 	}
 
 	/**
 	 * Append a formatted string.
 	 *
-	 * @param format the format specification
-	 * @param args   supplied arguments
+	 * @param fmt  the format specification
+	 * @param args supplied arguments
 	 * @return this
 	 */
-	public MsgBuilder append(String format, Object... args) {
-		sb.append(String.format(format, args));
+	public MsgBuilder append(String fmt, Object... args) {
+		sb.append(format(fmt, args));
 		return this;
 	}
 
 	/**
 	 * Conditionally append a formatted string.
 	 *
-	 * @param cond   the append enable condition
-	 * @param format the format specification
-	 * @param args   supplied arguments
+	 * @param cond the append enable condition
+	 * @param fmt  the format specification
+	 * @param args supplied arguments
 	 * @return this
 	 */
-	public MsgBuilder append(boolean cond, String format, Object... args) {
-		if (cond) sb.append(String.format(format, args));
+	public MsgBuilder append(boolean cond, String fmt, Object... args) {
+		if (cond) sb.append(format(fmt, args));
 		return this;
 	}
 
 	/**
 	 * Append a formatted string with a leading tab character.
 	 *
-	 * @param format the format specification
-	 * @param args   supplied arguments
+	 * @param fmt  the format specification
+	 * @param args supplied arguments
 	 * @return this
 	 */
-	public MsgBuilder indent(String format, Object... args) {
+	public MsgBuilder indent(String fmt, Object... args) {
 		indent();
-		sb.append(String.format(format, args));
+		sb.append(format(fmt, args));
 		return this;
 	}
 
 	/**
 	 * Append a formatted string with a leading tab character.
 	 *
-	 * @param cond   the append enable condition
-	 * @param format the format specification
-	 * @param args   supplied arguments
+	 * @param cond the append enable condition
+	 * @param fmt  the format specification
+	 * @param args supplied arguments
 	 * @return this
 	 */
-	public MsgBuilder indent(boolean cond, String format, Object... args) {
+	public MsgBuilder indent(boolean cond, String fmt, Object... args) {
 		if (cond) {
 			indent();
-			sb.append(String.format(format, args));
+			sb.append(format(fmt, args));
 		}
 		return this;
 	}

@@ -27,18 +27,19 @@ import net.certiv.common.stores.props.Props;
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
 		implements IBuild<N, E> {
 
-	protected static final String GRAPH_NAME = "GraphName";
-
-	static final Counter CTR = new Counter();
+	public static final String GRAPH_NAME = "GraphName";
 
 	/** Unique numerical graph identifier */
 	public final long _gid;
+	/** shared graph identifier generator */
+	static final Counter CTR = new Counter();
 
 	/** All graph nodes. */
 	private final LinkedHashSet<N> nodes = new LinkedHashSet<>();
 
-	/** Graph modification control lock. */
+	/** Graph modification access lock. */
 	private final ReentrantLock lock = new ReentrantLock();
+	// private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	/**
 	 * Construct a graph.
@@ -196,11 +197,19 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public boolean addEdge(E edge) {
 		Assert.notNull(ERR_EDGE, edge, edge.beg(), edge.end());
-		edge.beg().add(edge, Sense.OUT);
-		edge.end().add(edge, Sense.IN);
-		boolean ok = install(edge.beg());
-		ok |= install(edge.end());
-		return ok;
+		lock();
+		try {
+			boolean preexisting = edge.isConnected();
+			edge.beg().add(edge, Sense.OUT);
+			edge.end().add(edge, Sense.IN);
+			boolean ok = install(edge.beg());
+			ok |= install(edge.end());
+			if (!preexisting) fire(GraphEvent.add(this, edge));
+			return ok;
+
+		} finally {
+			unlock();
+		}
 	}
 
 	/**
@@ -211,18 +220,22 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @see Graph#addEdge(Edge)
 	 */
 	boolean install(N node) {
-		return nodes.add(node);
+		boolean mod = nodes.add(node);
+		if (mod) fire(GraphEvent.install(this, node));
+		return mod;
 	}
 
 	/**
-	 * Deletes the node from the graph node list. <b>Internal use only.</b>
+	 * Uninstall the node from the graph node list. <b>Internal use only.</b>
 	 *
 	 * @param node the node to remove
 	 * @return {@code true} if removed
 	 * @see Graph#addEdge(Edge)
 	 */
-	boolean delete(N node) {
-		return nodes.remove(node);
+	boolean uninstall(N node) {
+		boolean mod = nodes.remove(node);
+		if (mod) fire(GraphEvent.uninstall(this, node));
+		return mod;
 	}
 
 	/**
@@ -361,9 +374,11 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			N beg = edge.beg();
 			N end = edge.end();
 
-			boolean ok = edge.remove(clear);
-			if (ok && beg.adjacent().isEmpty()) delete(beg);
-			if (ok && end.adjacent().isEmpty()) delete(end);
+			boolean ok = edge.remove(false);
+			if (ok) fire(GraphEvent.remove(this, edge));
+			if (ok && beg.adjacent().isEmpty()) uninstall(beg);
+			if (ok && end.adjacent().isEmpty()) uninstall(end);
+			if (clear) edge.clear();
 			return edge;
 
 		} finally {
@@ -576,8 +591,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public void clear() {
-		getEdges(true).forEach(e -> e.remove(true));
-		nodes.forEach(n -> n.clear());
+		getEdges(true).forEach(e -> removeEdge(e, true));
 		super.clear();
 	}
 

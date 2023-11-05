@@ -8,13 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.util.FsUtil;
 
-class BuilderStrOpsTest extends TestGraphBase {
+class BuilderStrOpsTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -32,7 +32,7 @@ class BuilderStrOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "Structure.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "Structure.md").value;
+		String txt = loadResource(getClass(), "Structure.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

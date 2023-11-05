@@ -7,10 +7,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
 
-class FinderTest extends TestGraphBase {
+class FinderTest extends TestCommon {
 
 	private DemoNode c;
 	private DemoNode d;

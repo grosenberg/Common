@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
@@ -16,7 +17,7 @@ import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.UniqueList;
 
-class SubgraphTest extends TestGraphBase {
+class SubgraphTest extends TestCommon {
 
 	DemoNode a;
 	DemoNode b;
@@ -149,7 +150,7 @@ class SubgraphTest extends TestGraphBase {
 	void testFindTerminals() {
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> sg = sgf.debug() //
+		SubGraph<DemoNode, DemoEdge> sg = sgf //
 				.begin(n -> n.equals(b)) //
 				.end(n -> stops.contains(n)) //
 				.find();

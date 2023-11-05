@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.util.FsUtil;
 
-class BuilderOpsTest extends TestGraphBase {
+class BuilderOpsTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -31,7 +31,7 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build0.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build0.md").value;
+		String txt = loadResource(getClass(), "build0.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -48,12 +48,12 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build1.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build1.md").value;
+		String txt = loadResource(getClass(), "build1.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = graph.dump();
-		String dtxt = FsUtil.loadResource(getClass(), "build1dump.txt").value;
+		String dtxt = loadResource(getClass(), "build1dump.txt");
 		assertEquals(dump, dtxt);
 	}
 
@@ -68,12 +68,12 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build2.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build2.md").value;
+		String txt = loadResource(getClass(), "build2.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = graph.dump();
-		String dtxt = FsUtil.loadResource(getClass(), "build2dump.txt").value;
+		String dtxt = loadResource(getClass(), "build2dump.txt");
 		assertEquals(dump, dtxt);
 	}
 
@@ -88,7 +88,7 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build3.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build3.md").value;
+		String txt = loadResource(getClass(), "build3.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -108,12 +108,12 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build4.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build4.md").value;
+		String txt = loadResource(getClass(), "build4.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = graph.dump();
-		String dtxt = FsUtil.loadResource(getClass(), "build4dump.txt").value;
+		String dtxt = loadResource(getClass(), "build4dump.txt");
 		assertEquals(dump, dtxt);
 	}
 
@@ -131,7 +131,7 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build5.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build5.md").value;
+		String txt = loadResource(getClass(), "build5.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -145,7 +145,7 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build6.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build6.md").value;
+		String txt = loadResource(getClass(), "build6.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
@@ -162,7 +162,7 @@ class BuilderOpsTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), "build7.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), "build7.md").value;
+		String txt = loadResource(getClass(), "build7.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

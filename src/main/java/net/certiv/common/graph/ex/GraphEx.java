@@ -1,34 +1,34 @@
 package net.certiv.common.graph.ex;
 
 import net.certiv.common.ex.IAssertException.Test;
-import net.certiv.common.ex.IType;
+import net.certiv.common.ex.IGraphExType;
 
 public class GraphEx {
 
 	// Generalized --------------------
 
-	public static GraphException of(IType type) {
-		return new GraphException(type);
+	public static GraphException of(IGraphExType graphExType) {
+		return new GraphException(graphExType);
 	}
 
-	public static GraphException of(IType type, String msg) {
-		return new GraphException(type, msg);
+	public static GraphException of(IGraphExType graphExType, String msg) {
+		return new GraphException(graphExType, msg);
 	}
 
-	public static GraphException of(IType type, String fmt, Object... args) {
-		return new GraphException(type, String.format(fmt, args));
+	public static GraphException of(IGraphExType graphExType, String fmt, Object... args) {
+		return new GraphException(graphExType, String.format(fmt, args));
 	}
 
-	public static GraphException of(IType type, Throwable cause) {
-		return new GraphException(type, cause);
+	public static GraphException of(IGraphExType graphExType, Throwable cause) {
+		return new GraphException(graphExType, cause);
 	}
 
-	public static GraphException of(IType type, Throwable cause, String msg) {
-		return new GraphException(type, msg, cause);
+	public static GraphException of(IGraphExType graphExType, Throwable cause, String msg) {
+		return new GraphException(graphExType, msg, cause);
 	}
 
-	public static GraphException of(IType type, Throwable cause, String fmt, Object... args) {
-		return new GraphException(type, String.format(fmt, args), cause);
+	public static GraphException of(IGraphExType graphExType, Throwable cause, String fmt, Object... args) {
+		return new GraphException(graphExType, String.format(fmt, args), cause);
 	}
 
 	// Legacy: specific to Test -------

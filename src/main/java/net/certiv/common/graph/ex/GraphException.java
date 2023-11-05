@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.ex.IAssertException;
-import net.certiv.common.ex.IType;
+import net.certiv.common.ex.IGraphExType;
 import net.certiv.common.util.MsgBuilder;
 
 /**
@@ -15,7 +15,7 @@ import net.certiv.common.util.MsgBuilder;
  */
 public class GraphException extends RuntimeException implements IAssertException {
 
-	private IType type;
+	private IGraphExType graphExType;
 	private String msg;
 	private Object[] elements;
 	private boolean hasElems;
@@ -24,35 +24,35 @@ public class GraphException extends RuntimeException implements IAssertException
 		this(Test.OTHER);
 	}
 
-	public GraphException(IType type) {
+	public GraphException(IGraphExType graphExType) {
 		super(ASSERT_FAILED);
-		this.type = type;
+		this.graphExType = graphExType;
 	}
 
-	public GraphException(IType type, String msg) {
+	public GraphException(IGraphExType graphExType, String msg) {
 		super(msg);
-		this.type = type;
+		this.graphExType = graphExType;
 	}
 
-	public GraphException(IType type, String fmt, Object... args) {
+	public GraphException(IGraphExType graphExType, String fmt, Object... args) {
 		super(fmt);
-		this.type = type;
+		this.graphExType = graphExType;
 		msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
 	}
 
-	public GraphException(IType type, Throwable cause) {
+	public GraphException(IGraphExType graphExType, Throwable cause) {
 		super(cause);
-		this.type = type;
+		this.graphExType = graphExType;
 	}
 
-	public GraphException(IType type, Throwable cause, String msg) {
+	public GraphException(IGraphExType graphExType, Throwable cause, String msg) {
 		super(msg, cause);
-		this.type = type;
+		this.graphExType = graphExType;
 	}
 
-	public GraphException(IType type, Throwable cause, String fmt, Object... args) {
+	public GraphException(IGraphExType graphExType, Throwable cause, String fmt, Object... args) {
 		super(fmt, cause);
-		this.type = type;
+		this.graphExType = graphExType;
 		msg = (args != null && args.length > 0) ? String.format(fmt, args) : fmt;
 	}
 
@@ -76,13 +76,13 @@ public class GraphException extends RuntimeException implements IAssertException
 	}
 
 	@Override
-	public IType type() {
-		return type;
+	public IGraphExType graphExType() {
+		return graphExType;
 	}
 
 	@Override
-	public GraphException setType(IType type) {
-		this.type = type;
+	public GraphException setType(IGraphExType graphExType) {
+		this.graphExType = graphExType;
 		return this;
 	}
 

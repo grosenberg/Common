@@ -1,29 +1,30 @@
 package net.certiv.common.graph;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.stores.LinkedHashList;
+import net.certiv.common.stores.TreeMapSet;
 import net.certiv.common.stores.UniqueList;
 
 /**
- * Default embedded EdgeSet.
+ * Default EdgeSet.
+ * <p>
+ * Relies on the native comparable ordering of nodes and edges.
  */
 public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdgeSet<N, E> {
 
 	/** 1:1 map: key=edge; value=distal node */
-	private final LinkedHashMap<E, N> forward = new LinkedHashMap<>();
+	private final TreeMap<E, N> forward = new TreeMap<>();
 	/** 1:n map: key=distal node; value=edge */
-	private final LinkedHashList<N, E> reverse = new LinkedHashList<>();
+	private final TreeMapSet<N, E> reverse = new TreeMapSet<>();
 
 	private final Sense dir;
 
 	public EdgeSet(Sense dir) {
 		this.dir = dir;
-		reverse.setUniqueValued(true);
 	}
 
 	@Override
@@ -36,8 +37,8 @@ public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdg
 	@Override
 	public boolean remove(E edge) {
 		N n = forward.remove(edge);
-		if (n != null) reverse.remove(n, edge);
-		return n != null;
+		if (n != null) return reverse.remove(n, edge);
+		return false;
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdg
 
 	@Override
 	public UniqueList<E> edges(N node) {
-		LinkedList<E> edges = reverse.get(node);
+		Set<E> edges = reverse.get(node);
 		return edges != null ? new UniqueList<>(edges) : new UniqueList<>();
 	}
 

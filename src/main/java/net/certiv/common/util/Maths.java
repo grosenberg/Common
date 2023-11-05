@@ -7,6 +7,7 @@
 package net.certiv.common.util;
 
 import java.math.MathContext;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
@@ -68,14 +69,9 @@ public class Maths {
 		return m >= 0 ? m : m + b;
 	}
 
+	/** Returns the absolute value difference between the given values. */
 	public static int delta(int a, int b) {
 		return Math.abs(a - b);
-	}
-
-	/** Restrict the range of the given val to between -1 and 1. */
-	@Deprecated
-	public static int limit(int val) {
-		return (val > 1) ? 1 : (val < -1 ? -1 : val);
 	}
 
 	/** Restrict the range of the given val to between -1 and 1. */
@@ -149,12 +145,30 @@ public class Maths {
 	}
 
 	/**
-	 * Computes the median for an array of doubles.
+	 * Computes the median value in the given array of doubles.
 	 *
-	 * @param vector the array
+	 * @param vector the value array
 	 * @return the median
+	 * @see ArrayUtil#toDoubleArray
 	 */
 	public static double median(double[] vector) {
+		Arrays.sort(vector);
+		if (vector.length == 0) return 0;
+
+		int mid = vector.length / 2;
+		if (vector.length % 2 != 0) return vector[mid];
+		return (vector[mid - 1] + vector[mid]) / 2;
+	}
+
+	/**
+	 * Calculates the median of the given array of values.
+	 *
+	 * @param vector the values
+	 * @return the median of the given values
+	 * @see ArrayUtil#toLongArray
+	 */
+	public static long median(long[] vector) {
+		Arrays.sort(vector);
 		if (vector.length == 0) return 0;
 
 		int mid = vector.length / 2;
@@ -321,6 +335,64 @@ public class Maths {
 		value = Math.max(value, min);
 		value = Math.min(value, max);
 		return value;
+	}
+
+	/**
+	 * Returns whether the given value is in the range defined by the given min and max
+	 * numbers, subject to the given range style.
+	 *
+	 * @param value a set value
+	 * @param left  left end-point
+	 * @param right right end-point
+	 * @return {@code true} if the value is in-range
+	 */
+	public static boolean inRange(int value, int left, int right, RangeStyle style) {
+		switch (style) {
+			default:
+			case CLOSED:
+				return left <= value && value <= right;
+			case LEFT_OPEN:
+				return left < value && value <= right;
+			case RIGHT_OPEN:
+				return left <= value && value < right;
+			case OPEN:
+				return left < value && value < right;
+		}
+	}
+
+	/**
+	 * Returns whether the given value is in the range defined by the given min and max
+	 * numbers, subject to the given range style.
+	 *
+	 * @param value a set value
+	 * @param left  left end-point
+	 * @param right right end-point
+	 * @return {@code true} if the value is in-range
+	 */
+	public static boolean inRange(double value, double left, double right, RangeStyle style) {
+		switch (style) {
+			default:
+			case CLOSED:
+				return left <= value && value <= right;
+			case LEFT_OPEN:
+				return left < value && value <= right;
+			case RIGHT_OPEN:
+				return left <= value && value < right;
+			case OPEN:
+				return left < value && value < right;
+		}
+	}
+
+	/** Range style definition. */
+	public enum RangeStyle {
+		/** Includes both end-points. */
+		CLOSED,
+		/** Does not include left end-point. */
+		LEFT_OPEN,
+		/** Does not include right end-point. */
+		RIGHT_OPEN,
+		/** Does not include either end-point. */
+		OPEN;
 	}
 
 	/**

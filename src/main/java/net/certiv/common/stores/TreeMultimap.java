@@ -6,7 +6,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/** {@link TreeMap} with {@link TreeSet} values. */
+/**
+ * {@link TreeMap} with {@link TreeSet} values.
+ *
+ * @deprecated Use TreeMapSet
+ */
+@Deprecated
 public class TreeMultimap<K, V> {
 
 	private final TreeMap<K, Set<V>> map;
@@ -44,16 +49,14 @@ public class TreeMultimap<K, V> {
 	}
 
 	/**
-	 * Returns {@code true} if at least one of the value sets contains the given
-	 * value.
+	 * Returns {@code true} if at least one of the value sets contains the given value.
 	 */
 	public boolean containsValue(V value) {
 		return map.containsValue(value);
 	}
 
 	/**
-	 * Returns {@code true} if the value set for the given key contains the given
-	 * value.
+	 * Returns {@code true} if the value set for the given key contains the given value.
 	 */
 	public boolean contains(K key, V value) {
 		if (!map.containsKey(key)) return false;

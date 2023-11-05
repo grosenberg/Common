@@ -19,8 +19,8 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	private final Graph<N, E> graph;
 
-	/** entire subgraph path set last found by this sgf */
-	private SubGraph<N, E> sg = new SubGraph<>();
+	/** entire subgraph path set last found by this subgraph finder */
+	private final SubGraph<N, E> sg;
 	/** Path weight property key: for min total weighted distance */
 	private final String key;
 
@@ -32,7 +32,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	private boolean debug = false;
 
 	/**
-	 * Construct a sgf instance.
+	 * Construct a subgraph finder instance.
 	 *
 	 * @param graph the search target
 	 */
@@ -41,7 +41,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Construct a sgf instance with the given {@code key} instance value.
+	 * Construct a subgraph finder instance with the given {@code key} instance value.
 	 *
 	 * @param graph the search target
 	 * @param key   weighted distance property key
@@ -55,16 +55,18 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	// --------------------------------
 
 	/**
-	 * Construct a sgf instance with the given {@code key} instance value.
+	 * Construct a subgraph finder instance with the given {@code key} instance value.
 	 *
 	 * @param graph the search target
 	 * @param key   weighted distance property key
 	 * @see SubGraphFinder#makeDKey(int, int)
 	 */
 	private SubGraphFinder(Graph<N, E> graph, String key) {
-		Assert.notEmpty(key);
+		Assert.notEmpty(graph, key);
 		this.graph = graph;
 		this.key = key;
+
+		sg = new SubGraph<>(graph);
 	}
 
 	/** @return the weighted distance property key */
@@ -163,7 +165,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Set this sgf to log visitor steps.
+	 * Set this subgraph finder to log visitor steps.
 	 *
 	 * @return {@code this}
 	 */
@@ -173,7 +175,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Set the sgf to to log visitor steps.
+	 * Set the subgraph finder to to log visitor steps.
 	 *
 	 * @param enable {@code true} to log visitor steps
 	 * @return {@code this}
@@ -184,9 +186,9 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/**
-	 * Execute this path sgf to collect the subgraph paths existing under all graph roots,
-	 * subselected according to the established {@link beg}, {@link include}, and
-	 * {@link end} criteria.
+	 * Execute this path subgraph finder to collect the subgraph paths existing under all
+	 * graph roots, subselected according to the established {@link beg}, {@link include},
+	 * and {@link end} criteria.
 	 * <p>
 	 * Each found subgraph path:
 	 * <ul>
@@ -210,9 +212,9 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	// --------------------------------
 
 	/**
-	 * Execute this path sgf to collect the subgraph paths existing under the given graph
-	 * start node, subselected according to the established {@link beg}, {@link include},
-	 * and {@link end} criteria.
+	 * Execute this path subgraph finder to collect the subgraph paths existing under the
+	 * given graph start node, subselected according to the established {@link beg},
+	 * {@link include}, and {@link end} criteria.
 	 * <p>
 	 * Each found subgraph path:
 	 * <ul>
@@ -317,7 +319,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 	}
 
-	/** Defaults the path sgf criteria and {@code debug} state. */
+	/** Defaults the path subgraph finder criteria and {@code debug} state. */
 	public void reset() {
 		beg = TRUE;
 		include = TRUE;

@@ -17,7 +17,7 @@ import net.certiv.common.util.MsgBuilder;
  */
 public class AssertException extends RuntimeException implements IAssertException {
 
-	private IType type;
+	private IGraphExType graphExType;
 	private String msg;
 	private Object[] elements;
 	private boolean hasElems;
@@ -28,32 +28,32 @@ public class AssertException extends RuntimeException implements IAssertExceptio
 
 	public AssertException(Test type) {
 		super(ASSERT_FAILED);
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	public AssertException(Test type, String msg) {
 		super(msg);
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	public AssertException(Test type, String fmt, Object... args) {
 		super(String.format(fmt, args));
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	public AssertException(Test type, Throwable cause) {
 		super(cause);
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	public AssertException(Test type, Throwable cause, String msg) {
 		super(msg, cause);
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	public AssertException(Test type, Throwable cause, String fmt, Object... args) {
 		super(String.format(fmt, args), cause);
-		this.type = type;
+		this.graphExType = type;
 	}
 
 	@Override
@@ -76,13 +76,13 @@ public class AssertException extends RuntimeException implements IAssertExceptio
 	}
 
 	@Override
-	public IType type() {
-		return type;
+	public IGraphExType graphExType() {
+		return graphExType;
 	}
 
 	@Override
-	public AssertException setType(IType type) {
-		this.type = type;
+	public AssertException setType(IGraphExType graphExType) {
+		this.graphExType = graphExType;
 		return this;
 	}
 

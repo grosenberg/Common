@@ -112,6 +112,11 @@ public class Result<T> {
 		return err != null || !valid;
 	}
 
+	/** Returns the error message, if any. */
+	public String errMessage() {
+		return err != null ? err.getMessage() : "<No error>";
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(err, value, valid);

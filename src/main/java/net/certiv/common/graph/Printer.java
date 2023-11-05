@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.TextStringBuilder;
 
@@ -159,7 +161,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		sb.append(graphProperties(graph, dent(1)));
 
 		Walker<N, E> walker = graph.walker().debug(debug);
-		UniqueList<N> roots = graph.getRoots();
+		UniqueList<N> roots = graph.getRoots().dup();
+		Collections.sort(roots);
 		switch (roots.size()) {
 			case 0:
 				break;
@@ -220,7 +223,6 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	private TextStringBuilder nodeProperties(Graph<N, E> graph, N root, String dent) {
 		TextStringBuilder sb = new TextStringBuilder();
-
 		DotStyle ds = graph.getDotStyle();
 		sb.append(ds.titledAttributes(ON.NODES, dent));
 		return sb;
@@ -236,10 +238,8 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 	public static class DotVisitor<N extends Node<N, E>, E extends Edge<N, E>> extends NodeVisitor<N> {
 
-		// value=formatted node definition string
-		private Set<String> nodes = new LinkedHashSet<>();
-		private UniqueList<E> edges = new UniqueList<>();
-		private TextStringBuilder sb = new TextStringBuilder();
+		private TreeSet<N> nodes = new TreeSet<>();
+		private TreeSet<E> edges = new TreeSet<>();
 
 		private String dent;
 
@@ -251,22 +251,21 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 			this.dent = dent;
 			nodes.clear();
 			edges.clear();
-			sb.clear();
 		}
 
 		public Set<String> nodes() {
-			return nodes;
+			return nodes.stream().map(n -> style(n)).collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		public TextStringBuilder edges() {
-			Collections.sort(edges);
+			TextStringBuilder sb = new TextStringBuilder();
 			edges.forEach(e -> sb.appendln(EDGE, dent, fix(e.beg().uname()), fix(e.end().uname()), style(e)));
 			return sb;
 		}
 
 		@Override
 		public boolean enter(Sense dir, LinkedHashList<N, N> visited, N parent, N node) {
-			nodes.add(style(node));
+			nodes.add(node);
 			if (parent != null) edges.addAll(parent.to(node));
 			return true;
 		}

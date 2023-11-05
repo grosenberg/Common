@@ -7,15 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.TestCommon;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
-import net.certiv.common.util.FsUtil;
 
-class TransformRmTest extends TestGraphBase {
+class TransformRmTest extends TestCommon {
 
 	static final boolean FORCE = false;
 
@@ -35,7 +35,7 @@ class TransformRmTest extends TestGraphBase {
 		String dot = graph.render();
 		writeResource(getClass(), XForm + "Structure.md", dot, FORCE);
 
-		String txt = FsUtil.loadResource(getClass(), XForm + "Structure.md").value;
+		String txt = loadResource(getClass(), XForm + "Structure.md");
 		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeMap;
 
+@Deprecated
 public class TreeTreeMultimap<K, N, V> {
 
 	private TreeMap<K, TreeMultimap<N, V>> map;

@@ -2,11 +2,11 @@ digraph "Builder Multi" {
 
     "Root(0)"
     "A(1)"
+    "B(2)"
     "C(3)"
     "Delta(4)"
-    "Z(6)"
     "Eta(5)"
-    "B(2)"
+    "Z(6)"
 
     "Root(0)" -> "A(1)"
     "Root(0)" -> "B(2)"
