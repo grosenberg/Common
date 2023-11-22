@@ -104,6 +104,13 @@ public abstract class TypedEventListener implements EventListener {
 	}
 
 	/**
+	 * Clears all registered keys.
+	 */
+	protected void clear() {
+		registry.clear();
+	}
+
+	/**
 	 * Returns the subset of registered keys that are comprehended by the give key.
 	 *
 	 * @param key type key
@@ -158,9 +165,9 @@ public abstract class TypedEventListener implements EventListener {
 	}
 
 	/**
-	 * Called when the given event is dispatched.
+	 * Called when the given event is fired/dispatched.
 	 *
 	 * @param event a {@link TypedEvent} object
 	 */
-	protected abstract <TE extends TypedEvent> void handle(TE event);
+	protected abstract <TE extends TypedEvent> void accept(TE event);
 }

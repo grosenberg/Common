@@ -204,7 +204,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			edge.end().add(edge, Sense.IN);
 			boolean ok = install(edge.beg());
 			ok |= install(edge.end());
-			if (!preexisting) fire(GraphEvent.add(this, edge));
+			if (!preexisting) fire(GraphEvent.addEdge(this, edge));
 			return ok;
 
 		} finally {
@@ -221,7 +221,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	boolean install(N node) {
 		boolean mod = nodes.add(node);
-		if (mod) fire(GraphEvent.install(this, node));
+		if (mod) fire(GraphEvent.addNode(this, node));
 		return mod;
 	}
 
@@ -234,7 +234,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	boolean uninstall(N node) {
 		boolean mod = nodes.remove(node);
-		if (mod) fire(GraphEvent.uninstall(this, node));
+		if (mod) fire(GraphEvent.rmvNode(this, node));
 		return mod;
 	}
 
@@ -375,7 +375,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			N end = edge.end();
 
 			boolean ok = edge.remove(false);
-			if (ok) fire(GraphEvent.remove(this, edge));
+			if (ok) fire(GraphEvent.rmvEdge(this, edge));
 			if (ok && beg.adjacent().isEmpty()) uninstall(beg);
 			if (ok && end.adjacent().isEmpty()) uninstall(end);
 			if (clear) edge.clear();

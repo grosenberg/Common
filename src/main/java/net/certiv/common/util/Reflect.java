@@ -211,15 +211,15 @@ public class Reflect {
 	 * @return {@code Result} object representing the desired class
 	 */
 	public static <C> Result<Class<C>> forName(String name) {
-		return forName(name, null);
+		return forName(name, ClassUtil.defaultClassLoader());
 	}
 
 	/**
 	 * Returns an initialized class instance corresponding to the given class name using
 	 * the given class loader.
 	 *
-	 * @param loader the class loader to use to load the class
 	 * @param name   fully qualified name of the desired class
+	 * @param loader the class loader to use to load the class
 	 * @return {@code Result} object representing the desired class
 	 */
 	public static <C> Result<Class<C>> forName(String name, ClassLoader loader) {
@@ -245,7 +245,7 @@ public class Reflect {
 	 */
 	public static <C> Result<C> make(String classname, Object... args) {
 		try {
-			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			ClassLoader cl = ClassUtil.defaultClassLoader();
 			Class<C> cls = cast(Class.forName(classname, true, cl));
 			return make(cls, args);
 

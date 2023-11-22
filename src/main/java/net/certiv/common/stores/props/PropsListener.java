@@ -37,7 +37,7 @@ public class PropsListener extends TypedEventListener {
 	}
 
 	@Override
-	protected <TE extends TypedEvent> void handle(TE event) {
+	protected <TE extends TypedEvent> void accept(TE event) {
 		if (event instanceof PropEvent) {
 			for (Consumer<? super PropEvent> action : actions) {
 				action.accept((PropEvent) event);

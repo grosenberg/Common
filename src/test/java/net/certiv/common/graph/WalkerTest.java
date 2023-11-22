@@ -4,36 +4,45 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.LinkedHashSet;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.TestCommon;
+import net.certiv.common.CommonSupport;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.util.test.CommonTestBase;
 
-class WalkerTest extends TestCommon {
+class WalkerTest extends CommonTestBase {
 
 	static final boolean FORCE = true;
+	private final CommonSupport CS = new CommonSupport();
 	private DemoNode root;
 
 	@BeforeEach
-	void setUp() {
-		builder.createAndAddEdges("A->B->C->D->E");
-		builder.createAndAddEdges("C->F->G");
-		builder.createAndAddEdges("D->H->I->J");
+	public void setup() {
+		CS.setup();
+		CS.builder.createAndAddEdges("A->B->C->D->E");
+		CS.builder.createAndAddEdges("C->F->G");
+		CS.builder.createAndAddEdges("D->H->I->J");
+		root = CS.builder.getNode("A");
+	}
 
-		root = builder.getNode("A");
+	@AfterEach
+	public void teardown() {
+		root = null;
+		CS.teardown();
 	}
 
 	@Test
 	void testFullWalk() {
-		graph.put(Graph.GRAPH_NAME, "Walker");
+		CS.graph.put(Graph.GRAPH_NAME, "Walker");
 
-		Walker<DemoNode, DemoEdge> w = graph.walker();
+		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("X", "Y", "Z"), root);
 		UniqueList<DemoNode> v = new UniqueList<>(w.visited().valuesAll());
 		assertEquals(10, v.size());
@@ -41,9 +50,9 @@ class WalkerTest extends TestCommon {
 
 	@Test
 	void testWalkRet() {
-		graph.put(Graph.GRAPH_NAME, "Walker");
+		CS.graph.put(Graph.GRAPH_NAME, "Walker");
 
-		Walker<DemoNode, DemoEdge> w = graph.walker();
+		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("D", "Y", "Z"), root);
 		UniqueList<DemoNode> v = new UniqueList<>(w.visited().valuesAll());
 		assertEquals(6, v.size());
@@ -51,20 +60,20 @@ class WalkerTest extends TestCommon {
 
 	@Test
 	void testWalkDone() {
-		graph.put(Graph.GRAPH_NAME, "Walker");
+		CS.graph.put(Graph.GRAPH_NAME, "Walker");
 
 		Vis vis = new Vis("X", "D", "Z");
-		graph.walker().descend(vis, root);
+		CS.graph.walker().descend(vis, root);
 		assertEquals(4, vis.entered.size());
 		assertEquals(4, vis.exited.size());
 	}
 
 	@Test
 	void testWalkStop() {
-		graph.put(Graph.GRAPH_NAME, "Walker");
+		CS.graph.put(Graph.GRAPH_NAME, "Walker");
 
 		Vis vis = new Vis("X", "Y", "D");
-		graph.walker().descend(vis, root);
+		CS.graph.walker().descend(vis, root);
 		assertEquals(4, vis.entered.size());
 		assertEquals(0, vis.exited.size());
 	}

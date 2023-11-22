@@ -82,9 +82,25 @@ public final class FsUtil {
 		}
 	}
 
-	/** Replaces each dot with a forward slash. */
-	public static String slashify(String name) {
-		return name.replace(Strings.DOT, Strings.SLASH);
+	/**
+	 * Replaces each DOT in the given source string with a forward slash.
+	 *
+	 * @param source an original string
+	 * @return the modified source
+	 */
+	public static String slashify(String source) {
+		return slashify(Strings.DOT, source);
+	}
+
+	/**
+	 * Replaces each target sequence in the given source string with a forward slash.
+	 *
+	 * @param target a sequence of char values to be replaced
+	 * @param source an original string
+	 * @return the modified source
+	 */
+	public static String slashify(CharSequence target, String source) {
+		return source.replace(target, Strings.SLASH);
 	}
 
 	public static String mkPathname(Package pkg, String name) {
@@ -641,8 +657,9 @@ public final class FsUtil {
 	 * @return the copied out File
 	 */
 	public static Result<File> fromBundle(Object ref, String pathname, File dst) {
+		Class<?> cls = ref instanceof Class ? (Class<?>) ref : ref.getClass();
 		try {
-			URL url = ref.getClass().getResource(pathname);
+			URL url = cls.getResource(pathname);
 			if (url == null) {
 				return Result.of(new NoSuchFileException(String.format("'%s:%s' not found.", ref, pathname)));
 			}
@@ -697,6 +714,12 @@ public final class FsUtil {
 	// }
 	// }
 
+	/**
+	 * Returns the system temporary directory. On windows:
+	 * {@code C:\Users\<user>\AppData\Local\Temp}
+	 *
+	 * @return the system temporary directory
+	 */
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {
 			if (!TmpDir.endsWith(File.separator)) {
@@ -709,19 +732,26 @@ public final class FsUtil {
 		return sysTmp;
 	}
 
+	/**
+	 * Deletes the given directory, recursively, on JVM runtime shutdown.
+	 *
+	 * @param dir a directory to delete
+	 */
 	public static void deleteTmpFolderOnExit(File dir) {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
+		if (dir != null) {
+			Runtime.getRuntime().addShutdownHook(new Thread() {
 
-			@Override
-			public void run() {
-				try {
-					if (dir.isDirectory()) Files.walk(dir.toPath()) //
-							.map(Path::toFile) //
-							.sorted(Comparator.reverseOrder()) //
-							.forEach(File::delete);
-				} catch (Exception e) {}
-			}
-		});
+				@Override
+				public void run() {
+					try {
+						if (dir.isDirectory()) Files.walk(dir.toPath()) //
+								.map(Path::toFile) //
+								.sorted(Comparator.reverseOrder()) //
+								.forEach(File::delete);
+					} catch (Exception e) {}
+				}
+			});
+		}
 	}
 
 	public static File createTmpFolder(String path) throws IOException {

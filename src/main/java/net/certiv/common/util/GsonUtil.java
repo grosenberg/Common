@@ -1,6 +1,7 @@
 package net.certiv.common.util;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,7 +16,12 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.ToNumberStrategy;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -24,17 +30,31 @@ import com.google.gson.stream.JsonWriter;
 import com.google.gson.stream.MalformedJsonException;
 
 import net.certiv.common.annotations.Exclude;
+import net.certiv.common.stores.Result;
+import net.certiv.common.stores.context.IKVScope;
 import net.certiv.common.stores.context.type.Hex;
 
 public class GsonUtil {
 
 	/**
-	 * Serialize/deserialize for persistence; implements the
-	 * {@code ExcludeAnnotationStrategy} to permit use of {@code Exclude} annotations.
+	 * Serialize/deserialize builder, typically for persistence.
+	 * <p>
+	 * To enable automatic conversion of interfaces, tag the interfaces with
+	 * {@link Convertable} to auto-record instance classnames for use in deserialization.
+	 * Then, register the concrete class(es) with the builder.
+	 *
+	 * <pre>{@code
+	 * .registerTypeAdapter(<concrete>.class, ConvertableSerDes.safe())
+	 * }</pre>
+	 * <p>
+	 * Use {@code transient} to exclude any field.
+	 * <p>
+	 * Alternatively, exclude a field by marking with an {@link Exclude} annotation.
 	 */
-	public static final Gson GSON = new GsonBuilder() //
+	public static final GsonBuilder BUILDER = new GsonBuilder() //
 			.registerTypeHierarchyAdapter(Class.class, ClassAdapter.safe())
 			.registerTypeHierarchyAdapter(Path.class, PathAdapter.safe())
+			.registerTypeAdapter(IKVScope.class, ConvertableAdapter.safe())
 			.registerTypeAdapter(URI.class, UriAdapter.safe())
 			.registerTypeAdapter(Instant.class, InstantAdapter.safe())
 			.registerTypeAdapter(Duration.class, DurationAdapter.safe())
@@ -43,8 +63,19 @@ public class GsonUtil {
 			.disableHtmlEscaping() //
 			.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY) //
 			.setDateFormat(DateFormat.LONG) //
-			.setObjectToNumberStrategy(NumStrategy.safe()) //
-			.create();
+			.setObjectToNumberStrategy(NumStrategy.safe());
+
+	/**
+	 * Serialize/deserialize operator, typically for persistence.
+	 * <p>
+	 * To enable automatic conversion of interfaces, tag the interfaces with
+	 * {@link Convertable} to auto-record instance classnames for use in deserialization.
+	 * <p>
+	 * Use {@code transient} to exclude any field.
+	 * <p>
+	 * Alternatively, exclude a field by marking with an {@link Exclude} annotation.
+	 */
+	public static final Gson GSON = BUILDER.create();
 
 	/** Generalized, unconstrained serialize/deserialize operator. */
 	public static final Gson SerDes = new GsonBuilder() //
@@ -52,7 +83,8 @@ public class GsonUtil {
 			.registerTypeHierarchyAdapter(Path.class, PathAdapter.safe())
 			.registerTypeAdapter(URI.class, UriAdapter.safe())
 			.registerTypeAdapter(Instant.class, InstantAdapter.safe())
-			.registerTypeAdapter(Duration.class, DurationAdapter.safe()) //
+			.registerTypeAdapter(Duration.class, DurationAdapter.safe())
+			.addSerializationExclusionStrategy(new ExcludeAnnotationStrategy())
 			.enableComplexMapKeySerialization() //
 			.setObjectToNumberStrategy(NumStrategy.safe()) //
 			.create();
@@ -66,6 +98,11 @@ public class GsonUtil {
 		return GSON.toJson(value);
 	}
 
+	public static final <T> String toJson(T value, boolean prettify) {
+		if (!prettify) return toJson(value);
+		return BUILDER.setPrettyPrinting().create().toJson(value);
+	}
+
 	public static final <T> T fromJson(String json, Class<T> cls) {
 		return GSON.fromJson(json, cls);
 	}
@@ -76,7 +113,7 @@ public class GsonUtil {
 
 		@Override
 		public boolean shouldSkipClass(Class<?> cls) {
-			return cls.getAnnotation(Exclude.class) != null;
+			return false;
 		}
 
 		@Override
@@ -256,6 +293,53 @@ public class GsonUtil {
 					}
 				}
 			}
+		}
+	}
+
+	// --------------------------------
+	// ---- SerDes Adapters -----------
+
+	/**
+	 * Tagging interface required for operation of {@link ConvertableAdapter}. Enables
+	 * deserialization of classes referenced by an interface.
+	 * <p>
+	 * Requires the tagged class contain a top-level, serializable field having the exact
+	 * name {@code className} and populated with the results of
+	 * {@code getClass().getName()}.
+	 * <p>
+	 * Register the interface for the tagged class against the {@link GsonUtil#BUILDER}:
+	 *
+	 * <pre>{@code
+	 * BUILDER.registerTypeAdapter(<Interface>.class, ConvertableAdapter.safe()).create.fromJson(...);
+	 * }</pre>
+	 */
+	public interface Convertable {}
+
+	/**
+	 * Requires any applicable class contain a top-level, serializable field having the
+	 * exact name {@code className} and populated with the results of
+	 * {@code getClass().getName()}.
+	 */
+	public static final class ConvertableAdapter<T extends Convertable> implements JsonDeserializer<T> {
+
+		private static final String CLASSNAME = "className";
+
+		private ConvertableAdapter() {}
+
+		static ConvertableAdapter<Convertable> safe() {
+			return new ConvertableAdapter<>();
+		}
+
+		@Override
+		public T deserialize(JsonElement elem, Type type, final JsonDeserializationContext context)
+				throws JsonParseException {
+
+			JsonObject obj = elem.getAsJsonObject();
+			JsonPrimitive prim = (JsonPrimitive) obj.get(CLASSNAME);
+			String className = prim.getAsString();
+			Result<Class<T>> res = Reflect.forName(className);
+			if (res.err()) throw new JsonParseException(res.err);
+			return context.deserialize(obj, res.value);
 		}
 	}
 

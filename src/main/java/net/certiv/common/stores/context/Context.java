@@ -42,6 +42,9 @@ import net.certiv.common.util.Maths;
  */
 public class Context implements IContext {
 
+	/** Implementing class name for Convertable. */
+	protected final String className = getClass().getName();
+
 	/** Scoping stack of instance key:value stores. Default depth is 1. */
 	private final LimitList<KVScope> scopes = new LimitList<>(1);
 	/** Event dispatcher. */
@@ -368,7 +371,7 @@ public class Context implements IContext {
 
 	@Override
 	public UUID freshen() {
-		if (firstScope().isEmpty()) return NO_SCOPE;
+		if (firstScope().isEmpty()) return EOS;
 		return merge(0, new KVScope());
 	}
 
@@ -407,7 +410,7 @@ public class Context implements IContext {
 	@Override
 	public UUID mergeLast(IKVScope scope) {
 		Assert.isTrue(scope != null);
-		UUID mark = !scopes.isEmpty() ? scopes.getLast().mark : NO_SCOPE;
+		UUID mark = !scopes.isEmpty() ? scopes.getLast().mark : EOS;
 		int limit = scopes.limit();
 		if (scope instanceof KVScope) {
 			if (depth() == limit) scopes.adjustLimit(limit + 1);

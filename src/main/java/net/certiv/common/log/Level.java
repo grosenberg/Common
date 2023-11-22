@@ -86,4 +86,19 @@ public enum Level {
 			return def;
 		}
 	}
+
+	/**
+	 * Determines whether the given level name corresponds to a defined level.
+	 *
+	 * @param name a level name
+	 * @return {@code true} if the name corresponds to a defined level.
+	 */
+	public static boolean valid(String name) {
+		try {
+			Level.valueOf(name.trim().toUpperCase());
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }

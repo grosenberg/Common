@@ -5,19 +5,22 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.TestCommon;
+import net.certiv.common.CommonSupport;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.util.test.CommonTestBase;
 
-class GraphNodesTest extends TestCommon {
+class GraphNodesTest extends CommonTestBase {
 
 	static final boolean FORCE = false;
+	private final CommonSupport CS = new CommonSupport();
 
 	DemoNode a;
 	DemoNode b;
@@ -28,37 +31,43 @@ class GraphNodesTest extends TestCommon {
 	DemoNode g;
 
 	@BeforeEach
-	void setup() {
-		graph.put(Graph.GRAPH_NAME, "Node Test");
+	public void setup() {
+		CS.setup();
+		CS.graph.put(Graph.GRAPH_NAME, "Node Test");
 
-		builder.createAndAddEdges("A->B->C->D->E");
-		builder.createAndAddEdges("C->F->G");
-		builder.createAndAddEdges("C->[B,C,E]");
+		CS.builder.createAndAddEdges("A->B->C->D->E");
+		CS.builder.createAndAddEdges("C->F->G");
+		CS.builder.createAndAddEdges("C->[B,C,E]");
 
-		a = builder.getNode("A");
-		b = builder.getNode("B");
-		c = builder.getNode("C");
-		d = builder.getNode("D");
-		e = builder.getNode("E");
-		f = builder.getNode("F");
-		g = builder.getNode("G");
+		a = CS.builder.getNode("A");
+		b = CS.builder.getNode("B");
+		c = CS.builder.getNode("C");
+		d = CS.builder.getNode("D");
+		e = CS.builder.getNode("E");
+		f = CS.builder.getNode("F");
+		g = CS.builder.getNode("G");
+	}
+
+	@AfterEach
+	public void teardown() {
+		CS.teardown();
 	}
 
 	@Test
 	void verifyStructure() {
-		String dot = graph.render();
+		String dot = CS.graph.render();
 		writeResource(getClass(), "node1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "node1.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testContains() {
-		assertTrue(graph.contains(a));
-		DemoNode z = builder.createNode("Z");
-		assertFalse(graph.contains(z));
+		assertTrue(CS.graph.contains(a));
+		DemoNode z = CS.builder.createNode("Z");
+		assertFalse(CS.graph.contains(z));
 	}
 
 	@Test

@@ -5,11 +5,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class ClassUtil {
 
@@ -20,31 +17,16 @@ public class ClassUtil {
 
 		@Override
 		public int compare(URL u1, URL u2) {
-			return u1.toString().compareToIgnoreCase(u1.toString());
+			return u1.toString().compareTo(u2.toString());
 		}
 	};
+	private static final Comparator<? super Package> PkgComp = new Comparator<>() {
 
-	public static ClassLoader defaultClassLoader() {
-		ClassLoader cl = null;
-		try {
-			cl = Thread.currentThread().getContextClassLoader();
-		} catch (Throwable ex) {
-			System.err.println("No context classLoader: " + ex.getMessage());
+		@Override
+		public int compare(Package p1, Package p2) {
+			return p1.getName().compareTo(p2.getName());
 		}
-		if (cl == null) {
-			cl = ClassUtil.class.getClassLoader();
-			if (cl == null) {
-				System.err.println("No 'ClassUtil.class' classLoader");
-				try {
-					cl = ClassLoader.getSystemClassLoader();
-				} catch (Throwable ex) {
-					System.err.println("No system classLoader: " + ex.getMessage());
-				}
-			}
-		}
-		System.err.println("ClassLoader: " + cl != null ? cl.getName() : null);
-		return cl;
-	}
+	};
 
 	public static List<URL> dump() {
 		List<URL> urls = new LinkedList<>();
@@ -55,53 +37,53 @@ public class ClassUtil {
 		return urls;
 	}
 
-	// ClassLoader cl = ClassLoader.getSystemClassLoader();
-	public static String dumpClasspath(URLClassLoader cl) {
-		return dumpURLs(cl.getURLs());
-	}
+	// // ClassLoader cl = ClassLoader.getSystemClassLoader();
+	// public static String dumpClasspath(URLClassLoader cl) {
+	// return dumpURLs(cl.getURLs());
+	// }
+	//
+	// public static String dumpURLs(URL[] urls) {
+	// StringBuilder sb = new StringBuilder("URL dump:\n");
+	// for (URL url : urls) {
+	// sb.append(url.toString() + Strings.EOL);
+	// }
+	// return sb.toString();
+	// }
 
-	public static String dumpURLs(URL[] urls) {
-		StringBuilder sb = new StringBuilder("URL dump:\n");
-		for (URL url : urls) {
-			sb.append(url.toString() + Strings.EOL);
-		}
-		return sb.toString();
-	}
+	/**
+	 * Dumps the loadable packages defined relative to the given class.
+	 *
+	 * @param cls a class defining the top-level classloader to examine
+	 * @return printable list of the classloader packages
+	 */
+	public static String dump(Class<?> cls) {
+		MsgBuilder mb = new MsgBuilder("ClassLoader Packages for %s", cls.getName());
 
-	/** Dumps he packages defined in this class loader. */
-	public static String dump(ClassLoader loader) {
-
-		StringBuilder sb = new StringBuilder();
-
-		if (loader instanceof URLClassLoader) {
-			URLClassLoader urlLoader = (URLClassLoader) loader;
-			for (URL url : urlLoader.getURLs()) {
-				sb.append(url.toString() + Strings.SEMI);
-			}
+		ClassLoader cl = cls.getClassLoader();
+		if (cl instanceof URLClassLoader) {
+			List<URL> urls = Arrays.asList(((URLClassLoader) cl).getURLs());
+			urls.sort(URLComp);
+			urls.stream().forEach(p -> mb.nl().indent(p.toString()));
 
 		} else {
-			Class<?> cls = loader.getClass();
-			while (cls != ClassLoader.class) {
-				cls = cls.getSuperclass();
-			}
-
-			LinkedHashMap<String, Package> packages = new LinkedHashMap<>();
-			try {
-				Map<?, ?> pkgmap = (Map<?, ?>) Reflect.get(cls, "packages");
-				for (Entry<?, ?> entry : pkgmap.entrySet()) {
-					String name = (String) entry.getKey();
-					Package pkg = (Package) entry.getValue();
-					packages.put(name, pkg);
-				}
-			} catch (Exception e) {
-				return "Error: " + e.getMessage();
-			}
-
-			for (String pkg : packages.keySet()) {
-				sb.append(pkg + Strings.SEMI);
-			}
+			List<Package> pkgs = Arrays.asList(cl.getDefinedPackages());
+			pkgs.sort(PkgComp);
+			pkgs.stream().forEach(p -> mb.nl().indent(p.getName()));
 		}
 
-		return sb.toString();
+		// for (ClassLoader cl = cls.getClassLoader(); cl != null; cl.getParent()) {
+		// }
+		return mb.toString();
+	}
+
+	public static ClassLoader defaultClassLoader() {
+		try {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			if (cl != null) return cl;
+
+		} catch (Throwable t) {
+			if (t instanceof OutOfMemoryError) throw t;
+		}
+		return ClassLoader.getSystemClassLoader();
 	}
 }

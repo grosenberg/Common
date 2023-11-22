@@ -1,0 +1,15 @@
+{
+  "className": "net.certiv.common.stores.context.KVStore",
+  "scope": [
+    [
+      {
+        "name": "test"
+      },
+      {
+        "beg": "one off",
+        "unit": "",
+        "range": false
+      }
+    ]
+  ]
+}

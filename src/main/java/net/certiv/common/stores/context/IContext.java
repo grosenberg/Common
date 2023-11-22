@@ -2,13 +2,15 @@ package net.certiv.common.stores.context;
 
 import java.util.UUID;
 
+import net.certiv.common.event.ITypedEventDispatcher;
+
 /**
  * Interface definition for a key-value store supporting multiple scopes.
  * <p>
  * Keys are value typed: {@code Key<V>}. Values are held in typed value holders:
  * {@code Value<V>}.
  */
-public interface IContext extends IKVScope {
+public interface IContext extends IKVScope, ITypedEventDispatcher {
 
 	/** Key removal qualifiers. */
 	public enum RmvScope {

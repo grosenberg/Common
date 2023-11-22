@@ -36,8 +36,8 @@ public class KVStore extends KVScope {
 	 * @param scope a {@link IKVScope} containing the initial values
 	 */
 	public KVStore(IKVScope scope) {
-		KVStore store = new KVStore();
-		store.mergeFirst(scope);
+		this();
+		mergeFirst(scope);
 	}
 
 	/**

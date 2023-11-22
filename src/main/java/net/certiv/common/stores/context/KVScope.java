@@ -28,11 +28,16 @@ import net.certiv.common.event.TypedEventListener;
  * Use of an {@link ITypedEventDispatcher} instance is supported. Both {@link KVStore} and
  * {@link Context} will install an {@link TypedEventDispatcher} instance.
  */
-public class KVScope implements IKVScope {
+public class KVScope implements IKVScope, ITypedEventDispatcher {
 
+	/** Implementing class name for Convertable. */
+	protected final String className = getClass().getName();
+
+	/** Key/Value map. */
 	protected final Map<Key<?>, Value<?>> scope = new LinkedHashMap<>();
-	/** Permanent, unique scope identification marker. */
-	protected final UUID mark;
+
+	/** Unique scope identification marker. */
+	protected transient final UUID mark;
 	/** Event dispatcher. */
 	protected transient ITypedEventDispatcher dispatcher;
 	/** Event dispatch reactivity enabled state. */
@@ -40,14 +45,13 @@ public class KVScope implements IKVScope {
 
 	/**
 	 * Makes a random scope UUID marker. By definition, will not be equal to the
-	 * {@link IKVScopeMin#NO_SCOPE} marker internally used as an end-of-scopes
-	 * delineation.
+	 * {@link IKVScopeMin#EOS} marker internally used as an end-of-scopes delineation.
 	 *
 	 * @return a unique scope UUID
 	 */
 	static UUID mkMark() {
 		UUID uuid = UUID.randomUUID();
-		if (uuid.equals(NO_SCOPE)) {
+		if (uuid.equals(EOS)) {
 			uuid = UUID.randomUUID();
 		}
 		return uuid;
@@ -249,7 +253,10 @@ public class KVScope implements IKVScope {
 
 	@Override
 	public KVScope delta() {
-		return dup();
+		KVScope dup = new KVScope();
+		keys().forEach(k -> dup.scope.put(k, getValue(k)));
+		dup.reactive(dispatcher, reactive);
+		return dup;
 	}
 
 	@Override

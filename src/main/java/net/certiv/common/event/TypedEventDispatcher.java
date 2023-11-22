@@ -24,7 +24,7 @@ public class TypedEventDispatcher implements ITypedEventDispatcher {
 			TypeKey key = TypeKey.get(event);
 			for (TypedEventListener listener : map.getOrDefault(key.type, List.of())) {
 				if (listener.comprehends(key)) {
-					listener.handle(event);
+					listener.accept(event);
 				}
 			}
 		}

@@ -1,47 +1,73 @@
 package net.certiv.common.graph;
 
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
 import net.certiv.common.event.TypedEvent;
 import net.certiv.common.event.TypedEventListener;
-import net.certiv.common.graph.GraphEvent.GraphChgType;
 
-public class GraphListener extends TypedEventListener {
+/**
+ * Base class for graph listeners. Extend and implement constructors:
+ *
+ * <pre>{@code
+ * public static <N extends Node<N, E>, E extends Edge<N, E>> GraphListener<N, E> of(GraphEvtType... types) {
+ * 	GraphListener<N, E> listener = new GraphListener<>();
+ * 	listener.register(types);
+ * 	return listener;
+ * }
+ * }</pre>
+ *
+ * <pre>{@code
+ * public static <N extends Node<N, E>, E extends Edge<N, E>> GraphListener<N, E> of(
+ * 		EnumSet<GraphEvtType> types) {
+ * 	GraphListener<N, E> listener = new GraphListener<>();
+ * 	listener.register(types);
+ * 	return listener;
+ * }
+ * }</pre>
+ *
+ * @param <N> node type
+ * @param <E> edge type
+ */
+public abstract class GraphListener<N extends Node<N, E>, E extends Edge<N, E>> extends TypedEventListener {
 
-	public static GraphListener of(GraphChgType... types) {
-		GraphListener listener = new GraphListener();
-		listener.register(types);
-		return listener;
+	private final LinkedHashSet<Consumer<? super GraphEvent<N, E>>> actions = new LinkedHashSet<>();
+
+	protected GraphListener() {
+		super();
 	}
 
-	public static GraphListener of(EnumSet<GraphChgType> types) {
-		GraphListener listener = new GraphListener();
-		listener.register(types);
-		return listener;
-	}
-
-	// --------------------------------
-
-	private final LinkedHashSet<Consumer<? super GraphEvent<?, ?>>> actions = new LinkedHashSet<>();
-
-	public GraphListener action(Consumer<? super GraphEvent<?, ?>> action) {
+	@SuppressWarnings("unchecked")
+	public <L extends GraphListener<N, E>> L action(Consumer<? super GraphEvent<N, E>> action) {
 		if (action != null) actions.add(action);
-		return this;
+		return (L) this;
 	}
 
-	public GraphListener addTo(Graph<?, ?> graph) {
+	@SuppressWarnings("unchecked")
+	public <L extends GraphListener<N, E>> L addTo(Graph<N, E> graph) {
 		if (graph != null) graph.addListener(this);
-		return this;
+		return (L) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <L extends GraphListener<N, E>> L removeFrom(Graph<N, E> graph) {
+		if (graph != null) graph.removeListener(this);
+		return (L) this;
 	}
 
 	@Override
-	protected <TE extends TypedEvent> void handle(TE event) {
+	@SuppressWarnings("unchecked")
+	protected <TE extends TypedEvent> void accept(TE event) {
 		if (event instanceof GraphEvent) {
-			for (Consumer<? super GraphEvent<?, ?>> action : actions) {
-				action.accept((GraphEvent<?, ?>) event);
+			for (Consumer<? super GraphEvent<N, E>> action : actions) {
+				action.accept((GraphEvent<N, E>) event);
 			}
 		}
+	}
+
+	@Override
+	public void clear() {
+		actions.clear();
+		super.clear();
 	}
 }

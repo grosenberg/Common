@@ -3,6 +3,7 @@ package net.certiv.common.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -45,10 +46,10 @@ public class Version {
 	 * </pre>
 	 *
 	 * @param cls any class within a jar prepared by Maven with version information
-	 * @return the package version of the jar
+	 * @return the specification version of the jar
 	 */
 	public static String pkgVersion(Class<?> cls) {
-		String ver = cls.getPackage().getImplementationVersion();
+		String ver = cls.getPackage().getSpecificationVersion();
 		if (ver != null) return ver;
 		return Strings.UNKNOWN;
 	}
@@ -89,7 +90,14 @@ public class Version {
 	 */
 	public static Pair<String, Instant> manifestVersion(Class<?> cls) {
 		try {
-			File file = new File(cls.getProtectionDomain().getCodeSource().getLocation().toURI());
+			URL location = cls.getProtectionDomain().getCodeSource().getLocation();
+			File file;
+			try {
+				file = new File(location.toURI());
+			} catch (Exception e) {
+				Log.debug("Manifest Location %s", location);
+				throw e;
+			}
 
 			if (file.isFile()) {
 				try (JarFile jar = new JarFile(file)) {

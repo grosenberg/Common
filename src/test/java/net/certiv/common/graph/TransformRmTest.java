@@ -4,129 +4,135 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.TestCommon;
+import net.certiv.common.CommonSupport;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
+import net.certiv.common.util.test.CommonTestBase;
 
-class TransformRmTest extends TestCommon {
+class TransformRmTest extends CommonTestBase {
 
 	static final boolean FORCE = false;
+	private final CommonSupport CS = new CommonSupport();
 
 	@BeforeEach
-	void testRemoveOps() {
-		// Log2.setName("RemoveOps", "../../src/test/resources/logs");
+	public void setup() {
+		CS.setup();
+		CS.graph.put(Graph.GRAPH_NAME, "RemoveOps");
+		CS.builder.createAndAddEdges("A->B->C->D->E");
+		CS.builder.createAndAddEdges("C->F->G");
+		CS.builder.createAndAddEdges("C->[B,C,E]");
+	}
 
-		graph.put(Graph.GRAPH_NAME, "RemoveOps");
-
-		builder.createAndAddEdges("A->B->C->D->E");
-		builder.createAndAddEdges("C->F->G");
-		builder.createAndAddEdges("C->[B,C,E]");
+	@AfterEach
+	public void teardown() {
+		CS.teardown();
 	}
 
 	@Test
 	void verifyStructure() {
-		String dot = graph.render();
-		writeResource(getClass(), XForm + "Structure.md", dot, FORCE);
+		String dot = CS.graph.render();
+		writeResource(getClass(), CommonSupport.XForm + "Structure.md", dot, FORCE);
 
-		String txt = loadResource(getClass(), XForm + "Structure.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		String txt = loadResource(getClass(), CommonSupport.XForm + "Structure.md");
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testRemoveNode() {
-		int cntNodes = graph.size();
-		int cntEdges = graph.getEdges().size();
+		int cntNodes = CS.graph.size();
+		int cntEdges = CS.graph.getEdges().size();
 
-		DemoNode b = builder.getNode("B");
+		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeNode(b);
 
 		assertTrue(res.valid());
-		assertEquals(graph.size(), cntNodes - 2);
-		assertEquals(graph.getEdges().size(), cntEdges - 3);
+		assertEquals(CS.graph.size(), cntNodes - 2);
+		assertEquals(CS.graph.getEdges().size(), cntEdges - 3);
 	}
 
 	@Test
 	void testRemoveEdge() {
-		int nodes = graph.size();
-		int edges = graph.getEdges().size();
+		int nodes = CS.graph.size();
+		int edges = CS.graph.getEdges().size();
 
-		DemoEdge ab = builder.getEdges("A", "B").getFirst();
+		DemoEdge ab = CS.builder.getEdges("A", "B").getFirst();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdge(ab, false);
 
 		assertTrue(res.valid());
-		assertEquals(graph.size(), nodes - 1);
-		assertEquals(graph.getEdges().size(), edges - 1);
+		assertEquals(CS.graph.size(), nodes - 1);
+		assertEquals(CS.graph.getEdges().size(), edges - 1);
 
-		assertTrue(graph.addEdge(ab));
-		assertEquals(graph.size(), nodes);
-		assertEquals(graph.getEdges().size(), edges);
+		assertTrue(CS.graph.addEdge(ab));
+		assertEquals(CS.graph.size(), nodes);
+		assertEquals(CS.graph.getEdges().size(), edges);
 	}
 
 	@Test
 	void testRemoveEdgesCollection() {
-		int nodes = graph.size();
-		int edges = graph.getEdges().size();
+		int nodes = CS.graph.size();
+		int edges = CS.graph.getEdges().size();
 
-		UniqueList<DemoEdge> bc = builder.getEdges("B", "C");
+		UniqueList<DemoEdge> bc = CS.builder.getEdges("B", "C");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdges(bc, false);
 
 		assertTrue(res.valid());
-		assertEquals(graph.size(), nodes);
-		assertEquals(graph.getEdges().size(), edges - 2);
+		assertEquals(CS.graph.size(), nodes);
+		assertEquals(CS.graph.getEdges().size(), edges - 2);
 	}
 
 	@Test
 	void testRemoveEdgeIf() {
-		DemoEdge cc = builder.getEdges("C", "C").getFirst();
+		DemoEdge cc = CS.builder.getEdges("C", "C").getFirst();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdgeIf(cc, false, e -> !e.cyclic());
 		assertTrue(res.valid());
-		assertTrue(graph.contains(cc));
+		assertTrue(CS.graph.contains(cc));
 
 		res = xf.removeEdgeIf(cc, false, e -> e.cyclic());
 		assertTrue(res.valid());
-		assertFalse(graph.contains(cc));
+		assertFalse(CS.graph.contains(cc));
 	}
 
 	@Test
 	void testRemoveEdgesNNBoolean() {
-		int nodes = graph.size();
-		int edges = graph.getEdges().size();
-		DemoNode b = builder.getNode("B");
-		DemoNode c = builder.getNode("C");
+		int nodes = CS.graph.size();
+		int edges = CS.graph.getEdges().size();
+		DemoNode b = CS.builder.getNode("B");
+		DemoNode c = CS.builder.getNode("C");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdges(Sense.OUT, b, c, false);
 
 		assertTrue(res.valid());
-		assertEquals(graph.size(), nodes);
-		assertEquals(graph.getEdges().size(), edges - 1);
+		assertEquals(CS.graph.size(), nodes);
+		assertEquals(CS.graph.getEdges().size(), edges - 1);
 	}
 
 	@Test
 	void testRemoveEdgesIf() {
-		DemoNode c = builder.getNode("C");
-		int edges = builder.getEdges("C", "C").size();
+		DemoNode c = CS.builder.getNode("C");
+		int edges = CS.builder.getEdges("C", "C").size();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdgesIf(Sense.OUT, c, c, false, e -> e.cyclic());
 		assertTrue(res.valid());
 
-		assertEquals(builder.getEdges("C", "C").size(), edges - 1);
+		assertEquals(CS.builder.getEdges("C", "C").size(), edges - 1);
 	}
 }

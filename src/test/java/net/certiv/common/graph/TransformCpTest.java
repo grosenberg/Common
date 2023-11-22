@@ -5,110 +5,119 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedList;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.certiv.common.TestCommon;
+import net.certiv.common.CommonSupport;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;
+import net.certiv.common.util.test.CommonTestBase;
 
-public class TransformCpTest extends TestCommon {
+public class TransformCpTest extends CommonTestBase {
 
 	static final boolean FORCE = true;
+	private final CommonSupport CS = new CommonSupport();
 
 	@BeforeEach
-	void setup() {
-		builder.createAndAddEdges("A->B->C->D->E");
-		builder.createAndAddEdges("C->F->G");
-		builder.createAndAddEdges("C->[B,C,E]");
+	public void setup() {
+		CS.setup();
+		CS.builder.createAndAddEdges("A->B->C->D->E");
+		CS.builder.createAndAddEdges("C->F->G");
+		CS.builder.createAndAddEdges("C->[B,C,E]");
 
-		builder.createAndAddEdges("U->X->Y");
-		builder.createAndAddEdges("U->Z");
+		CS.builder.createAndAddEdges("U->X->Y");
+		CS.builder.createAndAddEdges("U->Z");
+	}
+
+	@AfterEach
+	public void teardown() {
+		CS.teardown();
 	}
 
 	@Test
 	void testCopyEnd() {
-		graph.put(Graph.GRAPH_NAME, "Copy End");
+		CS.graph.put(Graph.GRAPH_NAME, "Copy End");
 
-		DemoNode g = builder.getNode("G");
-		DemoNode u = builder.getNode("U");
+		DemoNode g = CS.builder.getNode("G");
+		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
 		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.copy(sg, g, true);	// copy in like =>G=>, removing G
 		xf.remove(sg, true);	// remove source subgraph
 
-		String dot = graph.render();
-		writeResource(getClass(), XForm + "CopyEnd.md", dot, FORCE);
+		String dot = CS.graph.render();
+		writeResource(getClass(), CommonSupport.XForm + "CopyEnd.md", dot, FORCE);
 
-		String txt = loadResource(getClass(), XForm + "CopyEnd.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyEnd.md");
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyMid() {
-		graph.put(Graph.GRAPH_NAME, "Copy Mid");
+		CS.graph.put(Graph.GRAPH_NAME, "Copy Mid");
 
-		DemoNode f = builder.getNode("F");
-		DemoNode u = builder.getNode("U");
+		DemoNode f = CS.builder.getNode("F");
+		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
 		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, false); // copy in like =>F=>
 		assertTrue(res.valid());
 
-		String dot = graph.render();
-		writeResource(getClass(), XForm + "CopyMid.md", dot, FORCE);
+		String dot = CS.graph.render();
+		writeResource(getClass(), CommonSupport.XForm + "CopyMid.md", dot, FORCE);
 
-		String txt = loadResource(getClass(), XForm + "CopyMid.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyMid.md");
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyRemove() {
-		graph.put(Graph.GRAPH_NAME, "Copy Remove");
+		CS.graph.put(Graph.GRAPH_NAME, "Copy Remove");
 
-		DemoNode f = builder.getNode("F");
-		DemoNode u = builder.getNode("U");
+		DemoNode f = CS.builder.getNode("F");
+		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
 		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		// copy in like =>F=>, removing F
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());
 
-		String dot = graph.render();
-		writeResource(getClass(), XForm + "CopyRm.md", dot, FORCE);
+		String dot = CS.graph.render();
+		writeResource(getClass(), CommonSupport.XForm + "CopyRm.md", dot, FORCE);
 
-		String txt = loadResource(getClass(), XForm + "CopyRm.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyRm.md");
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyRemoveReduce() {
-		graph.put(Graph.GRAPH_NAME, "Copy RemoveReduce");
+		CS.graph.put(Graph.GRAPH_NAME, "Copy RemoveReduce");
 
-		DemoNode f = builder.getNode("F");
-		DemoNode u = builder.getNode("U");
+		DemoNode f = CS.builder.getNode("F");
+		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(graph);
+		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
 		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(graph);
+		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		// copy in like =>F=>, removing F
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());
@@ -117,11 +126,11 @@ public class TransformCpTest extends TestCommon {
 		Result<Boolean> rm = xf.remove(sg, true);
 		assertTrue(rm.valid());
 
-		String dot = graph.render();
-		writeResource(getClass(), XForm + "CopyRmRd.md", dot, FORCE);
+		String dot = CS.graph.render();
+		writeResource(getClass(), CommonSupport.XForm + "CopyRmRd.md", dot, FORCE);
 
-		String txt = loadResource(getClass(), XForm + "CopyRmRd.md");
-		Differ.diff((String) graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyRmRd.md");
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
