@@ -20,13 +20,38 @@ public class ClassUtil {
 			return u1.toString().compareTo(u2.toString());
 		}
 	};
-	private static final Comparator<? super Package> PkgComp = new Comparator<>() {
+
+	public static final Comparator<? super Package> PkgComp = new Comparator<>() {
 
 		@Override
 		public int compare(Package p1, Package p2) {
 			return p1.getName().compareTo(p2.getName());
 		}
 	};
+
+	String adj(String cn) {
+		if (!cn.contains("$")) return abbr(cn);
+
+		String[] parts = cn.split("\\$", 2);
+		String outer = abbr(parts[0]);
+		String inner = parts[1];
+		return outer + "$" + inner;
+	}
+
+	String abbr(String cn) {
+		if (!cn.contains(Strings.DOT)) return cn;
+
+		StringBuilder sb = new StringBuilder();
+		String[] parts = cn.split("\\.");
+		for (int idx = 0; idx < parts.length - 1; idx++) {
+			String part = parts[idx];
+			if (!part.isEmpty()) {
+				sb.append(part.charAt(0) + Chars.DOT);
+			}
+		}
+		sb.append(parts[parts.length - 1]);
+		return sb.toString();
+	}
 
 	public static List<URL> dump() {
 		List<URL> urls = new LinkedList<>();
@@ -36,19 +61,6 @@ public class ClassUtil {
 		} catch (IOException ex) {}
 		return urls;
 	}
-
-	// // ClassLoader cl = ClassLoader.getSystemClassLoader();
-	// public static String dumpClasspath(URLClassLoader cl) {
-	// return dumpURLs(cl.getURLs());
-	// }
-	//
-	// public static String dumpURLs(URL[] urls) {
-	// StringBuilder sb = new StringBuilder("URL dump:\n");
-	// for (URL url : urls) {
-	// sb.append(url.toString() + Strings.EOL);
-	// }
-	// return sb.toString();
-	// }
 
 	/**
 	 * Dumps the loadable packages defined relative to the given class.

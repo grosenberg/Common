@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.check.Check;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.stores.Table;
 import net.certiv.common.util.CompareUtil;
 

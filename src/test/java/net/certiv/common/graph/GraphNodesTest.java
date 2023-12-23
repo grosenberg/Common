@@ -33,7 +33,7 @@ class GraphNodesTest extends CommonTestBase {
 	@BeforeEach
 	public void setup() {
 		CS.setup();
-		CS.graph.put(Graph.GRAPH_NAME, "Node Test");
+		CS.graph.put(Graph.GRAPH_ID, "Node Test");
 
 		CS.builder.createAndAddEdges("A->B->C->D->E");
 		CS.builder.createAndAddEdges("C->F->G");
@@ -59,7 +59,7 @@ class GraphNodesTest extends CommonTestBase {
 		writeResource(getClass(), "node1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "node1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 

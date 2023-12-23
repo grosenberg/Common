@@ -190,9 +190,8 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/**
-	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
-	 * this properties store. Creates and adds an {@code ON#EDGES} default category
-	 * {@code DotStyle} store, if a store does not exist.
+	 * Returns the existing {@code DotStyle}. Creates and adds an {@code ON#EDGES} default
+	 * category {@code DotStyle} store, if a store does not exist.
 	 *
 	 * @return the dot style store
 	 */
@@ -205,7 +204,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	 * <p>
 	 * Override to define a custom configured style.
 	 */
-	public DotStyle defineStyle() {
+	protected DotStyle defineStyle() {
 		return getDotStyle();
 	}
 

@@ -121,8 +121,7 @@ public class LinkedHashList<K, V> {
 	public LinkedList<V> putIfAbsent(K key, Collection<? extends V> values) {
 		LinkedList<V> list = map.get(key);
 		if (list == null) return put(key, values);
-		// return map.get(key);
-		return null; // TODO: return value or null signalling not absent?
+		return null;
 	}
 
 	public void forEach(BiConsumer<? super K, ? super LinkedList<V>> action) {
@@ -134,7 +133,9 @@ public class LinkedHashList<K, V> {
 	}
 
 	public boolean containsValue(V value) {
-		return map.containsValue(value);
+		return map.values().stream() //
+				.flatMap(l -> l.stream()) //
+				.anyMatch(v -> v.equals(value));
 	}
 
 	public boolean containsEntry(K key, V value) {

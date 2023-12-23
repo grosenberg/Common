@@ -29,24 +29,6 @@ public class DemoEvent extends GraphEvent<DemoNode, DemoEdge> {
 		return new DemoEvent(graph, GraphEvtType.Log, level, msg, loc, e);
 	}
 
-	@Override
-	public String toString() {
-		switch ((GraphEvtType) type()) {
-			case AddEdge:
-			case AddNode:
-				return String.format("[%s] %s", name(), value());
-			case RmvEdge:
-			case RmvNode:
-				return String.format("[%s] %s", name(), prior());
-
-			case Log:
-				return String.format("%s", value());
-
-			default:
-				return super.toString();
-		}
-	}
-
 	// --------------------------------
 
 	protected DemoEvent(DemoGraph graph, GraphEvtType type, Level level, String msg, StackTraceElement loc,

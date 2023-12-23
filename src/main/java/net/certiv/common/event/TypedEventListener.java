@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.certiv.common.check.Assert;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.util.CompareUtil;
 import net.certiv.common.util.Maths;

@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.ITypedEventDispatcher;
 import net.certiv.common.event.TypedEvent;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.event.TypedEventDispatcher;
 import net.certiv.common.event.TypedEventListener;
 

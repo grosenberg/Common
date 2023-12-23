@@ -22,7 +22,7 @@ public abstract class TypedEvent extends EventObject {
 	protected transient final String name;
 
 	protected <S> TypedEvent(S source, IEvtType type) {
-		this(source, type, type.typeName());
+		this(source, type, type.name());
 	}
 
 	protected <S> TypedEvent(S source, IEvtType type, String name) {
@@ -104,29 +104,11 @@ public abstract class TypedEvent extends EventObject {
 
 	// --------------------------------
 
-	/** Defines an event type. */
-	public static interface IEvtType {
-
-		/** @return the type name */
-		String typeName();
-
-		/** @return {@code true} if this type defines an action event */
-		boolean isActionType();
-
-		/** @return {@code true} if this type defines a property change event */
-		boolean isChangeType();
-
-		/** @return {@code true} if this type is an Enum */
-		default boolean isEnum() {
-			return this instanceof Enum;
-		}
-	}
-
 	/** General Event type. */
-	public enum EvtType implements IEvtType {
+	public static class EvtType implements IEvtType {
 
-		ACTION("Action", true, false),
-		CHANGE("Change", false, true);
+		public static final EvtType ACTION = new EvtType("Action", true, false);
+		public static final EvtType CHANGE = new EvtType("Change", false, true);
 
 		private final String name;
 		private final boolean action;
@@ -139,7 +121,7 @@ public abstract class TypedEvent extends EventObject {
 		}
 
 		@Override
-		public String typeName() {
+		public String name() {
 			return name;
 		}
 

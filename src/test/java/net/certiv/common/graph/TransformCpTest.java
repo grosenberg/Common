@@ -41,7 +41,7 @@ public class TransformCpTest extends CommonTestBase {
 
 	@Test
 	void testCopyEnd() {
-		CS.graph.put(Graph.GRAPH_NAME, "Copy End");
+		CS.graph.put(Graph.GRAPH_ID, "Copy End");
 
 		DemoNode g = CS.builder.getNode("G");
 		DemoNode u = CS.builder.getNode("U");
@@ -57,14 +57,14 @@ public class TransformCpTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "CopyEnd.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyEnd.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyMid() {
-		CS.graph.put(Graph.GRAPH_NAME, "Copy Mid");
+		CS.graph.put(Graph.GRAPH_ID, "Copy Mid");
 
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
@@ -80,13 +80,13 @@ public class TransformCpTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "CopyMid.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyMid.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyRemove() {
-		CS.graph.put(Graph.GRAPH_NAME, "Copy Remove");
+		CS.graph.put(Graph.GRAPH_ID, "Copy Remove");
 
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
@@ -103,13 +103,13 @@ public class TransformCpTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "CopyRm.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyRm.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopyRemoveReduce() {
-		CS.graph.put(Graph.GRAPH_NAME, "Copy RemoveReduce");
+		CS.graph.put(Graph.GRAPH_ID, "Copy RemoveReduce");
 
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
@@ -130,7 +130,7 @@ public class TransformCpTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "CopyRmRd.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "CopyRmRd.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 

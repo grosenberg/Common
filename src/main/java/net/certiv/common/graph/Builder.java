@@ -96,7 +96,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		N node = null;
 		if (built) {
 			LinkedList<N> nodes = this.built.stream() //
-					.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
+					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
 					.collect(Collectors.toCollection(LinkedList::new));
 			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
 			node = nodes.peek();
@@ -104,7 +104,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 
 		if (node == null) {
 			LinkedList<N> nodes = graph.getNodes().stream() //
-					.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
+					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
 					.collect(Collectors.toCollection(LinkedList::new));
 			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
 			node = nodes.peek();
@@ -259,7 +259,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		Assert.notEmpty(name);
 		I id = makeId(name);
 		return graph.getNodes().stream() //
-				.filter(n -> n.get(Node.NODE_NAME).equals(id)) //
+				.filter(n -> n.get(Node.NODE_ID).equals(id)) //
 				.count() < 2;
 	}
 

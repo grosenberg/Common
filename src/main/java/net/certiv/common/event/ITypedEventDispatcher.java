@@ -3,8 +3,6 @@ package net.certiv.common.event;
 import java.util.Collection;
 import java.util.Set;
 
-import net.certiv.common.event.TypedEvent.IEvtType;
-
 public interface ITypedEventDispatcher {
 
 	/**

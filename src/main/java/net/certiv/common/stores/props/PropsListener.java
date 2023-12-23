@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.TypedEvent;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.event.TypedEventListener;
 
 public class PropsListener extends TypedEventListener {

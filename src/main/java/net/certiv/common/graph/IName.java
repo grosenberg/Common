@@ -17,7 +17,7 @@ package net.certiv.common.graph;
  *
  * @param <I> node name object type
  * @param <T> node categorizing type
- * @see Graph#setNameObj(Object)
+ * @see Graph#setGraphId(Object)
  * @see Graph#createNode(Object)
  * @see Graph#copyNode(Node)
  */

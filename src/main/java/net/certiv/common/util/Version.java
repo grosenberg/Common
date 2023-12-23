@@ -69,7 +69,7 @@ public class Version {
 			prop.load(in);
 			return (String) prop.get("version");
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Log.error("Failed reading version from '%s': %s", filename, e.getMessage());
 			return Strings.UNKNOWN;
 		}

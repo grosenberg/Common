@@ -844,11 +844,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	private final N find(HashMap<Object, N> added, N node, boolean copy) {
-		N n = added.get(node.nameObj());
+		N n = added.get(node.nodeId());
 		if (n == null) {
 			if (!copy) throw ERR_COPY_FIND.on(node);
 			n = graph.copyNode(node);
-			added.put(n.nameObj(), n);
+			added.put(n.nodeId(), n);
 		}
 		return n;
 	}

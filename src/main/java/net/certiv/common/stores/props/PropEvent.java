@@ -1,5 +1,6 @@
 package net.certiv.common.stores.props;
 
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.TypedChangeEvent;
 
 public class PropEvent extends TypedChangeEvent {

@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -696,7 +697,7 @@ public final class FsUtil {
 					Files.createDirectory(dstPath);
 					continue;
 				}
-				Files.copy(zip.getInputStream(entry), dstPath);
+				Files.copy(zip.getInputStream(entry), dstPath, StandardCopyOption.REPLACE_EXISTING);
 			}
 
 			return Result.of(root.toFile());

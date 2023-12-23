@@ -1,12 +1,17 @@
 package net.certiv.common.graph;
 
-import java.util.EnumSet;
+import java.util.Set;
 
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.LogDesc;
-import net.certiv.common.event.TypedChangeEvent;
+import net.certiv.common.event.TypedActionEvent.IEvtCmd;
+import net.certiv.common.event.TypedEvent;
 import net.certiv.common.log.Level;
 
-public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends TypedChangeEvent {
+/**
+ * Graph events encompass both action and change events.
+ */
+public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends TypedEvent {
 
 	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> addNode(Graph<N, E> graph,
 			N node) {
@@ -28,69 +33,147 @@ public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends Type
 		return new GraphEvent<>(graph, GraphEvtType.RmvEdge, edge);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> of(Graph<N, E> graph,
+	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
 			Level level, String msg) {
 		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> of(Graph<N, E> graph,
+	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
+			Level level, String msg, StackTraceElement loc) {
+		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg, loc, null);
+	}
+
+	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
 			Level level, String msg, StackTraceElement loc, Throwable e) {
 		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg, loc, e);
 	}
 
-	@Override
-	public String toString() {
-		switch ((GraphEvtType) type()) {
-			case AddEdge:
-			case AddNode:
-				return String.format("[%s] %s", name(), value());
-			case RmvEdge:
-			case RmvNode:
-				return String.format("[%s] %s", name(), prior());
-			case Log:
-				return String.format("%s", value());
-			default:
-				return super.toString();
-		}
-	}
-
 	// --------------------------------
 
+	/** Event action. */
+	protected transient final Object action;
+	/** Event current value. */
+	protected transient final Object value;
+	/** Event prior value. */
+	protected transient final Object prior;
+
+	/** Graph change event. */
 	protected <V> GraphEvent(Graph<N, E> graph, IEvtType type, V value) {
-		super(graph, type, value, null);
+		this(graph, type, value, null);
 	}
 
-	protected GraphEvent(Graph<N, E> core, IEvtType type, Level level, String msg) {
-		super(core, type, level.name(), LogDesc.of(level, msg));
+	/** Graph change event w/prior. */
+	protected <V> GraphEvent(Graph<N, E> graph, IEvtType type, V value, V prior) {
+		super(graph, type);
+		action = null;
+		this.value = value;
+		this.prior = prior;
 	}
 
-	protected GraphEvent(Graph<N, E> core, IEvtType type, Level level, String msg, StackTraceElement loc,
+	/** Graph log action event. */
+	protected GraphEvent(Graph<N, E> graph, IEvtType type, Level level, String msg) {
+		super(graph, type, level.name());
+		this.action = level.name();
+		this.value = LogDesc.of(level, msg);
+		prior = null;
+	}
+
+	/** Graph log action event. */
+	protected GraphEvent(Graph<N, E> graph, IEvtType type, Level level, String msg, StackTraceElement loc,
 			Throwable e) {
-		super(core, type, level.name(), LogDesc.of(level, msg, loc, e));
+		super(graph, type, level.name());
+		this.action = level.name();
+		this.value = LogDesc.of(level, msg, loc, e);
+		prior = null;
 	}
+
+	/**
+	 * Returns the action that this event defines.
+	 *
+	 * @return the event action
+	 */
+	@SuppressWarnings("unchecked")
+	public <A extends IEvtCmd> A action() {
+		return (A) action;
+	}
+
+	/**
+	 * Returns the value associated with this action event.
+	 *
+	 * @return the action value
+	 */
+	@SuppressWarnings("unchecked")
+	public <V> V value() {
+		return (V) value;
+	}
+
+	/**
+	 * Returns the prior change value associated with this event.
+	 *
+	 * @return the prior value
+	 */
+	@SuppressWarnings("unchecked")
+	public <V> V prior() {
+		return (V) value;
+	}
+
+	@Override
+	public boolean issuable() {
+		return valueChanged();
+	}
+
+	/**
+	 * Returns whether this event presents an actual {@code prior ==> value} change.
+	 *
+	 * @return {@code true} if this event presents an actual value change
+	 */
+	public boolean valueChanged() {
+		return value != prior && (value != null || prior != null);
+	}
+
+	@Override
+	public String toString() {
+		GraphEvtType type = type();
+		if (type.equals(GraphEvtType.Log)) {
+			return String.format("%s", value());
+		}
+		if (type.equals(GraphEvtType.AddEdge) || type.equals(GraphEvtType.AddNode)) {
+			return String.format("[%s] %s", name(), value());
+		}
+		if (type.equals(GraphEvtType.RmvEdge) || type.equals(GraphEvtType.RmvNode)) {
+			return String.format("[%s] %s", name(), prior());
+		}
+		return super.toString();
+	}
+
+	// ================================
 
 	/** Graph Event type. */
-	public enum GraphEvtType implements IEvtType {
+	public static class GraphEvtType implements IEvtType {
 
 		// actions
-		Log("Log", true, false),
+		public static final GraphEvtType Log = new GraphEvtType("Log", true, false);
 
 		// node changes
-		AddNode("Add node", false, true),
-		RmvNode("Remove node", false, true),
+		public static final GraphEvtType AddNode = new GraphEvtType("Add node", false, true);
+		public static final GraphEvtType RmvNode = new GraphEvtType("Rmv node", false, true);
 
 		// edge changes
-		AddEdge("Add edge", false, true),
-		RmvEdge("Remove edge", false, true);
+		public static final GraphEvtType AddEdge = new GraphEvtType("Add edge", false, true);
+		public static final GraphEvtType RmvEdge = new GraphEvtType("Rmv edge", false, true);
 
 		// ----------------------------
 
-		public static EnumSet<GraphEvtType> actionTypes() {
-			return EnumSet.of(Log);
+		public static Set<GraphEvtType> actionTypes() {
+			return Set.of(Log);
 		}
 
-		public static EnumSet<GraphEvtType> changeTypes() {
-			return EnumSet.of(AddNode, RmvNode, AddEdge, RmvEdge);
+		public static Set<GraphEvtType> changeTypes() {
+			return Set.of(AddNode, RmvNode, AddEdge, RmvEdge);
+		}
+
+		public static Set<GraphEvtType> allTypes() {
+			return Set.of(Log, AddNode, RmvNode, AddEdge, RmvEdge);
 		}
 
 		// ----------------------------
@@ -99,14 +182,14 @@ public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends Type
 		private final boolean action;
 		private final boolean change;
 
-		GraphEvtType(String name, boolean action, boolean change) {
+		protected GraphEvtType(String name, boolean action, boolean change) {
 			this.name = name;
 			this.action = action;
 			this.change = change;
 		}
 
 		@Override
-		public String typeName() {
+		public String name() {
 			return name;
 		}
 

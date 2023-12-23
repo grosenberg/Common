@@ -27,7 +27,7 @@ import net.certiv.common.stores.props.Props;
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
 		implements IBuild<N, E> {
 
-	public static final String GRAPH_NAME = "GraphName";
+	public static final String GRAPH_ID = "GraphId";
 
 	/** Unique numerical graph identifier */
 	public final long _gid;
@@ -39,7 +39,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	/** Graph modification access lock. */
 	private final ReentrantLock lock = new ReentrantLock();
-	// private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	/**
 	 * Construct a graph.
@@ -56,7 +55,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 */
 	public Graph(Object id) {
 		this();
-		setNameObj(id);
+		setGraphId(id);
 	}
 
 	/** Lock access to this graph. */
@@ -69,21 +68,20 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		lock.unlock();
 	}
 
-	/** Return the object used to provide the name of this graph instance. */
-	public Object nameObj() {
-		return get(GRAPH_NAME);
+	/** Return the graph instance identifier object used to provide the graph name. */
+	public Object graphId() {
+		return get(GRAPH_ID);
 	}
 
-	/** Set the object used to provide the name of this graph instance. */
-	public Object setNameObj(Object id) {
-		Object old = nameObj();
-		put(GRAPH_NAME, id);
-		return old;
+	/** Set the graph instance identifier object. */
+	public Object setGraphId(Object id) {
+		Assert.notNull(id);
+		return put(GRAPH_ID, id);
 	}
 
 	/** Return a display name for this graph instance. */
 	public String name() {
-		Object name = nameObj();
+		Object name = graphId();
 		if (name == null || name.toString().isBlank()) return String.valueOf(_gid);
 		return name.toString();
 	}
@@ -248,7 +246,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return a new node otherwise unassociated with the graph
 	 */
 	public N copyNode(N node) {
-		N n = createNode(node.nameObj());
+		N n = createNode(node.nodeId());
 		n.putAll(node.properties());
 		return n;
 	}

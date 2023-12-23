@@ -20,7 +20,7 @@ public class DemoNode extends Node<DemoNode, DemoEdge> {
 	public DemoNode(DemoGraph graph, EdgeSet<DemoNode, DemoEdge> in, EdgeSet<DemoNode, DemoEdge> out,
 			String name) {
 		this(graph, in, out);
-		if (!name.isBlank()) put(NODE_NAME, name);
+		if (!name.isBlank()) put(NODE_ID, name);
 	}
 
 	public DemoNode(DemoGraph graph, EdgeSet<DemoNode, DemoEdge> in, EdgeSet<DemoNode, DemoEdge> out,

@@ -21,7 +21,7 @@ class MultiGraphTest extends CommonTestBase {
 	@BeforeEach
 	public void setup() {
 		CS.setup();
-		CS.graph.put(Graph.GRAPH_NAME, "Multigraph Test");
+		CS.graph.put(Graph.GRAPH_ID, "Multigraph Test");
 	}
 
 	@AfterEach
@@ -42,7 +42,7 @@ class MultiGraphTest extends CommonTestBase {
 		writeResource(getClass(), "multi1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "multi1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
@@ -62,7 +62,7 @@ class MultiGraphTest extends CommonTestBase {
 		writeResource(getClass(), "multi2.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "multi2.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 }

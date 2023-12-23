@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import net.certiv.common.stores.Pair;
+import net.certiv.common.stores.context.Value;
 
 /**
  * Utility for keeping running measurements of time.
@@ -81,23 +82,37 @@ public class Time {
 	}
 
 	/** Sleep for the given number of seconds. */
-	public static boolean sleep(int seconds) {
+	public static InterruptedException sleep(int seconds) {
 		try {
 			TimeUnit.SECONDS.sleep(seconds);
-			return true;
+			return null;
 		} catch (InterruptedException e) {
-			return false;
+			return e;
 		}
 	}
 
 	/** Sleep for the given number of time units. */
-	public static boolean sleep(int cnt, TimeUnit unit) {
+	public static Exception sleep(int cnt, String unit) {
+		try {
+			return sleep(cnt, TimeUnit.valueOf(unit.toUpperCase()));
+		} catch (Exception e) {
+			return e;
+		}
+	}
+
+	/** Sleep for the given number of time units. */
+	public static InterruptedException sleep(int cnt, TimeUnit unit) {
 		try {
 			unit.sleep(cnt);
-			return true;
+			return null;
 		} catch (InterruptedException e) {
-			return false;
+			return e;
 		}
+	}
+
+	/** Sleep for the given value defined number and type of time units. */
+	public static void sleep(Value<Integer> delay) {
+		Time.sleep(delay.value(), delay.unit());
 	}
 
 	public static final String formatDate(LocalDateTime date) {

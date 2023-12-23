@@ -12,9 +12,9 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import net.certiv.common.check.Assert;
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.ITypedEventDispatcher;
 import net.certiv.common.event.TypedEvent;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.event.TypedEventDispatcher;
 import net.certiv.common.event.TypedEventListener;
 
@@ -261,13 +261,13 @@ public class KVScope implements IKVScope, ITypedEventDispatcher {
 
 	@Override
 	public UUID mergeFirst(IKVScope scope) {
-		scope.keys().forEach(k -> this.scope.put(k, getValue(k)));
+		scope.keys().forEach(k -> this.scope.put(k, scope.getValue(k)));
 		return mark;
 	}
 
 	@Override
 	public UUID mergeLast(IKVScope scope) {
-		scope.keys().forEach(k -> this.scope.putIfAbsent(k, getValue(k)));
+		scope.keys().forEach(k -> this.scope.putIfAbsent(k, scope.getValue(k)));
 		return mark;
 	}
 

@@ -23,7 +23,7 @@ import net.certiv.common.stores.props.Props;
 public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props
 		implements Comparable<N> {
 
-	public static final String NODE_NAME = "NodeName";
+	public static final String NODE_ID = "NodeId";
 
 	@VisibleForTesting
 	static final Counter CTR = new Counter();
@@ -41,7 +41,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		this.in = in;
 		this.out = out;
 		_nid = CTR.getAndIncrement();
-		put(NODE_NAME, String.valueOf(_nid));
+		put(NODE_ID, String.valueOf(_nid)); // default id
 	}
 
 	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out, Map<Object, Object> props) {
@@ -49,23 +49,22 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		putAll(props);
 	}
 
-	/** Return the object used to provide the name of this node instance. */
-	public Object nameObj() {
-		return get(NODE_NAME);
+	/** Return the node instance identifying object. */
+	public Object nodeId() {
+		return get(NODE_ID);
 	}
 
 	/** Set the object used to provide the name of this node instance. */
-	public Object setNameObj(Object id) {
-		Object old = nameObj();
-		put(NODE_NAME, id);
-		return old;
+	public <V> V setNodeId(V id) {
+		Assert.notNull(id);
+		return put(NODE_ID, id);
 	}
 
 	/** Return a simple display name for this node instance. */
 	public String name() {
-		Object name = nameObj();
-		if (name == null || name.toString().isBlank()) return String.valueOf(_nid);
-		return name.toString();
+		Object id = nodeId();
+		if (id == null || id.toString().isBlank()) return String.valueOf(_nid);
+		return id.toString();
 	}
 
 	/** Return a unique display name for this node instance. */
@@ -415,9 +414,9 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public void clear() {
 		in.clear();
 		out.clear();
-		Object name = nameObj();
+		Object name = nodeId();
 		super.clear();
-		setNameObj(name);
+		setNodeId(name);
 	}
 
 	@Override

@@ -32,7 +32,7 @@ class DotStyleTest extends CommonTestBase {
 
 	@Test
 	void testStyles() {
-		CS.graph.put(Graph.GRAPH_NAME, "Dot Styles");
+		CS.graph.put(Graph.GRAPH_ID, "Dot Styles");
 		CS.graph.defineStyle();
 
 		DotStyle ds = CS.graph.getDotStyle();
@@ -77,7 +77,7 @@ class DotStyleTest extends CommonTestBase {
 		writeResource(getClass(), "dotStyle.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "dotStyle.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}

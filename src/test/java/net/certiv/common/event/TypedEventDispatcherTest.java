@@ -1,9 +1,9 @@
 package net.certiv.common.event;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,7 @@ import net.certiv.common.util.test.CommonTestBase;
 
 class TypedEventDispatcherTest extends CommonTestBase {
 
-	private final List<GraphEvtType> Types = Arrays.asList(GraphEvtType.values());
+	private final Set<GraphEvtType> Types = GraphEvtType.allTypes();
 	private final CommonSupport CS = new CommonSupport();
 
 	@BeforeEach
@@ -32,12 +32,12 @@ class TypedEventDispatcherTest extends CommonTestBase {
 
 	@Test
 	void testGraph() {
-		CS.graph.put(Graph.GRAPH_NAME, "Dispatcher");
+		CS.graph.put(Graph.GRAPH_ID, "Dispatcher");
 
-		DemoListener.of(GraphEvtType.values()) //
+		DemoListener.of(GraphEvtType.allTypes()) //
 				.action(e -> {
 					assertTrue(e.type().isChangeType());
-					assertTrue(e.type().isEnum());
+					assertFalse(e.type().isEnum());
 					assertTrue(Types.contains(e.type()));
 				}) //
 				.addTo(CS.graph);

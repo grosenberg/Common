@@ -42,7 +42,7 @@ class TransfutureTest extends CommonTestBase {
 
 	@Test
 	void testCopy() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Copy");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Copy");
 
 		CS.builder.createAndAddEdges("U->X->Y");
 		CS.builder.createAndAddEdges("U->Z");
@@ -64,14 +64,14 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "Copy.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "Copy.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testCopy1() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Copy1");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Copy1");
 
 		CS.builder.createAndAddEdges("U->X->Y");
 		CS.builder.createAndAddEdges("U->Z");
@@ -91,14 +91,14 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "Copy1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "Copy1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testRemoveNode() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Remove Node");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Remove Node");
 
 		DemoNode f = CS.builder.getNode("F");
 
@@ -110,13 +110,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "RemoveNode.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "RemoveNode.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testRemoveEdge() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Remove Edge");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Remove Edge");
 
 		DemoNode c = CS.builder.getNode("C");
 		DemoNode f = CS.builder.getNode("F");
@@ -132,13 +132,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "RemoveEdge.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "RemoveEdge.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReduceNode() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Reduce Node");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Reduce Node");
 
 		DemoNode f = CS.builder.getNode("F");
 
@@ -150,13 +150,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "ReduceNode.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "ReduceNode.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testTransfer() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Transfer");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Transfer");
 
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoEdge> cf = CS.builder.getEdges("C", "F");
@@ -169,13 +169,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "Transfer.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "Transfer.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testMove() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Move");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Move");
 
 		DemoNode b = CS.builder.getNode("B");
 		DemoNode c = CS.builder.getNode("C");
@@ -197,13 +197,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "Move.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "Move.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReplicate() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Replicate");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Replicate");
 
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[B,X,Y,Z]");
@@ -216,13 +216,13 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "Replicate.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "Replicate.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReplicateReduce() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfuture Replicate Reduce");
+		CS.graph.put(Graph.GRAPH_ID, "Transfuture Replicate Reduce");
 
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[X,Y,Z]");
@@ -235,7 +235,7 @@ class TransfutureTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XFuture + "ReplicateReduce.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XFuture + "ReplicateReduce.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 }

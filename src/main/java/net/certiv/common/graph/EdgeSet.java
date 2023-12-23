@@ -22,9 +22,24 @@ public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdg
 	private final TreeMapSet<N, E> reverse = new TreeMapSet<>();
 
 	private final Sense dir;
+	private N node;
 
 	public EdgeSet(Sense dir) {
 		this.dir = dir;
+	}
+
+	public Sense sense() {
+		return dir;
+	}
+
+	@Override
+	public N owner() {
+		return node;
+	}
+
+	@Override
+	public void setOwner(N node) {
+		this.node = node;
 	}
 
 	@Override

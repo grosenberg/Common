@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.stores.LinkedHashList;
 
 public class TypedEventDispatcher implements ITypedEventDispatcher {

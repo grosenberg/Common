@@ -15,7 +15,7 @@ public abstract class TypedChangeEvent extends TypedEvent {
 	protected transient final Object prior;
 
 	protected <S, T extends IEvtType, V> TypedChangeEvent(S source, T type, V value) {
-		this(source, type, type.typeName(), value, null);
+		this(source, type, type.name(), value, null);
 	}
 
 	protected <S, T extends IEvtType, V> TypedChangeEvent(S source, T type, String name, V value) {
@@ -23,7 +23,7 @@ public abstract class TypedChangeEvent extends TypedEvent {
 	}
 
 	protected <S, T extends IEvtType, V> TypedChangeEvent(S source, T type, V value, V prior) {
-		this(source, type, type.typeName(), value, prior);
+		this(source, type, type.name(), value, prior);
 	}
 
 	protected <S, T extends IEvtType, V> TypedChangeEvent(S source, T type, String name, V value, V prior) {

@@ -25,7 +25,7 @@ class BuilderStrOpsTest extends CommonTestBase {
 	@BeforeEach
 	public void setup() {
 		CS.setup();
-		CS.graph.put(Graph.GRAPH_NAME, "StringOps");
+		CS.graph.put(Graph.GRAPH_ID, "StringOps");
 	}
 
 	@AfterEach
@@ -41,7 +41,7 @@ class BuilderStrOpsTest extends CommonTestBase {
 		writeResource(getClass(), "Structure.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "Structure.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 

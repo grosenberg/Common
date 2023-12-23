@@ -34,7 +34,7 @@ class TransformTest extends CommonTestBase {
 
 	@Test
 	void testReduceNode() {
-		CS.graph.put(Graph.GRAPH_NAME, "Reduce");
+		CS.graph.put(Graph.GRAPH_ID, "Reduce");
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -51,13 +51,13 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Reduce1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Reduce1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReduceEdge() {
-		CS.graph.put(Graph.GRAPH_NAME, "ReduceEdge");
+		CS.graph.put(Graph.GRAPH_ID, "ReduceEdge");
 
 		CS.builder.createAndAddEdge("R", "A");
 		CS.builder.createAndAddEdge("A", "B");
@@ -77,13 +77,13 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ReduceEdge1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ReduceEdge1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testTransfer() {
-		CS.graph.put(Graph.GRAPH_NAME, "Transfer");
+		CS.graph.put(Graph.GRAPH_ID, "Transfer");
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -103,13 +103,13 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Transfer1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Transfer1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testMove() {
-		CS.graph.put(Graph.GRAPH_NAME, "Move");
+		CS.graph.put(Graph.GRAPH_ID, "Move");
 
 		CS.builder.createAndAddEdges("A->B->C->D->E");
 
@@ -128,13 +128,13 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Move1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Move1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReplicate() {
-		CS.graph.put(Graph.GRAPH_NAME, "Replicate");
+		CS.graph.put(Graph.GRAPH_ID, "Replicate");
 
 		CS.builder.createAndAddEdges("A => B => C");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[B,X,Y,Z]");
@@ -148,13 +148,13 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Replicate1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Replicate1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testReplicateReduce() {
-		CS.graph.put(Graph.GRAPH_NAME, "Replicate Remove");
+		CS.graph.put(Graph.GRAPH_ID, "Replicate Remove");
 
 		CS.builder.createAndAddEdges("A => B => C");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[X,Y,Z]");
@@ -168,7 +168,7 @@ class TransformTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Replicate2.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Replicate2.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_NAME), txt, dot).sdiff(true, 120).out();
+		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 }

@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.certiv.common.check.Assert;
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.ITypedEventDispatcher;
 import net.certiv.common.event.TypedEvent;
-import net.certiv.common.event.TypedEvent.IEvtType;
 import net.certiv.common.event.TypedEventDispatcher;
 import net.certiv.common.event.TypedEventListener;
 import net.certiv.common.ex.NotImplementedException;

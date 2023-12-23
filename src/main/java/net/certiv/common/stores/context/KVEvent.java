@@ -1,5 +1,6 @@
 package net.certiv.common.stores.context;
 
+import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.TypedChangeEvent;
 
 public class KVEvent extends TypedChangeEvent {

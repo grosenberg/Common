@@ -7,6 +7,10 @@ import net.certiv.common.stores.UniqueList;
 /** Interface for a node edge set. */
 public interface IEdgeSet<N extends Node<N, E>, E extends Edge<N, E>> {
 
+	N owner();
+
+	void setOwner(N node);
+
 	void add(E edge);
 
 	/**
