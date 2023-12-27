@@ -34,7 +34,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 
 	@Test
 	void testConsolidateEnd() {
-		CS.graph.put(Graph.GRAPH_ID, "Consolidate End");
+		CS.graph.setId(CS.factory.make("Consolidate End"));
 		CS.createMultiRootNetwork();
 
 		DemoNode g = CS.builder.getNode("G");
@@ -47,14 +47,14 @@ public class TransformConsolidateTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ConsolidateEnd.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ConsolidateEnd.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testConsolidateMid() {
-		CS.graph.put(Graph.GRAPH_ID, "Consolidate Mid");
+		CS.graph.setId(CS.factory.make("Consolidate Mid"));
 		CS.createMultiRootNetwork();
 
 		DemoNode d = CS.builder.getNode("D");
@@ -69,13 +69,13 @@ public class TransformConsolidateTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ConsolidateMid.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ConsolidateMid.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testConsolidateCyclic() {
-		CS.graph.put(Graph.GRAPH_ID, "Consolidate Cyclic");
+		CS.graph.setId(CS.factory.make("Consolidate Cyclic"));
 		CS.createMinimalCyclicNetwork();
 
 		DemoNode b = CS.builder.getNode("B");
@@ -89,13 +89,13 @@ public class TransformConsolidateTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ConsolidateCyclic.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ConsolidateCyclic.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testConsolidateComplex() {
-		CS.graph.put(Graph.GRAPH_ID, "Consolidate Complex");
+		CS.graph.setId(CS.factory.make("Consolidate Complex"));
 		CS.createMultiRootNetwork();
 
 		UniqueList<DemoNode> sources = CS.builder.findNodes("[B,E,H]");
@@ -108,13 +108,13 @@ public class TransformConsolidateTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ConsolidateComplex.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ConsolidateComplex.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testConsolidateComplexCyclic() {
-		CS.graph.put(Graph.GRAPH_ID, "Consolidate Complex Cyclic");
+		CS.graph.setId(CS.factory.make("Consolidate Complex Cyclic"));
 		CS.createMultiRootNetwork();
 
 		UniqueList<DemoNode> sources = CS.builder.findNodes("[C,E,F]");
@@ -128,7 +128,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "ConsolidateComplexCyclic.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "ConsolidateComplexCyclic.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 }

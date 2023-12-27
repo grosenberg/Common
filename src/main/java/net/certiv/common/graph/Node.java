@@ -60,7 +60,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return put(NODE_ID, id);
 	}
 
-	/** Return a simple display name for this node instance. */
+	/** Return a simple name for this node instance. */
 	public String name() {
 		Object id = nodeId();
 		if (id == null || id.toString().isBlank()) return String.valueOf(_nid);
@@ -68,7 +68,7 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	}
 
 	/** Return a unique display name for this node instance. */
-	public String uname() {
+	public String displayName() {
 		String name = name();
 		String nid = String.valueOf(_nid);
 		if (name.equals(nid)) return nid;
@@ -385,10 +385,12 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	/**
 	 * Returns the {@code DotStyle} store for the {@code Node} or {@code Edge} containing
-	 * this properties store. Creates and adds an {@code ON#NODES} default category
+	 * this properties store. Creates and adds an empty {@code ON#NODES} default category
 	 * {@code DotStyle} store, if a store does not exist.
 	 * <p>
-	 * Override {@code #defineStyle()} to define a custom configured style.
+	 * Override {@code #defineStyle()} to define a custom configured style. Call
+	 * {@code #defineStyle()} on all graph elements prior to rendering; allows for lazy
+	 * population of the {@code DotStyle} store.
 	 *
 	 * @return the dot style store
 	 */
@@ -441,6 +443,6 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 
 	@Override
 	public String toString() {
-		return uname();
+		return displayName();
 	}
 }

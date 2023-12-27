@@ -29,7 +29,7 @@ class BuilderOpsTest extends CommonTestBase {
 
 	@Test
 	void testGraph() {
-		CS.graph.put(Graph.GRAPH_ID, "Build Minimal");
+		CS.graph.setId(CS.factory.make("Build Minimal"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -46,13 +46,13 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build0.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build0.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testGraphSimple() {
-		CS.graph.put(Graph.GRAPH_ID, "Simple");
+		CS.graph.setId(CS.factory.make("Simple"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -63,7 +63,7 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build1.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build1.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = CS.graph.dump();
@@ -73,7 +73,7 @@ class BuilderOpsTest extends CommonTestBase {
 
 	@Test
 	void testMultiRoots() {
-		CS.graph.put(Graph.GRAPH_ID, "Two-root Test");
+		CS.graph.setId(CS.factory.make("Two-root Test"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -83,7 +83,7 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build2.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build2.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = CS.graph.dump();
@@ -93,7 +93,7 @@ class BuilderOpsTest extends CommonTestBase {
 
 	@Test
 	void testCyclesSelf() {
-		CS.graph.put(Graph.GRAPH_ID, "Cyclic");
+		CS.graph.setId(CS.factory.make("Cyclic"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "B");
@@ -103,13 +103,13 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build3.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build3.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testLoops() {
-		CS.graph.put(Graph.GRAPH_ID, "Loop Test");
+		CS.graph.setId(CS.factory.make("Loop Test"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -123,7 +123,7 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build4.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build4.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 
 		String dump = CS.graph.dump();
@@ -133,7 +133,7 @@ class BuilderOpsTest extends CommonTestBase {
 
 	@Test
 	void testMultiEdges() {
-		CS.graph.put(Graph.GRAPH_ID, "Multiple Edges Test");
+		CS.graph.setId(CS.factory.make("Multiple Edges Test"));
 
 		CS.builder.createAndAddEdge("A", "B");
 		CS.builder.createAndAddEdge("B", "C");
@@ -146,13 +146,13 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build5.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build5.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testBuilder() {
-		CS.graph.put(Graph.GRAPH_ID, "Builder");
+		CS.graph.setId(CS.factory.make("Builder"));
 
 		CS.builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
 
@@ -160,13 +160,13 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build6.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build6.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 
 	@Test
 	void testBuilderMulti() {
-		CS.graph.put(Graph.GRAPH_ID, "Builder Multi");
+		CS.graph.setId(CS.factory.make("Builder Multi"));
 
 		CS.builder.createAndAddEdges("Root -> [A,B]");
 		CS.builder.createAndAddEdges("[A,B] => C => [Delta, Eta] -> [Z]");
@@ -177,7 +177,7 @@ class BuilderOpsTest extends CommonTestBase {
 		writeResource(getClass(), "build7.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), "build7.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 }

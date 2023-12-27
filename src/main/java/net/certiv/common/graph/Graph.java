@@ -13,6 +13,8 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IdFactory;
 import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraphFinder;
@@ -27,7 +29,7 @@ import net.certiv.common.stores.props.Props;
 public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
 		implements IBuild<N, E> {
 
-	public static final String GRAPH_ID = "GraphId";
+	private static final String GRAPH_ID = "GraphId";
 
 	/** Unique numerical graph identifier */
 	public final long _gid;
@@ -46,16 +48,17 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	public Graph() {
 		super();
 		_gid = CTR.getAndIncrement();
+		setId(IdFactory.anon());
 	}
 
 	/**
 	 * Construct a graph with the given graph identifier.
 	 *
-	 * @param id a graph identifier object.
+	 * @param id a graph identifier.
 	 */
-	public Graph(Object id) {
+	public Graph(Id id) {
 		this();
-		setGraphId(id);
+		setId(id);
 	}
 
 	/** Lock access to this graph. */
@@ -68,26 +71,29 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		lock.unlock();
 	}
 
-	/** Return the graph instance identifier object used to provide the graph name. */
-	public Object graphId() {
-		return get(GRAPH_ID);
+	/** Return the graph instance identifier used to provide the graph name. */
+	public Id id() {
+		return (Id) get(GRAPH_ID);
 	}
 
-	/** Set the graph instance identifier object. */
-	public Object setGraphId(Object id) {
+	/** Set the graph instance identifier. */
+	public Id setId(Id id) {
 		Assert.notNull(id);
-		return put(GRAPH_ID, id);
+		return (Id) put(GRAPH_ID, id);
 	}
 
-	/** Return a display name for this graph instance. */
+	/** Return the graph instance name. */
 	public String name() {
-		Object name = graphId();
-		if (name == null || name.toString().isBlank()) return String.valueOf(_gid);
-		return name.toString();
+		return id().name();
+	}
+
+	/** Return the graph instance namespace. */
+	public String namespace() {
+		return id().namespace();
 	}
 
 	/** Return a unique display name for this graph instance. */
-	public String uname() {
+	public String displayName() {
 		String name = name();
 		String gid = String.valueOf(_gid);
 		if (name.equals(gid)) return gid;
@@ -609,6 +615,6 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 	@Override
 	public String toString() {
-		return uname();
+		return displayName();
 	}
 }

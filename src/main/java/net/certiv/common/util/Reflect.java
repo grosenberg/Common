@@ -257,6 +257,30 @@ public class Reflect {
 	/**
 	 * Returns an instantiated instance of the {@code Class} object identified by the
 	 * given fully-qualified class name (in the same format returned by {@code getName}),
+	 * using the bootstrap class loader and given constuctor parameter arguments.
+	 * <p>
+	 * Fails if the instantiated class cannot be cast to the intended class type.
+	 *
+	 * @param <C>       the intended class type
+	 * @param classname fully-qualified class name
+	 * @param params    constuctor parameter types required for instantiation
+	 * @param args      constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation error
+	 */
+	public static <C> Result<C> make(String classname, Class<?>[] params, Object[] args) {
+		try {
+			ClassLoader cl = ClassUtil.defaultClassLoader();
+			Class<C> cls = cast(Class.forName(classname, true, cl));
+			return make(cls, params, args);
+
+		} catch (Exception | Error e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Returns an instantiated instance of the {@code Class} object identified by the
+	 * given fully-qualified class name (in the same format returned by {@code getName}),
 	 * using the given class loader and constuctor parameter arguments.
 	 * <p>
 	 * Fails if the instantiated class cannot be cast to the intended class type.

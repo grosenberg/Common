@@ -6,6 +6,7 @@ import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoBuilder;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoGraph;
+import net.certiv.common.graph.id.IdFactory;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.context.Key;
 
@@ -16,12 +17,14 @@ public class CommonSupport {
 	public static final String XForm = "xform/";
 	public static final String XFuture = "xfuture/";
 
+	public IdFactory factory;
 	public DemoGraph graph;
 	public DemoBuilder builder;
 
 	public void setup() {
 		Log.setTestMode(true);
-		graph = new DemoGraph("Names");
+		factory = new IdFactory("Demo");
+		graph = new DemoGraph(factory.make("Names"));
 		builder = new DemoBuilder(graph);
 	}
 

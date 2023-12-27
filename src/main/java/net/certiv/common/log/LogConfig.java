@@ -79,7 +79,7 @@ public class LogConfig {
 
 		builder.setConfigurationName(logname);
 		builder.setLoggerContext(new LoggerContext("common.log"));
-		builder.setStatusLevel(Level.DEBUG);
+		builder.setStatusLevel(Level.WARN); // internal message reporting level
 		builder.setVerbosity("disable");
 
 		// threshold filter

@@ -5,17 +5,17 @@ import net.certiv.common.graph.EdgeSet;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Printer;
 import net.certiv.common.graph.Walker;
+import net.certiv.common.graph.id.Id;
 
 public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 
-	public DemoGraph(String name) {
-		super(name);
+	public DemoGraph(Id id) {
+		super(id);
 	}
 
 	@Override
 	public DemoNode createNode(Object id) {
-		return new DemoNode(this, new EdgeSet<>(Sense.IN),
-				new EdgeSet<>(Sense.OUT), (String) id);
+		return new DemoNode(this, new EdgeSet<>(Sense.IN), new EdgeSet<>(Sense.OUT), (String) id);
 	}
 
 	@Override

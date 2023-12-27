@@ -180,7 +180,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 				for (N root : roots) {
 					if (root.hasEdges(Sense.OUT, true)) {
 						sb.appendNewLine();
-						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.uname())));
+						sb.appendln(SUBGRAPH_BEG, dent(1), fix(String.format(SUBGRAPH_NAME, root.displayName())));
 						sb.appendln(clusterProperties(graph, root, dent(2)));
 						sb.append(render(walker, visitor, root, dent(3)));
 						sb.appendln(SUBGRAPH_END, dent(1));
@@ -259,7 +259,7 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 
 		public TextStringBuilder edges() {
 			TextStringBuilder sb = new TextStringBuilder();
-			edges.forEach(e -> sb.appendln(EDGE, dent, fix(e.beg().uname()), fix(e.end().uname()), style(e)));
+			edges.forEach(e -> sb.appendln(EDGE, dent, fix(e.beg().displayName()), fix(e.end().displayName()), style(e)));
 			return sb;
 		}
 
@@ -271,9 +271,9 @@ public class Printer<N extends Node<N, E>, E extends Edge<N, E>> {
 		}
 
 		protected String style(N node) {
-			if (!node.has(DotStyle.PropName)) return fix(node.uname());
+			if (!node.has(DotStyle.PropName)) return fix(node.displayName());
 			DotStyle ds = (DotStyle) node.get(DotStyle.PropName);
-			return String.format(NODE, fix(node.uname()), ds.inlineAttributes(ON.NODES));
+			return String.format(NODE, fix(node.displayName()), ds.inlineAttributes(ON.NODES));
 		}
 
 		protected String style(E edge) {

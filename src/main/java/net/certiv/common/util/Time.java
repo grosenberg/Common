@@ -81,7 +81,7 @@ public class Time {
 		return UTC_FORMATTER.format(Instant.ofEpochMilli(msSinceEpoch)) + 'Z';
 	}
 
-	/** Sleep for the given number of seconds. */
+	/** Sleep for the given count of seconds. */
 	public static InterruptedException sleep(int seconds) {
 		try {
 			TimeUnit.SECONDS.sleep(seconds);
@@ -91,7 +91,10 @@ public class Time {
 		}
 	}
 
-	/** Sleep for the given number of time units. */
+	/**
+	 * Sleep for the given count of units, where the given unit is convertable to
+	 * {@link TimeUnit}.
+	 */
 	public static Exception sleep(int cnt, String unit) {
 		try {
 			return sleep(cnt, TimeUnit.valueOf(unit.toUpperCase()));
@@ -100,7 +103,7 @@ public class Time {
 		}
 	}
 
-	/** Sleep for the given number of time units. */
+	/** Sleep for the given count of time units. */
 	public static InterruptedException sleep(int cnt, TimeUnit unit) {
 		try {
 			unit.sleep(cnt);

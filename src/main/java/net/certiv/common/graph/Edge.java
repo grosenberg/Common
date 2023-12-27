@@ -54,7 +54,7 @@ public abstract class Edge<N extends Node<N, E>, E extends Edge<N, E>> extends P
 		return String.valueOf(_eid);
 	}
 
-	public String uname() {
+	public String displayName() {
 		return name();
 	}
 

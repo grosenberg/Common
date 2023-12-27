@@ -25,7 +25,7 @@ class TransformRmTest extends CommonTestBase {
 	@BeforeEach
 	public void setup() {
 		CS.setup();
-		CS.graph.put(Graph.GRAPH_ID, "RemoveOps");
+		CS.graph.setId(CS.factory.make("RemoveOps"));
 		CS.builder.createAndAddEdges("A->B->C->D->E");
 		CS.builder.createAndAddEdges("C->F->G");
 		CS.builder.createAndAddEdges("C->[B,C,E]");
@@ -42,7 +42,7 @@ class TransformRmTest extends CommonTestBase {
 		writeResource(getClass(), CommonSupport.XForm + "Structure.md", dot, FORCE);
 
 		String txt = loadResource(getClass(), CommonSupport.XForm + "Structure.md");
-		Differ.diff((String) CS.graph.get(Graph.GRAPH_ID), txt, dot).sdiff(true, 120).out();
+		Differ.diff(CS.graph.displayName(), txt, dot).sdiff(true, 120).out();
 		assertEquals(txt, dot);
 	}
 

@@ -40,7 +40,7 @@ class WalkerTest extends CommonTestBase {
 
 	@Test
 	void testFullWalk() {
-		CS.graph.put(Graph.GRAPH_ID, "Walker");
+		CS.graph.setId(CS.factory.make("Walker"));
 
 		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("X", "Y", "Z"), root);
@@ -50,7 +50,7 @@ class WalkerTest extends CommonTestBase {
 
 	@Test
 	void testWalkRet() {
-		CS.graph.put(Graph.GRAPH_ID, "Walker");
+		CS.graph.setId(CS.factory.make("Walker"));
 
 		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("D", "Y", "Z"), root);
@@ -60,7 +60,7 @@ class WalkerTest extends CommonTestBase {
 
 	@Test
 	void testWalkDone() {
-		CS.graph.put(Graph.GRAPH_ID, "Walker");
+		CS.graph.setId(CS.factory.make("Walker"));
 
 		Vis vis = new Vis("X", "D", "Z");
 		CS.graph.walker().descend(vis, root);
@@ -70,7 +70,7 @@ class WalkerTest extends CommonTestBase {
 
 	@Test
 	void testWalkStop() {
-		CS.graph.put(Graph.GRAPH_ID, "Walker");
+		CS.graph.setId(CS.factory.make("Walker"));
 
 		Vis vis = new Vis("X", "Y", "D");
 		CS.graph.walker().descend(vis, root);

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.certiv.common.CommonSupport;
-import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.GraphEvent.GraphEvtType;
 import net.certiv.common.graph.demo.DemoListener;
 import net.certiv.common.util.test.CommonTestBase;
@@ -32,7 +31,7 @@ class TypedEventDispatcherTest extends CommonTestBase {
 
 	@Test
 	void testGraph() {
-		CS.graph.put(Graph.GRAPH_ID, "Dispatcher");
+		CS.graph.setId(CS.factory.make("Dispatcher"));
 
 		DemoListener.of(GraphEvtType.allTypes()) //
 				.action(e -> {
