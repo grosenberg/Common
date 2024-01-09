@@ -7,15 +7,15 @@ import net.certiv.common.graph.Printer;
 import net.certiv.common.graph.Walker;
 import net.certiv.common.graph.id.Id;
 
-public class DemoGraph extends Graph<DemoNode, DemoEdge> {
+public class DemoGraph extends Graph<Id, DemoNode, DemoEdge> {
 
 	public DemoGraph(Id id) {
 		super(id);
 	}
 
 	@Override
-	public DemoNode createNode(Object id) {
-		return new DemoNode(this, new EdgeSet<>(Sense.IN), new EdgeSet<>(Sense.OUT), (String) id);
+	public DemoNode createNode(Id id) {
+		return new DemoNode(this, id, new EdgeSet<>(Sense.IN), new EdgeSet<>(Sense.OUT));
 	}
 
 	@Override
@@ -24,11 +24,11 @@ public class DemoGraph extends Graph<DemoNode, DemoEdge> {
 	}
 
 	@Override
-	public Walker<DemoNode, DemoEdge> walker() {
+	public Walker<Id, DemoNode, DemoEdge> walker() {
 		return new Walker<>();
 	}
 
-	public Printer<DemoNode, DemoEdge> printer() {
+	public Printer<Id, DemoNode, DemoEdge> printer() {
 		return new Printer<>();
 	}
 

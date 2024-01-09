@@ -13,6 +13,7 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.test.CommonTestBase;
@@ -53,7 +54,7 @@ class TransformRmTest extends CommonTestBase {
 
 		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeNode(b);
 
 		assertTrue(res.valid());
@@ -68,7 +69,7 @@ class TransformRmTest extends CommonTestBase {
 
 		DemoEdge ab = CS.builder.getEdges("A", "B").getFirst();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdge(ab, false);
 
 		assertTrue(res.valid());
@@ -87,7 +88,7 @@ class TransformRmTest extends CommonTestBase {
 
 		UniqueList<DemoEdge> bc = CS.builder.getEdges("B", "C");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdges(bc, false);
 
 		assertTrue(res.valid());
@@ -99,7 +100,7 @@ class TransformRmTest extends CommonTestBase {
 	void testRemoveEdgeIf() {
 		DemoEdge cc = CS.builder.getEdges("C", "C").getFirst();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdgeIf(cc, false, e -> !e.cyclic());
 		assertTrue(res.valid());
 		assertTrue(CS.graph.contains(cc));
@@ -116,7 +117,7 @@ class TransformRmTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		DemoNode c = CS.builder.getNode("C");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdges(Sense.OUT, b, c, false);
 
 		assertTrue(res.valid());
@@ -129,7 +130,7 @@ class TransformRmTest extends CommonTestBase {
 		DemoNode c = CS.builder.getNode("C");
 		int edges = CS.builder.getEdges("C", "C").size();
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.removeEdgesIf(Sense.OUT, c, c, false, e -> e.cyclic());
 		assertTrue(res.valid());
 

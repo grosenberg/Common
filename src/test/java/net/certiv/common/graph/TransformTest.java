@@ -14,6 +14,7 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.test.CommonTestBase;
 
@@ -41,7 +42,7 @@ class TransformTest extends CommonTestBase {
 
 		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.reduce(b);
 
 		b = CS.builder.getNode("B");
@@ -67,7 +68,7 @@ class TransformTest extends CommonTestBase {
 		UniqueList<DemoEdge> ab = CS.builder.getEdges("A", "B");
 		UniqueList<DemoEdge> cd = CS.builder.getEdges("C", "D");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.reduce(ab.getFirst(), cd.getFirst());
 
 		DemoNode b = CS.builder.getNode("B");
@@ -96,7 +97,7 @@ class TransformTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoEdge> cf = CS.builder.getEdges("C", "F");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.transfer(cf, b); // cf becomes bf
 
 		String dot = CS.graph.render();
@@ -121,7 +122,7 @@ class TransformTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		DemoNode d = CS.builder.getNode("D");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.move(ce, b, d);
 
 		String dot = CS.graph.render();
@@ -141,7 +142,7 @@ class TransformTest extends CommonTestBase {
 
 		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.replicateEdges(b, targets); // replicate =>B=> to =>[targets-B]=>
 
 		String dot = CS.graph.render();
@@ -161,7 +162,7 @@ class TransformTest extends CommonTestBase {
 
 		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.replicateEdges(b, targets, true);
 
 		String dot = CS.graph.render();

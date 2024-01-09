@@ -6,45 +6,46 @@ import net.certiv.common.event.IEvtType;
 import net.certiv.common.event.LogDesc;
 import net.certiv.common.event.TypedActionEvent.IEvtCmd;
 import net.certiv.common.event.TypedEvent;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.log.Level;
 
 /**
  * Graph events encompass both action and change events.
  */
-public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends TypedEvent {
+public class GraphEvent<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends TypedEvent {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> addNode(Graph<N, E> graph,
-			N node) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> addNode(
+			Graph<I, N, E> graph, N node) {
 		return new GraphEvent<>(graph, GraphEvtType.AddNode, node);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> rmvNode(Graph<N, E> graph,
-			N node) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> rmvNode(
+			Graph<I, N, E> graph, N node) {
 		return new GraphEvent<>(graph, GraphEvtType.RmvNode, node);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> addEdge(Graph<N, E> graph,
-			E edge) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> addEdge(
+			Graph<I, N, E> graph, E edge) {
 		return new GraphEvent<>(graph, GraphEvtType.AddEdge, edge);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> rmvEdge(Graph<N, E> graph,
-			E edge) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> rmvEdge(
+			Graph<I, N, E> graph, E edge) {
 		return new GraphEvent<>(graph, GraphEvtType.RmvEdge, edge);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
-			Level level, String msg) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> log(
+			Graph<I, N, E> graph, Level level, String msg) {
 		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
-			Level level, String msg, StackTraceElement loc) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> log(
+			Graph<I, N, E> graph, Level level, String msg, StackTraceElement loc) {
 		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg, loc, null);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> GraphEvent<N, E> log(Graph<N, E> graph,
-			Level level, String msg, StackTraceElement loc, Throwable e) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphEvent<I, N, E> log(
+			Graph<I, N, E> graph, Level level, String msg, StackTraceElement loc, Throwable e) {
 		return new GraphEvent<>(graph, GraphEvtType.Log, level, msg, loc, e);
 	}
 
@@ -58,12 +59,12 @@ public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends Type
 	protected transient final Object prior;
 
 	/** Graph change event. */
-	protected <V> GraphEvent(Graph<N, E> graph, IEvtType type, V value) {
+	protected <V> GraphEvent(Graph<I, N, E> graph, IEvtType type, V value) {
 		this(graph, type, value, null);
 	}
 
 	/** Graph change event w/prior. */
-	protected <V> GraphEvent(Graph<N, E> graph, IEvtType type, V value, V prior) {
+	protected <V> GraphEvent(Graph<I, N, E> graph, IEvtType type, V value, V prior) {
 		super(graph, type);
 		action = null;
 		this.value = value;
@@ -71,7 +72,7 @@ public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends Type
 	}
 
 	/** Graph log action event. */
-	protected GraphEvent(Graph<N, E> graph, IEvtType type, Level level, String msg) {
+	protected GraphEvent(Graph<I, N, E> graph, IEvtType type, Level level, String msg) {
 		super(graph, type, level.name());
 		this.action = level.name();
 		this.value = LogDesc.of(level, msg);
@@ -79,7 +80,7 @@ public class GraphEvent<N extends Node<N, E>, E extends Edge<N, E>> extends Type
 	}
 
 	/** Graph log action event. */
-	protected GraphEvent(Graph<N, E> graph, IEvtType type, Level level, String msg, StackTraceElement loc,
+	protected GraphEvent(Graph<I, N, E> graph, IEvtType type, Level level, String msg, StackTraceElement loc,
 			Throwable e) {
 		super(graph, type, level.name());
 		this.action = level.name();

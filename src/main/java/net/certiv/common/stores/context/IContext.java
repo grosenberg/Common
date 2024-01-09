@@ -93,4 +93,19 @@ public interface IContext extends IKVScope, ITypedEventDispatcher {
 	 * top-most scope. A {@code depth} of {@code 1} corresponds to the top-most scope.
 	 */
 	IContext dup(int depth);
+
+	/** Returns the current maximum scope depth of this Context. */
+	int maxDepth();
+
+	/**
+	 * Adjusts the maximum scope depth of this Context.
+	 * <p>
+	 * If the adjustment reduces the depth to less than the current actual depth, the
+	 * excess scopes are either trimmed (and lost) or flattened and merged into a single
+	 * scope at max depth, depending on the state of the {@code trim} parameter.
+	 *
+	 * @param depth the defined maximum number of scoped key:value stores
+	 * @param trim  {@code true} to trim excess scopes; otherwise flatten
+	 */
+	void adjustMaxDepth(int depth, boolean trim);
 }

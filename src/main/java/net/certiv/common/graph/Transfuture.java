@@ -10,6 +10,7 @@ import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.XfPolicy.Flg;
 import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.ops.ConsolidateOp;
 import net.certiv.common.graph.ops.CopyOp;
 import net.certiv.common.graph.ops.ITransformOp;
@@ -37,12 +38,12 @@ import net.certiv.common.stores.UniqueList;
  * xf.apply();
  * }</pre>
  */
-public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements ITransform<N, E> {
+public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> implements ITransform<I, N, E> {
 
 	private static final XfPolicy CHECK = XfPolicy.of(XfPolicy.TEST, Flg.Repair);
 
-	private final LinkedList<ITransformOp<N, E>> ops = new LinkedList<>();
-	private final Transformer<N, E> xf;
+	private final LinkedList<ITransformOp<I, N, E>> ops = new LinkedList<>();
+	private final Transformer<I, N, E> xf;
 	private final XfPolicy policy;
 
 	/**
@@ -56,7 +57,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *
 	 * @param graph target graph
 	 */
-	public Transfuture(Graph<N, E> graph) {
+	public Transfuture(Graph<I, N, E> graph) {
 		this(graph, XfPolicy.DEFAULT, CHECK);
 	}
 
@@ -70,7 +71,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param graph target graph
 	 * @param exec  execution policy
 	 */
-	public Transfuture(Graph<N, E> graph, XfPolicy exec) {
+	public Transfuture(Graph<I, N, E> graph, XfPolicy exec) {
 		this(graph, exec, CHECK);
 	}
 
@@ -82,7 +83,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param exec  execution policy
 	 * @param check recordation acceptance policy; {@link Flg#Block} is enforced
 	 */
-	public Transfuture(Graph<N, E> graph, XfPolicy exec, XfPolicy check) {
+	public Transfuture(Graph<I, N, E> graph, XfPolicy exec, XfPolicy check) {
 		this(new Transformer<>(graph), exec, check);
 	}
 
@@ -98,7 +99,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *
 	 * @param xf reference transformer
 	 */
-	public Transfuture(Transformer<N, E> xf) {
+	public Transfuture(Transformer<I, N, E> xf) {
 		this(xf, XfPolicy.DEFAULT, CHECK);
 	}
 
@@ -113,7 +114,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param xf   reference transformer
 	 * @param exec execution policy
 	 */
-	public Transfuture(Transformer<N, E> xf, XfPolicy exec) {
+	public Transfuture(Transformer<I, N, E> xf, XfPolicy exec) {
 		this(xf, exec, CHECK);
 	}
 
@@ -126,14 +127,14 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 * @param exec  execution policy
 	 * @param check recordation acceptance policy; {@link Flg#Block} is enforced
 	 */
-	public Transfuture(Transformer<N, E> xf, XfPolicy exec, XfPolicy check) {
+	public Transfuture(Transformer<I, N, E> xf, XfPolicy exec, XfPolicy check) {
 		this.xf = xf;
 		this.policy = exec;
 		this.xf.setPolicy(XfPolicy.of(check, Flg.Block)); // must block
 	}
 
 	/** @return the accumulated transform ops (modifiable) */
-	public LinkedList<ITransformOp<N, E>> transforms() {
+	public LinkedList<ITransformOp<I, N, E>> transforms() {
 		return ops;
 	}
 
@@ -175,7 +176,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		xf.graph.lock();
 		Explainer xpr = new Explainer("Transfuture");
 		try {
-			for (ITransformOp<N, E> op : ops) {
+			for (ITransformOp<I, N, E> op : ops) {
 				if (verbose) Log.info("XF %s", op);
 				try {
 					xpr.add(op.apply(xf, policy));
@@ -400,7 +401,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> remove(GraphPath<N, E> path, boolean clear) {
+	public Result<Boolean> remove(GraphPath<I, N, E> path, boolean clear) {
 		UniqueList<E> edges = xf.findSubGraphEdges(List.of(path), clear);
 		if (!policy.qualify()) {
 			ops.add(RemoveEdgeOp.of(edges, clear));
@@ -425,7 +426,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<Boolean> remove(SubGraph<N, E> subgraph, boolean clear) {
+	public Result<Boolean> remove(SubGraph<I, N, E> subgraph, boolean clear) {
 		if (!policy.qualify()) {
 			UniqueList<E> edges = xf.findSubGraphEdges(subgraph.paths(), clear);
 			ops.add(RemoveEdgeOp.of(edges, clear));
@@ -598,7 +599,7 @@ public class Transfuture<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	 *         a pre-condition failure explaination
 	 */
 	@Override
-	public Result<LinkedList<E>> copy(SubGraph<N, E> sg, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(SubGraph<I, N, E> sg, N dst, boolean remove) {
 		if (!policy.qualify()) {
 			ops.add(CopyOp.of(sg, dst, remove));
 			return Result.nil();

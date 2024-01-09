@@ -16,6 +16,7 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;
@@ -50,10 +51,10 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		Result<LinkedList<DemoEdge>> cp = xf.copy(sg, f, true);
 		assertTrue(cp.valid());
 
@@ -79,10 +80,10 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode g = CS.builder.getNode("G");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.copy(sg, g, true);
 		xf.remove(sg, true);
 		xf.apply();
@@ -102,7 +103,7 @@ class TransfutureTest extends CommonTestBase {
 
 		DemoNode f = CS.builder.getNode("F");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.removeNode(f);
 		xf.apply();
 
@@ -122,7 +123,7 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		UniqueList<DemoEdge> edges = CS.builder.getEdges(c, f);
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		for (DemoEdge edge : edges) {
 			xf.removeEdge(edge, true);
 		}
@@ -142,7 +143,7 @@ class TransfutureTest extends CommonTestBase {
 
 		DemoNode f = CS.builder.getNode("F");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.reduce(f);
 		xf.apply();
 
@@ -161,7 +162,7 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoEdge> cf = CS.builder.getEdges("C", "F");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.transfer(cf, b); // cf becomes bf
 		xf.apply();
 
@@ -189,7 +190,7 @@ class TransfutureTest extends CommonTestBase {
 			ds.put(COLOR, "blue");
 		}
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.move(ce, b, d, false);
 		xf.apply();
 
@@ -208,7 +209,7 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[B,X,Y,Z]");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.replicateEdges(b, targets);
 		xf.apply();
 
@@ -227,7 +228,7 @@ class TransfutureTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		UniqueList<DemoNode> targets = CS.builder.findOrCreateNodes("[X,Y,Z]");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.replicateEdges(b, targets, true);
 		xf.apply();
 

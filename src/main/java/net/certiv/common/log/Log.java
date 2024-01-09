@@ -335,8 +335,12 @@ public class Log {
 		}
 	}
 
-	public static void setTestMode(boolean testMode) {
-		testMode_ = testMode;
+	public static boolean isTestMode() {
+		return testMode_;
+	}
+
+	public static void setTestMode(boolean enable) {
+		testMode_ = enable;
 
 		try (LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext()) {
 			AbstractConfiguration cfg = (AbstractConfiguration) ctx.getConfiguration();

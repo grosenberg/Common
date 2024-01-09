@@ -9,19 +9,21 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
-public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class ReplicateOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
 	/**
 	 * @param src     a source node
 	 * @param targets the target nodes
 	 * @param remove  {@code true} to remove the source node
 	 */
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReplicateOp<N, E> of(N src,
-			Collection<? extends N> targets, boolean remove) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReplicateOp<I, N, E> of(
+			N src, Collection<? extends N> targets, boolean remove) {
 		return new ReplicateOp<>(src, targets, remove);
 	}
 
@@ -43,13 +45,13 @@ public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		Result<LinkedList<E>> res = xf.replicateEdges(src, targets, remove);
 		return res.valid() ? Result.OK : Result.FAIL;
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		Result<LinkedList<E>> res = xf.replicateEdges(policy, src, targets, remove);
 		return res.valid() ? Result.OK : Result.FAIL;
 	}
@@ -64,7 +66,7 @@ public class ReplicateOp<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ReplicateOp<?, ?> other = (ReplicateOp<?, ?>) obj;
+		ReplicateOp<?, ?, ?> other = (ReplicateOp<?, ?, ?>) obj;
 		return Objects.equals(src, other.src) && remove == other.remove
 				&& Objects.equals(targets, other.targets);
 	}

@@ -16,6 +16,7 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Maths;
@@ -32,7 +33,7 @@ import net.certiv.common.util.Strings;
  *          I--J--K
  * </pre>
  */
-public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
+public class GraphPath<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	public static final String DKEY_PREFIX = "DKEY-";
 	public static final GraphException ERR_DKEY = GraphEx.of("No weighted distance key/value for edge: %s");
@@ -50,7 +51,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	private final LinkedHashList<N, E> idxEnd = new LinkedHashList<>();
 
 	/** Owning graph */
-	private final Graph<N, E> graph;
+	private final Graph<I, N, E> graph;
 	/** Path weight property key: for min total weighted distance */
 	private final String key;
 
@@ -69,12 +70,12 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	}
 
 	/** Construct an instance with a random path weight property key. */
-	public GraphPath(Graph<N, E> graph) {
+	public GraphPath(Graph<I, N, E> graph) {
 		this(graph, makeDKey(999, 4));
 	}
 
 	/** Construct an instance with the given path weight property key. */
-	public GraphPath(Graph<N, E> graph, String key) {
+	public GraphPath(Graph<I, N, E> graph, String key) {
 		this.graph = graph;
 		this.key = key;
 	}
@@ -84,7 +85,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return the owning graph
 	 */
-	public Graph<N, E> graph() {
+	public Graph<I, N, E> graph() {
 		return graph;
 	}
 
@@ -422,7 +423,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param path another path
 	 * @return {@code true} if the paths intersect
 	 */
-	public boolean intersects(GraphPath<N, E> path) {
+	public boolean intersects(GraphPath<I, N, E> path) {
 		return edges.stream().anyMatch(e -> path.contains(e));
 	}
 
@@ -483,8 +484,8 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 		return edges.stream();
 	}
 
-	public GraphPath<N, E> dup() {
-		GraphPath<N, E> cp = new GraphPath<>(graph, key);
+	public GraphPath<I, N, E> dup() {
+		GraphPath<I, N, E> cp = new GraphPath<>(graph, key);
 		cp.addAll(edges);
 		terminals.forEach(t -> cp.addTerminal(t));
 		return cp;
@@ -500,7 +501,7 @@ public class GraphPath<N extends Node<N, E>, E extends Edge<N, E>> {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		GraphPath<?, ?> other = (GraphPath<?, ?>) obj;
+		GraphPath<?, ?, ?> other = (GraphPath<?, ?, ?>) obj;
 		return Objects.equals(edges, other.edges);
 	}
 

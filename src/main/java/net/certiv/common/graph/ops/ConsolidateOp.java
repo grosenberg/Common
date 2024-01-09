@@ -8,12 +8,14 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 
-public class ConsolidateOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class ConsolidateOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ConsolidateOp<N, E> of(
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ConsolidateOp<I, N, E> of(
 			Collection<? extends N> sources, N target) {
 		return new ConsolidateOp<>(sources, target);
 	}
@@ -34,12 +36,12 @@ public class ConsolidateOp<N extends Node<N, E>, E extends Edge<N, E>> implement
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		return xf.consolidateEdges(sources, target);
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		return xf.consolidateEdges(policy, sources, target);
 	}
 
@@ -53,7 +55,7 @@ public class ConsolidateOp<N extends Node<N, E>, E extends Edge<N, E>> implement
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ConsolidateOp<?, ?> other = (ConsolidateOp<?, ?>) obj;
+		ConsolidateOp<?, ?, ?> other = (ConsolidateOp<?, ?, ?>) obj;
 		return Objects.equals(sources, other.sources) && Objects.equals(target, other.target);
 	}
 

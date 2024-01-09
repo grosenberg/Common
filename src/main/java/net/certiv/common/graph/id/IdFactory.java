@@ -16,6 +16,7 @@ import net.certiv.common.check.Assert;
 public class IdFactory {
 
 	public static final String ANON = "anon";
+	public static final String DEFAULT = "default";
 	public static final String NIL = "nil";
 	public static final String UNKNOWN = "unknown";
 
@@ -34,7 +35,7 @@ public class IdFactory {
 	 * @param ns the namespace for factored idents
 	 */
 	public IdFactory(String ns) {
-		this.ns = ns != null ? ns : ANON;
+		this.ns = ns != null ? ns : DEFAULT;
 	}
 
 	// ---- Public API ----
@@ -174,12 +175,12 @@ public class IdFactory {
 	// --------------------------------
 
 	public static Id anon() {
-		if (ANON_ID == null) ANON_ID = new Id(ANON, List.of(ANON));
+		if (ANON_ID == null) ANON_ID = new Id(DEFAULT, List.of(ANON));
 		return ANON_ID;
 	}
 
 	public static Id unknown() {
-		if (UNKNOWN_ID == null) UNKNOWN_ID = new Id(ANON, List.of(UNKNOWN));
+		if (UNKNOWN_ID == null) UNKNOWN_ID = new Id(DEFAULT, List.of(UNKNOWN));
 		return UNKNOWN_ID;
 	}
 
@@ -264,15 +265,67 @@ public class IdFactory {
 	// ---- Internal API --------------
 
 	/** Record a newly made id in the cache. */
-	protected <T extends Id> T _make(T id) {
+	@SuppressWarnings("unchecked")
+	protected <T extends Id> T _make(Id id) {
 		Cache.add(id);
-		return id;
+		return (T) id;
 	}
 
 	// ---- Utilities -----------------
 
-	/** Single DOT pattern */
+	/** Namespace separator: double colon. */
+	public static final Pattern NS_SEP = Pattern.compile("\\:\\:");
+	/** Name element separator: Single DOT pattern */
 	public static final Pattern DOTTED = Pattern.compile("\\.");
+
+	/**
+	 * Determine if the given potentially compound name text contains a namespace prefix
+	 * delimited by a double colon pattern.
+	 *
+	 * @param txt name text
+	 * @return {@code true} if a namespace prefix is present
+	 */
+	public static boolean nsPresent(String txt) {
+		return nsPresent(NS_SEP, txt);
+	}
+
+	/**
+	 * Determine if the given potentially compound name text contains a namespace prefix
+	 * delimited by the given namespace separator pattern.
+	 *
+	 * @param sep namespace separator pattern
+	 * @param txt name text
+	 * @return {@code true} if a namespace prefix is present
+	 */
+	public static boolean nsPresent(Pattern sep, String txt) {
+		return nsParse(sep, txt, null) != null;
+	}
+
+	/**
+	 * Return the namespace derived from the given potentially compound name text using a
+	 * double colon namespace separator.
+	 *
+	 * @param txt name text
+	 * @param def namespace default value
+	 * @return namespace
+	 */
+	public static String nsParse(String txt, String def) {
+		return nsParse(NS_SEP, txt, def);
+	}
+
+	/**
+	 * Return the namespace derived from the given potentially compound name text using a
+	 * the given namespace separator.
+	 *
+	 * @param sep namespace separator pattern
+	 * @param txt name text
+	 * @param def namespace default value
+	 * @return namespace
+	 */
+	public static String nsParse(Pattern sep, String txt, String def) {
+		String[] nss = sep.split(txt, 2);
+		return nss.length == 2 ? nss[0] : def;
+	}
 
 	/**
 	 * Parse the given potentially compound name into a list of name elements using a
@@ -291,7 +344,7 @@ public class IdFactory {
 	 * single DOT regex pattern.
 	 *
 	 * @param names potentially compound names
-	 * @return a list of name elements
+	 * @return name elements
 	 */
 	public static List<String> parse(String... names) {
 		if (names == null || names.length == 0) return Collections.emptyList();
@@ -303,7 +356,7 @@ public class IdFactory {
 	 * single DOT regex pattern.
 	 *
 	 * @param names list of potentially compound names
-	 * @return a list of name elements
+	 * @return name elements
 	 */
 	public static List<String> parse(List<String> names) {
 		List<String> results = new ArrayList<>();
@@ -315,13 +368,13 @@ public class IdFactory {
 	 * Parse the given source text into a list of name elements using the given pattern to
 	 * split the source.
 	 *
-	 * @param pattern a regex pattern
-	 * @param source  a source text
-	 * @return a list of name elements
+	 * @param sep name element separator regex pattern
+	 * @param txt name text
+	 * @return name elements
 	 */
-	public static List<String> parse(Pattern pattern, String source) {
-		Assert.notNull(pattern, source);
-		return Arrays.asList(pattern.split(source, 0));
+	public static List<String> parse(Pattern sep, String txt) {
+		Assert.notNull(sep, txt);
+		return Arrays.asList(sep.split(txt, 0));
 	}
 
 	/**

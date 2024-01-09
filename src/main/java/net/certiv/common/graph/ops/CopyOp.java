@@ -10,24 +10,26 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Strings;
 
-public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class CopyOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> CopyOp<N, E> of(Collection<? extends N> nodes,
-			N dst, boolean remove) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> CopyOp<I, N, E> of(
+			Collection<? extends N> nodes, N dst, boolean remove) {
 		return new CopyOp<>(nodes, dst, remove);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> CopyOp<N, E> of(Collection<? extends E> edges,
-			N beg, N end, boolean cyclic) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> CopyOp<I, N, E> of(
+			Collection<? extends E> edges, N beg, N end, boolean cyclic) {
 		return new CopyOp<>(edges, beg, end, cyclic);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> CopyOp<N, E> of(SubGraph<N, E> sg, N dst,
-			boolean remove) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> CopyOp<I, N, E> of(
+			SubGraph<I, N, E> sg, N dst, boolean remove) {
 		return new CopyOp<>(sg, dst, remove);
 	}
 
@@ -41,7 +43,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 
 	private List<N> nodes;
 	private List<E> edges;
-	private SubGraph<N, E> sg;
+	private SubGraph<I, N, E> sg;
 
 	private N beg;
 	private N end;
@@ -66,7 +68,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 		this.kind = C.EDGES;
 	}
 
-	private CopyOp(SubGraph<N, E> sg, N dst, boolean remove) {
+	private CopyOp(SubGraph<I, N, E> sg, N dst, boolean remove) {
 		this.sg = sg.dup();
 		this.dst = dst;
 		this.remove = remove;
@@ -79,7 +81,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		Result<LinkedList<E>> res;
 		switch (kind) {
 			case NODES:
@@ -97,7 +99,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		Result<LinkedList<E>> res;
 		switch (kind) {
 			case NODES:
@@ -124,7 +126,7 @@ public class CopyOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		CopyOp<?, ?> other = (CopyOp<?, ?>) obj;
+		CopyOp<?, ?, ?> other = (CopyOp<?, ?, ?>) obj;
 		return Objects.equals(beg, other.beg) && cyclic == other.cyclic && Objects.equals(dst, other.dst)
 				&& Objects.equals(edges, other.edges) && Objects.equals(end, other.end) && kind == other.kind
 				&& Objects.equals(nodes, other.nodes) && remove == other.remove

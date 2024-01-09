@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
@@ -22,22 +23,22 @@ import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
 /** In-place graph transformer. */
-public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements ITransform<N, E> {
+public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> implements ITransform<I, N, E> {
 
-	public final Graph<N, E> graph;
+	public final Graph<I, N, E> graph;
 	private XfPolicy policy;
 
 	/**
 	 * Constructs a {@link XfPolicy#REPORT} transformer for the given graph.
 	 */
-	public Transformer(Graph<N, E> graph) {
+	public Transformer(Graph<I, N, E> graph) {
 		this(graph, XfPolicy.REPORT);
 	}
 
 	/**
 	 * Constructs a transformer for the given graph with the given {@link XfPolicy} value.
 	 */
-	public Transformer(Graph<N, E> graph, XfPolicy policy) {
+	public Transformer(Graph<I, N, E> graph, XfPolicy policy) {
 		this.graph = graph;
 		this.policy = policy;
 	}
@@ -431,11 +432,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> remove(GraphPath<N, E> path, boolean clear) {
+	public Result<Boolean> remove(GraphPath<I, N, E> path, boolean clear) {
 		return remove(policy, path, clear);
 	}
 
-	public Result<Boolean> remove(XfPolicy policy, GraphPath<N, E> path, boolean clear) {
+	public Result<Boolean> remove(XfPolicy policy, GraphPath<I, N, E> path, boolean clear) {
 		graph.lock();
 		Explainer xpr = new Explainer("Remove GraphPath");
 		boolean ok = xpr.last();
@@ -473,11 +474,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<Boolean> remove(SubGraph<N, E> subgraph, boolean clear) {
+	public Result<Boolean> remove(SubGraph<I, N, E> subgraph, boolean clear) {
 		return remove(policy, subgraph, clear);
 	}
 
-	public Result<Boolean> remove(XfPolicy policy, SubGraph<N, E> subgraph, boolean clear) {
+	public Result<Boolean> remove(XfPolicy policy, SubGraph<I, N, E> subgraph, boolean clear) {
 		graph.lock();
 		Explainer xpr = new Explainer("Remove SubGraph");
 		boolean ok = xpr.last();
@@ -490,7 +491,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, subgraph, "SubGraph is null");
-				for (GraphPath<N, E> path : subgraph) {
+				for (GraphPath<I, N, E> path : subgraph) {
 					ok &= chkEdges(xpr, ok, path.edges());
 				}
 
@@ -502,7 +503,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				}
 			}
 
-			for (GraphPath<N, E> path : subgraph) {
+			for (GraphPath<I, N, E> path : subgraph) {
 				ok &= rmGraphPath(xpr, path, clear);
 			}
 
@@ -750,11 +751,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	@Override
-	public Result<LinkedList<E>> copy(SubGraph<N, E> subgraph, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(SubGraph<I, N, E> subgraph, N dst, boolean remove) {
 		return copy(policy, subgraph, dst, remove);
 	}
 
-	public Result<LinkedList<E>> copy(XfPolicy policy, SubGraph<N, E> subgraph, N dst, boolean remove) {
+	public Result<LinkedList<E>> copy(XfPolicy policy, SubGraph<I, N, E> subgraph, N dst, boolean remove) {
 		graph.lock();
 		Explainer xpr = new Explainer("Copy SubGraph");
 		boolean ok = xpr.last();
@@ -767,7 +768,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (policy.qualify()) {
 				ok &= xpr.notNull(ok, subgraph, "SubGraph is null");
-				for (GraphPath<N, E> path : subgraph) {
+				for (GraphPath<I, N, E> path : subgraph) {
 					ok &= chkEdges(xpr, ok, path.edges());
 				}
 
@@ -784,7 +785,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 				UniqueList<E> tails = dst.edges(Sense.OUT);
 
 				for (N head : subgraph.heads()) {
-					GraphPath<N, E> path = subgraph.getPath(head);
+					GraphPath<I, N, E> path = subgraph.getPath(head);
 					for (E lead : leads) {
 						ok &= insertPath(xpr, dups, lead, head, path, tails);
 					}
@@ -806,7 +807,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 		}
 	}
 
-	private final boolean insertPath(Explainer xpr, LinkedList<E> dups, E lead, N head, GraphPath<N, E> path,
+	private final boolean insertPath(Explainer xpr, LinkedList<E> dups, E lead, N head, GraphPath<I, N, E> path,
 			UniqueList<E> tails) {
 		boolean ok = true;
 
@@ -844,11 +845,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	private final N find(HashMap<Object, N> added, N node, boolean copy) {
-		N n = added.get(node.nodeId());
+		N n = added.get(node.id());
 		if (n == null) {
 			if (!copy) throw ERR_COPY_FIND.on(node);
 			n = graph.copyNode(node);
-			added.put(n.nodeId(), n);
+			added.put(n.id(), n);
 		}
 		return n;
 	}
@@ -1463,7 +1464,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	// }
 
 	/** Internal: remove graph path */
-	final boolean rmGraphPath(Explainer xpr, GraphPath<N, E> path, boolean clear) {
+	final boolean rmGraphPath(Explainer xpr, GraphPath<I, N, E> path, boolean clear) {
 		UniqueList<E> edges = findSubGraphEdges(List.of(path), clear);
 		for (E edge : edges) {
 			graph.removeEdge(edge, clear);
@@ -1472,11 +1473,11 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 	}
 
 	/** Internal: find connections between the graph and given paths */
-	final UniqueList<E> findSubGraphEdges(Collection<GraphPath<N, E>> paths, boolean clear) {
+	final UniqueList<E> findSubGraphEdges(Collection<GraphPath<I, N, E>> paths, boolean clear) {
 		UniqueList<E> edges = new UniqueList<>();
 		if (paths != null) {
 			// collect all edges
-			for (GraphPath<N, E> path : paths) {
+			for (GraphPath<I, N, E> path : paths) {
 				for (N node : path.nodes()) {
 					edges.addAll(node.edges(Sense.BOTH));
 				}
@@ -1484,7 +1485,7 @@ public class Transformer<N extends Node<N, E>, E extends Edge<N, E>> implements 
 
 			if (!clear) {
 				// remove internal edges
-				for (GraphPath<N, E> path : paths) {
+				for (GraphPath<I, N, E> path : paths) {
 					edges.removeAll(path.edges());
 				}
 			}

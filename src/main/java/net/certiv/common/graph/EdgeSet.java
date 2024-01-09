@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.TreeMapSet;
 import net.certiv.common.stores.UniqueList;
 
@@ -14,7 +15,8 @@ import net.certiv.common.stores.UniqueList;
  * <p>
  * Relies on the native comparable ordering of nodes and edges.
  */
-public class EdgeSet<N extends Node<N, E>, E extends Edge<N, E>> implements IEdgeSet<N, E> {
+public class EdgeSet<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements IEdgeSet<I, N, E> {
 
 	/** 1:1 map: key=edge; value=distal node */
 	private final TreeMap<E, N> forward = new TreeMap<>();

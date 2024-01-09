@@ -4,56 +4,58 @@ import java.util.function.Predicate;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Holder;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 
-public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
+public class Finder<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	private final Predicate<N> TRUE = n -> true;
 	private final Predicate<N> FALSE = n -> false;
 
-	private final Graph<N, E> graph;
+	private final Graph<I, N, E> graph;
 
 	private Predicate<? super N> include = TRUE;
 	private Predicate<? super N> exclude = FALSE;
 	private Predicate<? super N> whilst = TRUE;
 	private boolean debug = false;
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> Finder<N, E> in(Graph<N, E> graph) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> Finder<I, N, E> in(
+			Graph<I, N, E> graph) {
 		return new Finder<>(graph);
 	}
 
-	private Finder(Graph<N, E> graph) {
+	private Finder(Graph<I, N, E> graph) {
 		this.graph = graph;
 	}
 
-	public Finder<N, E> include() {
+	public Finder<I, N, E> include() {
 		this.include = TRUE;
 		return this;
 	}
 
-	public Finder<N, E> include(Predicate<? super N> include) {
+	public Finder<I, N, E> include(Predicate<? super N> include) {
 		this.include = include != null ? include : TRUE;
 		return this;
 	}
 
-	public Finder<N, E> exclude() {
+	public Finder<I, N, E> exclude() {
 		this.exclude = FALSE;
 		return this;
 	}
 
-	public Finder<N, E> exclude(Predicate<? super N> exclude) {
+	public Finder<I, N, E> exclude(Predicate<? super N> exclude) {
 		this.exclude = exclude != null ? exclude : FALSE;
 		return this;
 	}
 
-	public Finder<N, E> whilst() {
+	public Finder<I, N, E> whilst() {
 		this.whilst = TRUE;
 		return this;
 	}
 
-	public Finder<N, E> whilst(Predicate<? super N> whilst) {
+	public Finder<I, N, E> whilst(Predicate<? super N> whilst) {
 		this.whilst = whilst != null ? whilst : TRUE;
 		return this;
 	}
@@ -82,7 +84,7 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	public UniqueList<N> all(N start) {
 		UniqueList<N> all = new UniqueList<>();
 		if (start != null) {
-			Walker<N, E> walker = graph.walker().debug(debug);
+			Walker<I, N, E> walker = graph.walker().debug(debug);
 			walker.descend(new NodeVisitor<N>() {
 
 				@Override
@@ -129,7 +131,7 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	public N first(N start) {
 		Holder<N> found = new Holder<>();
 		if (start != null) {
-			Walker<N, E> walker = graph.walker().debug(debug);
+			Walker<I, N, E> walker = graph.walker().debug(debug);
 			walker.descend(new NodeVisitor<N>() {
 
 				@Override
@@ -200,7 +202,7 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return the finder
 	 */
-	public Finder<N, E> debug() {
+	public Finder<I, N, E> debug() {
 		this.debug = true;
 		return this;
 	}
@@ -211,7 +213,7 @@ public class Finder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param enable {@code true} to log visitor steps
 	 * @return the finder
 	 */
-	public Finder<N, E> debug(boolean enable) {
+	public Finder<I, N, E> debug(boolean enable) {
 		this.debug = enable;
 		return this;
 	}

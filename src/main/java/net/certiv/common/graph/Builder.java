@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
@@ -20,13 +21,14 @@ import net.certiv.common.util.Strings;
  * This builder is suitable primarily where node uniqueness is based on or derived from a
  * string specification. Refer to the unit tests for examples.
  *
- * @param <I> type of unique name idenfier object
- * @param <G> type of graph object
- * @param <N> type of node object
- * @param <E> type of edge object
+ * @param <T> graph Id type
+ * @param <I> node Id type
+ * @param <G> graph type
+ * @param <N> node type
+ * @param <E> edge type
  */
-public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E extends Edge<N, E>>
-		implements IBuild<N, E> {
+public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, E>, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements IBuild<I, N, E> {
 
 	public static final String ERR_NODE_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
 
@@ -61,8 +63,13 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 	 */
 	protected abstract N createNode(I id);
 
-	/** Convert the given unique node name to a correspondingly unique {@code id}. */
-	protected abstract I makeId(String name);
+	/**
+	 * Convert the given unique node naming object to a correspondingly unique {@code id}.
+	 *
+	 * @param nameObj object providing a unique node name
+	 * @return typed identifier
+	 */
+	protected abstract I makeId(Object nameObj);
 
 	/** Convert the given unique {@code id} to a correspondingly unique node name. */
 	protected abstract String nameOf(I id);
@@ -279,7 +286,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 	 * @param edgeSpec specification of edges to be built and added
 	 * @return the {@code Builder}
 	 */
-	public Builder<I, G, N, E> createAndAddEdges(String edgeSpec) {
+	public Builder<T, I, G, N, E> createAndAddEdges(String edgeSpec) {
 		Assert.isTrue(MARK.matcher(edgeSpec).find());
 		return createEdges(edgeSpec).addEdges();
 	}
@@ -300,7 +307,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 	 * @param edgeSpec specification of edges to be built
 	 * @return the {@code Builder} holding the edges pending addition to the graph
 	 */
-	public Builder<I, G, N, E> createEdges(String edgeSpec) {
+	public Builder<T, I, G, N, E> createEdges(String edgeSpec) {
 		Assert.isTrue(MARK.matcher(edgeSpec).find());
 		parseEdgeSpec(edgeSpec);
 		return this;
@@ -355,7 +362,7 @@ public abstract class Builder<I, G extends Graph<N, E>, N extends Node<N, E>, E 
 		this.edges.addAll(edges);
 	}
 
-	public Builder<I, G, N, E> addEdges() {
+	public Builder<T, I, G, N, E> addEdges() {
 		edges.forEach(e -> graph.addEdge(e));
 		return this;
 	}

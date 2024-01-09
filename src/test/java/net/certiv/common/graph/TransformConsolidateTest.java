@@ -13,6 +13,7 @@ import net.certiv.common.CommonSupport;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.test.CommonTestBase;
@@ -40,7 +41,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		DemoNode g = CS.builder.getNode("G");
 		DemoNode u = CS.builder.getNode("U");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.consolidateEdges(List.of(g), u);	// edges =>G=> to =>U=>
 
 		String dot = CS.graph.render();
@@ -61,7 +62,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.consolidateEdges(List.of(f, u), d);
 		assertTrue(res.valid());
 
@@ -81,7 +82,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		DemoNode b = CS.builder.getNode("B");
 		DemoNode c = CS.builder.getNode("C");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<Boolean> res = xf.consolidateEdges(List.of(c), b);
 		assertTrue(res.valid());
 
@@ -101,7 +102,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		UniqueList<DemoNode> sources = CS.builder.findNodes("[B,E,H]");
 		DemoNode b = CS.builder.getNode("B");
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.consolidateEdges(sources, b); // edges =>[B,E,H]=> to =>B=>
 
 		String dot = CS.graph.render();
@@ -120,7 +121,7 @@ public class TransformConsolidateTest extends CommonTestBase {
 		UniqueList<DemoNode> sources = CS.builder.findNodes("[C,E,F]");
 		DemoNode b = CS.builder.getNode("B");
 
-		Transfuture<DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
+		Transfuture<Id, DemoNode, DemoEdge> xf = new Transfuture<>(CS.graph);
 		xf.consolidateEdges(sources, b);
 		xf.apply();
 

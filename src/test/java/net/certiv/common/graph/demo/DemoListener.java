@@ -4,8 +4,9 @@ import java.util.Set;
 
 import net.certiv.common.graph.GraphEvent.GraphEvtType;
 import net.certiv.common.graph.GraphListener;
+import net.certiv.common.graph.id.Id;
 
-public class DemoListener extends GraphListener<DemoNode, DemoEdge> {
+public class DemoListener extends GraphListener<Id, DemoNode, DemoEdge> {
 
 	public static DemoListener of(GraphEvtType... types) {
 		DemoListener listener = new DemoListener();

@@ -5,22 +5,24 @@ import java.util.function.Consumer;
 
 import net.certiv.common.event.TypedEvent;
 import net.certiv.common.event.TypedEventListener;
+import net.certiv.common.graph.id.Id;
 
 /**
  * Base class for graph listeners. Extend and implement constructors:
  *
  * <pre>{@code
- * public static <N extends Node<N, E>, E extends Edge<N, E>> GraphListener<N, E> of(GraphEvtType... types) {
- * 	GraphListener<N, E> listener = new GraphListener<>();
+ * public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
+ * 		GraphEvtType... types) {
+ * 	GraphListener<I, N, E> listener = new GraphListener<>();
  * 	listener.register(types);
  * 	return listener;
  * }
  * }</pre>
  *
  * <pre>{@code
- * public static <N extends Node<N, E>, E extends Edge<N, E>> GraphListener<N, E> of(
+ * public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
  * 		EnumSet<GraphEvtType> types) {
- * 	GraphListener<N, E> listener = new GraphListener<>();
+ * 	GraphListener<I, N, E> listener = new GraphListener<>();
  * 	listener.register(types);
  * 	return listener;
  * }
@@ -29,28 +31,29 @@ import net.certiv.common.event.TypedEventListener;
  * @param <N> node type
  * @param <E> edge type
  */
-public abstract class GraphListener<N extends Node<N, E>, E extends Edge<N, E>> extends TypedEventListener {
+public abstract class GraphListener<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		extends TypedEventListener {
 
-	private final LinkedHashSet<Consumer<? super GraphEvent<N, E>>> actions = new LinkedHashSet<>();
+	private final LinkedHashSet<Consumer<? super GraphEvent<I, N, E>>> actions = new LinkedHashSet<>();
 
 	protected GraphListener() {
 		super();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <L extends GraphListener<N, E>> L action(Consumer<? super GraphEvent<N, E>> action) {
+	public <L extends GraphListener<I, N, E>> L action(Consumer<? super GraphEvent<I, N, E>> action) {
 		if (action != null) actions.add(action);
 		return (L) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <L extends GraphListener<N, E>> L addTo(Graph<N, E> graph) {
+	public <L extends GraphListener<I, N, E>> L addTo(Graph<I, N, E> graph) {
 		if (graph != null) graph.addListener(this);
 		return (L) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <L extends GraphListener<N, E>> L removeFrom(Graph<N, E> graph) {
+	public <L extends GraphListener<I, N, E>> L removeFrom(Graph<I, N, E> graph) {
 		if (graph != null) graph.removeListener(this);
 		return (L) this;
 	}
@@ -59,8 +62,8 @@ public abstract class GraphListener<N extends Node<N, E>, E extends Edge<N, E>> 
 	@SuppressWarnings("unchecked")
 	protected <TE extends TypedEvent> void accept(TE event) {
 		if (event instanceof GraphEvent) {
-			for (Consumer<? super GraphEvent<N, E>> action : actions) {
-				action.accept((GraphEvent<N, E>) event);
+			for (Consumer<? super GraphEvent<I, N, E>> action : actions) {
+				action.accept((GraphEvent<I, N, E>) event);
 			}
 		}
 	}

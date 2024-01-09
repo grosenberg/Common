@@ -66,7 +66,7 @@ class GraphNodesTest extends CommonTestBase {
 	@Test
 	void testContains() {
 		assertTrue(CS.graph.contains(a));
-		DemoNode z = CS.builder.createNode("Z");
+		DemoNode z = CS.builder.findOrCreateNode("Z");
 		assertFalse(CS.graph.contains(z));
 	}
 

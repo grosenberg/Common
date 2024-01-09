@@ -1,8 +1,6 @@
 package net.certiv.common.stores.context;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.UUID;
 
@@ -10,160 +8,149 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.certiv.common.KVSupport;
+
 class ContextTest {
 
-	Key<String> NAME = Key.of("context.text.name");
-	Key<Integer> DATA = Key.of("context.text.data");
-
-	Context context;
-
-	IKVScope a;
-	IKVScope b;
-	IKVScope c;
-	IKVScope d;
-	IKVScope e;
-	IKVScope f;
+	private final KVSupport KS = new KVSupport();
 
 	@BeforeEach
 	void setUp() throws Exception {
-		a = createStore("A", 0);
-		b = createStore("B", 1);
-		c = createStore("C", 2);
-		d = createStore("D", 3);
-		e = createStore("E", 4);
-		f = createStore("F", 5);
+		KS.setUp();
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {}
+	void tearDown() throws Exception {
+		KS.tearDown();
+	}
 
 	@Test
 	void testOf() {
-		context = Context.of(1);
-		assertEquals(1, context.depth());
-		assertEquals(1, context.maxDepth());
+		KS.context = Context.of(1);
+		assertEquals(1, KS.context.depth());
+		assertEquals(1, KS.context.maxDepth());
 	}
 
 	@Test
 	void testMaxDepth() {
-		context = Context.of(3);
-		assertEquals(1, context.depth());
-		assertEquals(3, context.maxDepth());
+		KS.context = Context.of(3);
+		assertEquals(1, KS.context.depth());
+		assertEquals(3, KS.context.maxDepth());
 
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		context.mergeFirst(c);
-		context.mergeFirst(d);
-		context.mergeFirst(e);
-		context.mergeFirst(f);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
+		KS.context.mergeFirst(KS.e);
+		KS.context.mergeFirst(KS.f);
 
-		assertEquals(7, context.depth());
-		assertEquals(7, context.maxDepth());
+		assertEquals(7, KS.context.depth());
+		assertEquals(7, KS.context.maxDepth());
 
 	}
 
 	@Test
 	void testAdjustMaxDepth() {
-		context = Context.of(1);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		context.mergeFirst(c);
-		context.mergeFirst(d);
-		context.mergeFirst(e);
-		context.mergeFirst(f);
+		KS.context = Context.of(1);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
+		KS.context.mergeFirst(KS.e);
+		KS.context.mergeFirst(KS.f);
 
-		assertEquals(7, context.depth());
-		assertEquals(7, context.maxDepth());
+		assertEquals(7, KS.context.depth());
+		assertEquals(7, KS.context.maxDepth());
 
-		context.adjustMaxDepth(10, false);
+		KS.context.adjustMaxDepth(10, false);
 
-		assertEquals(7, context.depth());
-		assertEquals(10, context.maxDepth());
-		assertEquals(8, context.size());
+		assertEquals(7, KS.context.depth());
+		assertEquals(10, KS.context.maxDepth());
+		assertEquals(8, KS.context.size());
 	}
 
 	@Test
 	void testAdjustMaxDepthTrim() {
-		context = Context.of(1);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		context.mergeFirst(c);
-		context.mergeFirst(d);
-		context.mergeFirst(e);
-		context.mergeFirst(f);
+		KS.context = Context.of(1);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
+		KS.context.mergeFirst(KS.e);
+		KS.context.mergeFirst(KS.f);
 
-		context.adjustMaxDepth(3, true); // trim [4,5,6,7]
+		KS.context.adjustMaxDepth(3, true); // trim [4,5,6,7]
 
-		assertEquals(3, context.depth());
-		assertEquals(3, context.maxDepth());
-		assertEquals(5, context.size());
+		assertEquals(3, KS.context.depth());
+		assertEquals(3, KS.context.maxDepth());
+		assertEquals(5, KS.context.size());
 	}
 
 	@Test
 	void testAdjustMaxDepthFlatten() {
-		context = Context.of(1);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		context.mergeFirst(c);
-		context.mergeFirst(d);
-		context.mergeFirst(e);
-		context.mergeFirst(f);
+		KS.context = Context.of(1);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
+		KS.context.mergeFirst(KS.e);
+		KS.context.mergeFirst(KS.f);
 
-		context.adjustMaxDepth(3, false); // flatten [4,5,6,7] into 3
+		KS.context.adjustMaxDepth(3, false); // flatten [4,5,6,7] into 3
 
-		assertEquals(3, context.depth());
-		assertEquals(3, context.maxDepth());
-		assertEquals(8, context.size());
+		assertEquals(3, KS.context.depth());
+		assertEquals(3, KS.context.maxDepth());
+		assertEquals(8, KS.context.size());
 	}
 
 	@Test
 	void testDelta() {
-		context = Context.of(1);
-		assertEquals(0, context.size());
-		assertEquals(1, context.depth());
+		KS.context = Context.of(1);
+		assertEquals(0, KS.context.size());
+		assertEquals(1, KS.context.depth());
 
-		context.mergeFirst(a);
-		assertEquals(a, context.delta());
+		KS.context.mergeFirst(KS.a);
+		assertEquals(KS.a, KS.context.delta());
 
-		context.mergeFirst(b);
-		assertEquals(b, context.delta());
+		KS.context.mergeFirst(KS.b);
+		assertEquals(KS.b, KS.context.delta());
 	}
 
 	@Test
 	void testMerge() {
-		context = Context.of(3);
-		context.mergeFirst(a);
+		KS.context = Context.of(3);
+		KS.context.mergeFirst(KS.a);
 
-		assertEquals(a, context.delta());
+		assertEquals(KS.a, KS.context.delta());
 
-		assertEquals(2, context.depth());
-		assertEquals(3, context.maxDepth());
+		assertEquals(2, KS.context.depth());
+		assertEquals(3, KS.context.maxDepth());
 
-		context.mergeFirst(b);
-		assertEquals(3, context.depth());
-		assertEquals(3, context.maxDepth());
+		KS.context.mergeFirst(KS.b);
+		assertEquals(3, KS.context.depth());
+		assertEquals(3, KS.context.maxDepth());
 
-		context.mergeFirst(c);
-		assertEquals(4, context.depth());
-		assertEquals(4, context.maxDepth());
+		KS.context.mergeFirst(KS.c);
+		assertEquals(4, KS.context.depth());
+		assertEquals(4, KS.context.maxDepth());
 	}
 
 	@Test
 	void testMerge2() {
-		context = Context.of(2, false);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
+		KS.context = Context.of(2, false);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
 
 		Context other = Context.of(2, false);
-		other.mergeFirst(c);
-		other.mergeFirst(d);
+		other.mergeFirst(KS.c);
+		other.mergeFirst(KS.d);
 
-		context.mergeFirst(other);
+		KS.context.mergeFirst(other);
 
-		assertEquals(4, context.depth());	// scopes
-		assertEquals(6, context.size());	// keys
+		assertEquals(4, KS.context.depth());	// scopes
+		assertEquals(6, KS.context.size());	// keys
 
-		String existing = context.keys().toString();
+		String existing = KS.context.keys().toString();
 		String expected = "[" //
 				+ "context.text.name, context.text.data, " //
 				+ "context.text.name.layer[3], " //
@@ -175,14 +162,14 @@ class ContextTest {
 
 	@Test
 	void testShade() {
-		context = Context.of(4);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		context.mergeFirst(c);
-		context.mergeFirst(d);
+		KS.context = Context.of(4);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
 
-		assertEquals(6, context.size());
-		assertEquals(5, context.depth());
+		assertEquals(6, KS.context.size());
+		assertEquals(5, KS.context.depth());
 
 		String visible = "[" //
 				+ "context.text.name, context.text.data, " //
@@ -190,38 +177,60 @@ class ContextTest {
 				+ "context.text.name.layer[2], " //
 				+ "context.text.name.layer[1], " //
 				+ "context.text.name.layer[0]]"; //
-		assertEquals(context.keys().toString(), visible);
+		assertEquals(visible, KS.context.keys().toString());
 	}
 
 	@Test
 	void testRestore() {
-		context = Context.of(4);
-		context.mergeFirst(a);
-		context.mergeFirst(b);
-		String nameB = context.get(NAME);
+		KS.context = Context.of(4);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
+		String nameB = KS.context.get(KS.NAME);
 
-		UUID mark = context.mergeFirst(c);
-		context.mergeFirst(d);
-		assertNotEquals(nameB, context.get(NAME));
+		UUID mark = KS.context.mergeFirst(KS.c);
+		KS.context.mergeFirst(KS.d);
+		assertNotEquals(nameB, KS.context.get(KS.NAME));
 
-		boolean ok = context.restore(mark);
+		boolean ok = KS.context.restore(mark);
 
 		assertTrue(ok);
-		assertEquals(nameB, context.get(NAME));
+		assertEquals(nameB, KS.context.get(KS.NAME));
 	}
 
-	IKVScope createStore(String name, Integer data) {
-		IKVScope store = new KVStore();
+	@Test
+	void testContains() {
+		KS.a.put(KS.KeyA, "StrA");
 
-		// will shadow
-		store.put(NAME, name);
-		store.put(DATA, data);
+		KS.context = Context.of(2, false);
+		KS.context.mergeFirst(KS.a);
+		KS.context.mergeFirst(KS.b);
 
-		// will be visible
-		String id = String.format("%s[%s]", NAME.name + ".layer", data);
-		Key<String> IDENT = Key.of(id);
-		store.put(IDENT, id);
-		return store;
+		assertTrue(KS.a.contains(KS.KeyA));
+		assertFalse(KS.b.contains(KS.KeyA));
+		assertTrue(KS.context.contains(KS.KeyA));
+
+		KS.context.put(KS.KeyA, "StrB");
+		assertTrue(KS.context.contains(KS.KeyA));
+		assertEquals("StrB", KS.context.get(KS.KeyA));
 	}
 
+	@Test
+	void testPutIfAbsent() {
+		KS.a.put(KS.KeyA, "StrA");
+
+		KS.context = Context.of(2, false);
+		KS.context.mergeFirst(KS.a);
+
+		assertNull(KS.context.get(KS.KeyA));
+		KS.context.putIfAbsent(KS.KeyA, "StrA");
+		assertTrue(KS.context.contains(KS.KeyA));
+
+		KS.context.mergeFirst(KS.b);
+		assertTrue(KS.context.contains(KS.KeyA));
+
+		KS.context.putIfAbsent(KS.KeyA, "StrB");
+		assertTrue(KS.context.contains(KS.KeyA));
+		assertNotEquals("StrB", KS.context.get(KS.KeyA));
+		assertEquals("StrA", KS.context.get(KS.KeyA));
+	}
 }

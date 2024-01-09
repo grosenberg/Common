@@ -14,7 +14,6 @@ import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.id.Id;
-import net.certiv.common.graph.id.IdFactory;
 import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraphFinder;
@@ -25,9 +24,13 @@ import net.certiv.common.stores.props.Props;
 /**
  * Abstract base class for a directed multigraph. Supports graphs with multiple root nodes
  * or no root node.
+ *
+ * @param <I> node Id type; does not constrain graph id type
+ * @param <N> node type
+ * @param <E> edge type
  */
-public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends Props
-		implements IBuild<N, E> {
+public abstract class Graph<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
+		implements IBuild<I, N, E> {
 
 	private static final String GRAPH_ID = "GraphId";
 
@@ -43,21 +46,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	private final ReentrantLock lock = new ReentrantLock();
 
 	/**
-	 * Construct a graph.
-	 */
-	public Graph() {
-		super();
-		_gid = CTR.getAndIncrement();
-		setId(IdFactory.anon());
-	}
-
-	/**
 	 * Construct a graph with the given graph identifier.
 	 *
 	 * @param id a graph identifier.
 	 */
 	public Graph(Id id) {
-		this();
+		super();
+		_gid = CTR.getAndIncrement();
 		setId(id);
 	}
 
@@ -105,7 +100,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 *
 	 * @return a walker
 	 */
-	public abstract Walker<N, E> walker();
+	public abstract Walker<I, N, E> walker();
 
 	/**
 	 * Creates a new node instance uniquely identifiable by the given {@code id}.
@@ -129,7 +124,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @param id an object instance providing node name
 	 * @return a new node otherwise unassociated with the graph
 	 */
-	protected abstract N createNode(Object id);
+	protected abstract N createNode(I id);
 
 	/**
 	 * Creates a new edge instance with the given terminal nodes.
@@ -174,27 +169,25 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * <p>
 	 * Note: discretely constucting a node or edge alone does not add it to the graph.
 	 *
-	 * <pre>
-	 * <code>
-	 * 	public DemoEdge createEdge(String parent, String child) {
-	 * 		return createEdge(createNode(parent), createNode(child));
-	 * 	}
+	 * <pre>{@code
+	 * public DemoEdge createEdge(String parent, String child) {
+	 * 	return createEdge(createNode(parent), createNode(child));
+	 * }
 	 *
-	 * 	public DemoEdge createEdge(DemoNode parent, DemoNode child) {
-	 * 		DemoEdge edge = new DemoEdge(parent, child);
-	 * 		addEdge(edge);
-	 * 		return edge;
-	 * 	}
+	 * public DemoEdge createEdge(DemoNode parent, DemoNode child) {
+	 * 	DemoEdge edge = new DemoEdge(parent, child);
+	 * 	addEdge(edge);
+	 * 	return edge;
+	 * }
 	 *
-	 * 	public DemoNode createNode(String name) {
-	 * 		DemoNode node = getNode(name);
-	 * 		if (node != null) return node;
+	 * public DemoNode createNode(String name) {
+	 * 	DemoNode node = getNode(name);
+	 * 	if (node != null) return node;
 	 *
-	 * 		node = new DemoNode(this, name);
-	 * 		return node;
-	 * 	}
-	 * </code>
-	 * </pre>
+	 * 	node = new DemoNode(this, name);
+	 * 	return node;
+	 * }
+	 * }</pre>
 	 *
 	 * @param edge a graph edge
 	 * @returns {@code true} if either terminal node was not already present in the graph
@@ -252,7 +245,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return a new node otherwise unassociated with the graph
 	 */
 	public N copyNode(N node) {
-		N n = createNode(node.nodeId());
+		N n = createNode(node.id());
 		n.putAll(node.properties());
 		return n;
 	}
@@ -404,7 +397,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	 * @return unmodifiable list of real and implicit roots
 	 */
 	public UniqueList<N> getRoots() {
-		SubGraphFinder<N, E> sgf = SubGraphFinder.in(this);
+		SubGraphFinder<I, N, E> sgf = SubGraphFinder.in(this);
 		UniqueList<N> roots = new UniqueList<>();
 		LinkedHashSet<N> remainder = new LinkedHashSet<>(nodes);
 
@@ -418,7 +411,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 
 		// exclude real root subgraphs
 		for (N root : roots) {
-			for (GraphPath<N, E> path : sgf.find(root)) {
+			for (GraphPath<I, N, E> path : sgf.find(root)) {
 				UniqueList<N> pathNodes = path.nodes();
 				remainder.removeAll(pathNodes);
 			}
@@ -428,7 +421,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 			N node = remainder.iterator().next();
 			roots.add(node);
 			remainder.remove(node);
-			for (GraphPath<N, E> path : sgf.find(node)) {
+			for (GraphPath<I, N, E> path : sgf.find(node)) {
 				UniqueList<N> pathNodes = path.nodes();
 				remainder.removeAll(pathNodes);
 			}
@@ -486,13 +479,13 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 	}
 
 	/** Returns {@code true} if the graph contains the given path. */
-	public boolean contains(GraphPath<N, E> path) {
+	public boolean contains(GraphPath<I, N, E> path) {
 		if (path == null) return false;
 		return getEdges(true).containsAll(path.edges());
 	}
 
 	/** Returns {@code true} if the graph contains the given paths. */
-	public boolean containsAll(Collection<GraphPath<N, E>> paths) {
+	public boolean containsAll(Collection<GraphPath<I, N, E>> paths) {
 		if (paths == null) return false;
 		return paths.stream().allMatch(p -> contains(p));
 	}
@@ -609,7 +602,7 @@ public abstract class Graph<N extends Node<N, E>, E extends Edge<N, E>> extends 
 		if (this == obj) return true;
 		if (!super.equals(obj)) return false;
 		if (getClass() != obj.getClass()) return false;
-		Graph<?, ?> other = (Graph<?, ?>) obj;
+		Graph<?, ?, ?> other = (Graph<?, ?, ?>) obj;
 		return Objects.equals(nodes, other.nodes);
 	}
 

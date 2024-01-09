@@ -7,13 +7,14 @@ import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 
 /**
  * TransformOps describe elementary, deferrable graph manipulation operations. Each op is
  * executed by application to a {@code Graph}.
  */
-public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
+public interface ITransformOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	GraphException ERR_APPLY = GraphEx.of("Error applying graph transform op: %s.");
 
@@ -29,7 +30,7 @@ public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *         {@code Result#err} on failure
 	 * @see XfPolicy#TEST
 	 */
-	Result<Boolean> canApply(Transformer<N, E> xf);
+	Result<Boolean> canApply(Transformer<I, N, E> xf);
 
 	/**
 	 * Apply {@code this} transform on the given {@code Graph} subject to the given
@@ -43,5 +44,5 @@ public interface ITransformOp<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @see XfPolicy#TEST
 	 * @see XfPolicy#EXECUTE
 	 */
-	Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy);
+	Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy);
 }

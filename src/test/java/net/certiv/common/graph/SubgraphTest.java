@@ -14,6 +14,7 @@ import net.certiv.common.CommonSupport;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.UniqueList;
@@ -42,7 +43,7 @@ class SubgraphTest extends CommonTestBase {
 	DemoNode t;
 	DemoNode v;
 
-	SubGraphFinder<DemoNode, DemoEdge> sgf;
+	SubGraphFinder<Id, DemoNode, DemoEdge> sgf;
 	// String dot;
 
 	@BeforeEach
@@ -93,7 +94,7 @@ class SubgraphTest extends CommonTestBase {
 
 	@Test
 	void testFind() {
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find();
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find();
 
 		assertEquals(2, sg.size());
 		assertEquals(21, sg.stream().mapToInt(p -> p.size()).sum());
@@ -103,7 +104,7 @@ class SubgraphTest extends CommonTestBase {
 
 	@Test
 	void testFindA() {
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(a);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(a);
 
 		assertEquals(1, sg.size());
 		assertEquals(12, sg.getPath(a).size());
@@ -113,7 +114,7 @@ class SubgraphTest extends CommonTestBase {
 
 	@Test
 	void testFindC() {
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(c);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(c);
 
 		assertEquals(11, sg.getPath(c).size());
 	}
@@ -122,7 +123,7 @@ class SubgraphTest extends CommonTestBase {
 	void testFindD() {
 		CS.builder.createAndAddEdges("D->[X,Y]->Z");
 
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(d);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(d);
 
 		assertEquals(8, sg.getPath(d).size());
 	}
@@ -131,7 +132,7 @@ class SubgraphTest extends CommonTestBase {
 	void testFindEndPredicate() {
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> sg = sgf //
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf //
 				.begin(n -> n.equals(b)) //
 				.end(n -> stops.contains(n)) //
 				.find(a);
@@ -145,7 +146,7 @@ class SubgraphTest extends CommonTestBase {
 		List<DemoNode> starts = List.of(b, n);
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> sg = sgf //
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf //
 				.begin(n -> starts.contains(n)) //
 				.include(n -> n.get(CommonSupport.MARK, "").isEmpty()) //
 				.end(n -> stops.contains(n)) //
@@ -160,7 +161,7 @@ class SubgraphTest extends CommonTestBase {
 	void testFindTerminals() {
 		List<DemoNode> stops = List.of(d, f);
 
-		SubGraph<DemoNode, DemoEdge> sg = sgf //
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf //
 				.begin(n -> n.equals(b)) //
 				.end(n -> stops.contains(n)) //
 				.find();
@@ -174,7 +175,7 @@ class SubgraphTest extends CommonTestBase {
 
 	@Test
 	void testFindShortestBE() {
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(b);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(b);
 		LinkedList<DemoEdge> shortest = sg.getPath(b).shortestPathTo(e);
 		assertEquals(shortest.size(), 2);
 
@@ -185,7 +186,7 @@ class SubgraphTest extends CommonTestBase {
 
 	@Test
 	void testFindShortestAE() {
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(a);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(a);
 		LinkedList<DemoEdge> shortest = sg.getPath(a).shortestPathTo(e);
 		assertEquals(shortest.size(), 3);
 

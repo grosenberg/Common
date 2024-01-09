@@ -13,6 +13,7 @@ import net.certiv.common.CommonSupport;
 import net.certiv.common.diff.Differ;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;
@@ -46,10 +47,10 @@ public class TransformCpTest extends CommonTestBase {
 		DemoNode g = CS.builder.getNode("G");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		xf.copy(sg, g, true);	// copy in like =>G=>, removing G
 		xf.remove(sg, true);	// remove source subgraph
 
@@ -69,10 +70,10 @@ public class TransformCpTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, false); // copy in like =>F=>
 		assertTrue(res.valid());
 
@@ -91,10 +92,10 @@ public class TransformCpTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		// copy in like =>F=>, removing F
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());
@@ -114,10 +115,10 @@ public class TransformCpTest extends CommonTestBase {
 		DemoNode f = CS.builder.getNode("F");
 		DemoNode u = CS.builder.getNode("U");
 
-		SubGraphFinder<DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
-		SubGraph<DemoNode, DemoEdge> sg = sgf.find(u);
+		SubGraphFinder<Id, DemoNode, DemoEdge> sgf = SubGraphFinder.in(CS.graph);
+		SubGraph<Id, DemoNode, DemoEdge> sg = sgf.find(u);
 
-		Transformer<DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
+		Transformer<Id, DemoNode, DemoEdge> xf = new Transformer<>(CS.graph);
 		// copy in like =>F=>, removing F
 		Result<LinkedList<DemoEdge>> res = xf.copy(sg, f, true);
 		assertTrue(res.valid());

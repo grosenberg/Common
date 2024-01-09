@@ -31,7 +31,7 @@ class KVStoreTest {
 	}
 
 	@Test
-	void testOps() {
+	void testPuts() {
 		assertDoesNotThrow(() -> { store.put(A, "LetterA"); });
 		assertDoesNotThrow(() -> { store.put(One, 1); });
 		assertDoesNotThrow(() -> { store.put(Dbl, 5.5); });
@@ -42,19 +42,41 @@ class KVStoreTest {
 
 		assertDoesNotThrow(() -> { store.put(INTERVAL, 123L, ChronoUnit.SECONDS.name()); });
 		assertDoesNotThrow(() -> { store.put(DURATION, Duration.of(123, ChronoUnit.SECONDS)); });
+	}
 
-		assertEquals(store.get(A), "LetterA");
+	@Test
+	void testPutsDefault() {
 		assertNull(store.get(B));
+		assertEquals("DefaultB", store.get(B, "DefaultB"));
+	}
 
-		assertEquals(store.get(B, "DefaultB"), "DefaultB");
+	@Test
+	void testPutsRevise() {
+		assertNull(store.get(A));
+		store.put(A, "LetterA");
+		assertEquals("LetterA", store.get(A));
 
-		store.put(B, "LetterB");
-		assertEquals(store.get(B), "LetterB");
+		store.put(A, "LetterB");
+		assertEquals("LetterB", store.get(A));
+	}
 
-		store.putIfAbsent(B, "RevisedB");
-		assertEquals(store.get(B), "LetterB");
+	@Test
+	void testPutIfAbsent() {
+		assertNull(store.get(A));
 
-		store.put(B, "RevisedB");
-		assertEquals(store.get(B), "RevisedB");
+		store.putIfAbsent(A, "LetterA");
+		assertEquals(store.get(A), "LetterA");
+
+		store.putIfAbsent(A, "LetterB");
+		assertEquals("LetterA", store.get(A));
+	}
+
+	@Test
+	void testPutIfNotNull() {
+		store.put(A, "LetterA");
+		assertEquals("LetterA", store.get(A));
+
+		store.putIfNotNull(A, null);
+		assertEquals("LetterA", store.get(A));
 	}
 }

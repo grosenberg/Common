@@ -8,20 +8,23 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 
-public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class RemoveNodeOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveNodeOp<N, E> of(N node) {
-		RemoveNodeOp<N, E> op = new RemoveNodeOp<>();
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveNodeOp<I, N, E> of(
+			N node) {
+		RemoveNodeOp<I, N, E> op = new RemoveNodeOp<>();
 		op.nodes.add(node);
 		return op;
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveNodeOp<N, E> of(
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveNodeOp<I, N, E> of(
 			Collection<? extends N> nodes) {
-		RemoveNodeOp<N, E> op = new RemoveNodeOp<>();
+		RemoveNodeOp<I, N, E> op = new RemoveNodeOp<>();
 		op.nodes.addAll(nodes);
 		return op;
 	}
@@ -36,12 +39,12 @@ public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		return xf.removeNodes(nodes);
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		return xf.removeNodes(policy, nodes);
 	}
 
@@ -54,7 +57,7 @@ public class RemoveNodeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if ((obj == null) || (getClass() != obj.getClass())) return false;
-		RemoveNodeOp<?, ?> other = (RemoveNodeOp<?, ?>) obj;
+		RemoveNodeOp<?, ?, ?> other = (RemoveNodeOp<?, ?, ?>) obj;
 		return Objects.equals(nodes, other.nodes);
 	}
 

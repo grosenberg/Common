@@ -9,18 +9,20 @@ import java.util.stream.Stream;
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.UniqueList;
 
 /**
  * Sub-graph of a graph represented by a set of graph paths.
  */
-public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Iterable<GraphPath<N, E>> {
+public class SubGraph<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements Iterable<GraphPath<I, N, E>> {
 
 	/** {@code key=head node; value=graph path} */
-	private final LinkedHashMap<N, GraphPath<N, E>> paths = new LinkedHashMap<>();
-	private final Graph<N, E> graph;
+	private final LinkedHashMap<N, GraphPath<I, N, E>> paths = new LinkedHashMap<>();
+	private final Graph<I, N, E> graph;
 
-	public SubGraph(Graph<N, E> graph) {
+	public SubGraph(Graph<I, N, E> graph) {
 		this.graph = graph;
 	}
 
@@ -29,7 +31,7 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 *
 	 * @return the owning graph
 	 */
-	public Graph<N, E> graph() {
+	public Graph<I, N, E> graph() {
 		return graph;
 	}
 
@@ -50,7 +52,7 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @return the path associated with the given head node, or {@code null} if none
 	 *         exists
 	 */
-	public GraphPath<N, E> getPath(N head) {
+	public GraphPath<I, N, E> getPath(N head) {
 		return paths.get(head);
 	}
 
@@ -61,7 +63,7 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @return any previous path associated with the head node of the path being added
 	 * @throws IllegalArgumentException if the given path is empty
 	 */
-	public GraphPath<N, E> addPath(GraphPath<N, E> path) {
+	public GraphPath<I, N, E> addPath(GraphPath<I, N, E> path) {
 		if (path.head() == null) throw new IllegalArgumentException("The path is empty");
 		return paths.put(path.head(), path);
 	}
@@ -72,8 +74,8 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @param sg subgraph containing the paths to add
 	 * @throws IllegalArgumentException if any path in the given subgraph is empty
 	 */
-	public void addPaths(SubGraph<N, E> sg) {
-		for (GraphPath<N, E> path : sg) {
+	public void addPaths(SubGraph<I, N, E> sg) {
+		for (GraphPath<I, N, E> path : sg) {
 			addPath(path);
 		}
 	}
@@ -86,13 +88,13 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @param key  path weight property key
 	 * @return a new path associated with the given head node
 	 */
-	public GraphPath<N, E> startPath(N head, String key) {
-		GraphPath<N, E> path = new GraphPath<>(graph, key);
+	public GraphPath<I, N, E> startPath(N head, String key) {
+		GraphPath<I, N, E> path = new GraphPath<>(graph, key);
 		paths.put(head, path);
 		return path;
 	}
 
-	public N head(GraphPath<N, E> path) {
+	public N head(GraphPath<I, N, E> path) {
 		return heads().stream().filter(h -> getPath(h).equals(path)).findFirst().orElse(null);
 	}
 
@@ -108,7 +110,7 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 				.unmodifiable();
 	}
 
-	public List<GraphPath<N, E>> paths() {
+	public List<GraphPath<I, N, E>> paths() {
 		return List.copyOf(paths.values());
 	}
 
@@ -128,15 +130,15 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 	 * @param node a node within a path to find
 	 * @return the first path that contains the given node, or {@code null} if not found
 	 */
-	public GraphPath<N, E> containing(N node) {
+	public GraphPath<I, N, E> containing(N node) {
 		return paths.values().stream().filter(p -> p.contains(node)).findFirst().orElse(null);
 	}
 
-	public GraphPath<N, E> remove(N head) {
+	public GraphPath<I, N, E> remove(N head) {
 		return paths.remove(head);
 	}
 
-	public GraphPath<N, E> remove(GraphPath<N, E> path) {
+	public GraphPath<I, N, E> remove(GraphPath<I, N, E> path) {
 		return paths.remove(path.head());
 	}
 
@@ -152,18 +154,18 @@ public class SubGraph<N extends Node<N, E>, E extends Edge<N, E>> implements Ite
 		paths.clear();
 	}
 
-	public SubGraph<N, E> dup() {
-		SubGraph<N, E> dup = new SubGraph<>(graph);
+	public SubGraph<I, N, E> dup() {
+		SubGraph<I, N, E> dup = new SubGraph<>(graph);
 		dup.addPaths(this);
 		return dup;
 	}
 
-	public Stream<GraphPath<N, E>> stream() {
+	public Stream<GraphPath<I, N, E>> stream() {
 		return paths.values().stream();
 	}
 
 	@Override
-	public Iterator<GraphPath<N, E>> iterator() {
+	public Iterator<GraphPath<I, N, E>> iterator() {
 		return paths.values().iterator();
 	}
 

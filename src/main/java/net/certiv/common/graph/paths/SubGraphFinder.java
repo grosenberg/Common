@@ -9,18 +9,19 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.ITransform;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 
-public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
+public class SubGraphFinder<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	private final Predicate<N> TRUE = n -> true;
 	private final Predicate<N> FALSE = n -> false;
 
-	private final Graph<N, E> graph;
+	private final Graph<I, N, E> graph;
 
 	/** entire subgraph path set last found by this subgraph finder */
-	private final SubGraph<N, E> sg;
+	private final SubGraph<I, N, E> sg;
 	/** Path weight property key: for min total weighted distance */
 	private final String key;
 
@@ -36,7 +37,8 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param graph the search target
 	 */
-	public static <N extends Node<N, E>, E extends Edge<N, E>> SubGraphFinder<N, E> in(Graph<N, E> graph) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
+			Graph<I, N, E> graph) {
 		return new SubGraphFinder<>(graph, GraphPath.makeDKey(999, 4));
 	}
 
@@ -47,8 +49,8 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param key   weighted distance property key
 	 * @see GraphPath#makeDKey(int, int)
 	 */
-	public static <N extends Node<N, E>, E extends Edge<N, E>> SubGraphFinder<N, E> in(Graph<N, E> graph,
-			String key) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
+			Graph<I, N, E> graph, String key) {
 		return new SubGraphFinder<>(graph, key);
 	}
 
@@ -61,7 +63,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param key   weighted distance property key
 	 * @see SubGraphFinder#makeDKey(int, int)
 	 */
-	private SubGraphFinder(Graph<N, E> graph, String key) {
+	private SubGraphFinder(Graph<I, N, E> graph, String key) {
 		Assert.notEmpty(graph, key);
 		this.graph = graph;
 		this.key = key;
@@ -80,7 +82,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> begin() {
+	public SubGraphFinder<I, N, E> begin() {
 		beg = TRUE;
 		return this;
 	}
@@ -92,7 +94,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param beg current path initiation criteria
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> begin(Predicate<? super N> beg) {
+	public SubGraphFinder<I, N, E> begin(Predicate<? super N> beg) {
 		this.beg = beg != null ? beg : TRUE;
 		return this;
 	}
@@ -103,7 +105,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> include() {
+	public SubGraphFinder<I, N, E> include() {
 		this.include = TRUE;
 		return this;
 	}
@@ -115,7 +117,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param include current path node inclusion criteria
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> include(Predicate<? super N> include) {
+	public SubGraphFinder<I, N, E> include(Predicate<? super N> include) {
 		this.include = include != null ? include : TRUE;
 		return this;
 	}
@@ -126,7 +128,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> end() {
+	public SubGraphFinder<I, N, E> end() {
 		this.end = FALSE;
 		return this;
 	}
@@ -137,7 +139,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param end current path termination criteria
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> end(Predicate<? super N> end) {
+	public SubGraphFinder<I, N, E> end(Predicate<? super N> end) {
 		this.end = end != null ? end : FALSE;
 		return this;
 	}
@@ -148,7 +150,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> whilst() {
+	public SubGraphFinder<I, N, E> whilst() {
 		this.whilst = TRUE;
 		return this;
 	}
@@ -159,7 +161,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param whilst node allowance criteria
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> whilst(Predicate<? super N> whilst) {
+	public SubGraphFinder<I, N, E> whilst(Predicate<? super N> whilst) {
 		this.whilst = whilst != null ? whilst : TRUE;
 		return this;
 	}
@@ -169,7 +171,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> debug() {
+	public SubGraphFinder<I, N, E> debug() {
 		this.debug = true;
 		return this;
 	}
@@ -180,7 +182,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @param enable {@code true} to log visitor steps
 	 * @return {@code this}
 	 */
-	public SubGraphFinder<N, E> debug(boolean enable) {
+	public SubGraphFinder<I, N, E> debug(boolean enable) {
 		this.debug = enable;
 		return this;
 	}
@@ -202,7 +204,7 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph containing the found paths
 	 * @see ITransform#copy(SubGraph, Node, boolean)
 	 */
-	public SubGraph<N, E> find() {
+	public SubGraph<I, N, E> find() {
 		for (N root : graph.getRoots()) {
 			find(root);
 		}
@@ -229,11 +231,11 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return subgraph containing the found paths
 	 * @see ITransform#copy(SubGraph, Node, boolean)
 	 */
-	public SubGraph<N, E> find(N start) {
+	public SubGraph<I, N, E> find(N start) {
 		graph.walker().debug(debug).descend(new NodeVisitor<N>() {
 
 			/** current/last active path */
-			private GraphPath<N, E> path;
+			private GraphPath<I, N, E> path;
 			/** in-path collection state flag */
 			private boolean active;
 
@@ -310,9 +312,9 @@ public class SubGraphFinder<N extends Node<N, E>, E extends Edge<N, E>> {
 	 *
 	 * @param sg a subgraph
 	 */
-	public void clear(SubGraph<N, E> sg) {
+	public void clear(SubGraph<I, N, E> sg) {
 		if (sg != null && !sg.isEmpty()) {
-			for (GraphPath<N, E> path : sg.paths()) {
+			for (GraphPath<I, N, E> path : sg.paths()) {
 				path.clear();
 			}
 			sg.clear();

@@ -10,26 +10,29 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Strings;
 
-public class ReformOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class ReformOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReformOp<N, E> transfer(E edge, N beg) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
+			E edge, N beg) {
 		return new ReformOp<>(XfPermits.TRANSFER, List.of(edge), beg, false);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReformOp<N, E> transfer(
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
 			Collection<? extends E> edges, N beg) {
 		return new ReformOp<>(XfPermits.TRANSFER, edges, beg, false);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReformOp<N, E> reterminate(E edge, N end,
-			boolean cyclic) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
+			E edge, N end, boolean cyclic) {
 		return new ReformOp<>(XfPermits.RETERMINATE, List.of(edge), end, cyclic);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> ReformOp<N, E> reterminate(
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
 			Collection<? extends E> edges, N end, boolean cyclic) {
 		return new ReformOp<>(XfPermits.RETERMINATE, edges, end, cyclic);
 	}
@@ -55,13 +58,13 @@ public class ReformOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITr
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		if (XfPermits.TRANSFER == type) return xf.transfer(edges, target);
 		return xf.reterminate(edges, target, cyclic);
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		if (XfPermits.TRANSFER == type) return xf.transfer(policy, edges, target);
 		return xf.reterminate(policy, edges, target, cyclic);
 	}
@@ -76,7 +79,7 @@ public class ReformOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITr
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ReformOp<?, ?> other = (ReformOp<?, ?>) obj;
+		ReformOp<?, ?, ?> other = (ReformOp<?, ?, ?>) obj;
 		return cyclic == other.cyclic && Objects.equals(edges, other.edges)
 				&& Objects.equals(target, other.target) && type == other.type;
 	}

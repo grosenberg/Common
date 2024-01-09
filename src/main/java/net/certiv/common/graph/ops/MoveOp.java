@@ -9,18 +9,20 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Strings;
 
-public class MoveOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class MoveOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> MoveOp<N, E> of(E edge, N beg, N end,
-			boolean cyclic) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> MoveOp<I, N, E> of(E edge,
+			N beg, N end, boolean cyclic) {
 		return new MoveOp<>(List.of(edge), beg, end, cyclic);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> MoveOp<N, E> of(Collection<? extends E> edges,
-			N beg, N end, boolean cyclic) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> MoveOp<I, N, E> of(
+			Collection<? extends E> edges, N beg, N end, boolean cyclic) {
 		return new MoveOp<>(edges, beg, end, cyclic);
 	}
 
@@ -44,12 +46,12 @@ public class MoveOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		return xf.move(edges, beg, end, cyclic);
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		return xf.move(policy, edges, beg, end, cyclic);
 	}
 
@@ -63,7 +65,7 @@ public class MoveOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITran
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		MoveOp<?, ?> other = (MoveOp<?, ?>) obj;
+		MoveOp<?, ?, ?> other = (MoveOp<?, ?, ?>) obj;
 		return Objects.equals(edges, other.edges) && Objects.equals(beg, other.beg)
 				&& Objects.equals(end, other.end) && cyclic == other.cyclic;
 	}

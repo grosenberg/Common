@@ -1,29 +1,31 @@
 package net.certiv.common.graph.demo;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Builder;
-import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.EdgeSet;
+import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IdFactory;
 
-public class DemoBuilder extends Builder<String, DemoGraph, DemoNode, DemoEdge> {
+public class DemoBuilder extends Builder<Id, Id, DemoGraph, DemoNode, DemoEdge> {
+
+	IdFactory factory = new IdFactory(IdFactory.DEFAULT);
 
 	public DemoBuilder(DemoGraph graph) {
 		super(graph);
 	}
 
 	@Override
-	public DemoNode createNode(String name) {
-		return new DemoNode(graph, new EdgeSet<>(Sense.IN),
-				new EdgeSet<>(Sense.OUT), name);
+	public DemoNode createNode(Id id) {
+		return graph.createNode(id);
 	}
 
 	@Override
-	protected String makeId(String name) {
-		return name;
+	protected Id makeId(Object nameObj) {
+		Assert.isTrue(nameObj instanceof String);
+		return factory.make((String) nameObj);
 	}
 
 	@Override
-	protected String nameOf(String id) {
-		return id;
+	protected String nameOf(Id id) {
+		return id.name();
 	}
-
 }

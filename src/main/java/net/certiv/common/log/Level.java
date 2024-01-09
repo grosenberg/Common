@@ -94,6 +94,7 @@ public enum Level {
 	 * @return {@code true} if the name corresponds to a defined level.
 	 */
 	public static boolean valid(String name) {
+		if (name == null) return false;
 		try {
 			Level.valueOf(name.trim().toUpperCase());
 			return true;

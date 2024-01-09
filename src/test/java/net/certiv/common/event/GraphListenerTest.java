@@ -44,7 +44,7 @@ class GraphListenerTest extends CommonTestBase {
 		assertEquals(4, edges.sizeValues());
 	}
 
-	private void handleEvt(GraphEvent<?, ?> e) {
+	private void handleEvt(GraphEvent<?, ?, ?> e) {
 		// Log.debug("Event [%s] %s", e.type(), e.value());
 		GraphEvtType type = e.type();
 		Object val = e.value();

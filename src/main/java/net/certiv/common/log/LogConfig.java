@@ -53,7 +53,7 @@ public class LogConfig {
 
 		if (loc.isAbsolute()) {
 			Path path = loc.resolve(name + ".log");
-			System.err.println("Logpath: " + path.toString());
+			// System.err.println("Logpath: " + path.toString());
 			return new File(path.toUri()).getPath();
 		}
 
@@ -70,7 +70,7 @@ public class LogConfig {
 		}
 
 		Path path = Path.of(uri).resolve(location).resolve(name + ".log");
-		System.err.println("Logpath: " + path.toString());
+		// System.err.println("Logpath: " + path.toString());
 		return new File(path.toUri()).getPath();
 	}
 
@@ -79,7 +79,7 @@ public class LogConfig {
 
 		builder.setConfigurationName(logname);
 		builder.setLoggerContext(new LoggerContext("common.log"));
-		builder.setStatusLevel(Level.WARN); // internal message reporting level
+		builder.setStatusLevel(Level.ERROR); // internal message reporting level
 		builder.setVerbosity("disable");
 
 		// threshold filter

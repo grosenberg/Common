@@ -13,6 +13,7 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.test.CommonTestBase;
@@ -42,7 +43,7 @@ class WalkerTest extends CommonTestBase {
 	void testFullWalk() {
 		CS.graph.setId(CS.factory.make("Walker"));
 
-		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
+		Walker<Id, DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("X", "Y", "Z"), root);
 		UniqueList<DemoNode> v = new UniqueList<>(w.visited().valuesAll());
 		assertEquals(10, v.size());
@@ -52,7 +53,7 @@ class WalkerTest extends CommonTestBase {
 	void testWalkRet() {
 		CS.graph.setId(CS.factory.make("Walker"));
 
-		Walker<DemoNode, DemoEdge> w = CS.graph.walker();
+		Walker<Id, DemoNode, DemoEdge> w = CS.graph.walker();
 		w.descend(new Vis("D", "Y", "Z"), root);
 		UniqueList<DemoNode> v = new UniqueList<>(w.visited().valuesAll());
 		assertEquals(6, v.size());

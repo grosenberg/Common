@@ -9,15 +9,18 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Result;
 
-public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements ITransformOp<N, E> {
+public class RemoveEdgeOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransformOp<I, N, E> {
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveEdgeOp<N, E> of(E edge, boolean clear) {
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
+			E edge, boolean clear) {
 		return new RemoveEdgeOp<>(List.of(edge), clear);
 	}
 
-	public static <N extends Node<N, E>, E extends Edge<N, E>> RemoveEdgeOp<N, E> of(
+	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
 			Collection<? extends E> edges, boolean clear) {
 		return new RemoveEdgeOp<>(edges, clear);
 	}
@@ -38,12 +41,12 @@ public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 	}
 
 	@Override
-	public Result<Boolean> canApply(Transformer<N, E> xf) {
+	public Result<Boolean> canApply(Transformer<I, N, E> xf) {
 		return xf.removeEdges(edge, clear);
 	}
 
 	@Override
-	public Result<Boolean> apply(Transformer<N, E> xf, XfPolicy policy) {
+	public Result<Boolean> apply(Transformer<I, N, E> xf, XfPolicy policy) {
 		return xf.removeEdges(policy, edge, clear);
 	}
 
@@ -57,7 +60,7 @@ public class RemoveEdgeOp<N extends Node<N, E>, E extends Edge<N, E>> implements
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		RemoveEdgeOp<?, ?> other = (RemoveEdgeOp<?, ?>) obj;
+		RemoveEdgeOp<?, ?, ?> other = (RemoveEdgeOp<?, ?, ?>) obj;
 		return clear == other.clear && Objects.equals(edge, other.edge);
 	}
 

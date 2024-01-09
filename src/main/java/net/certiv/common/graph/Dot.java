@@ -1,8 +1,8 @@
 package net.certiv.common.graph;
 
 import net.certiv.common.dot.Dictionary.ON;
-import net.certiv.common.stores.props.Props;
 import net.certiv.common.dot.DotStyle;
+import net.certiv.common.stores.props.Props;
 
 /**
  * Helper for accessing the specialized Dot Styles record structure.

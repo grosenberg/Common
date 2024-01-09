@@ -1,9 +1,10 @@
 package net.certiv.common.graph.demo;
 
 import net.certiv.common.graph.GraphEvent;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.log.Level;
 
-public class DemoEvent extends GraphEvent<DemoNode, DemoEdge> {
+public class DemoEvent extends GraphEvent<Id, DemoNode, DemoEdge> {
 
 	public static DemoEvent addNode(DemoGraph graph, DemoNode node) {
 		return new DemoEvent(graph, GraphEvtType.AddNode, node);

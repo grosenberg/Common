@@ -11,6 +11,7 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
@@ -20,7 +21,7 @@ import net.certiv.common.stores.props.Props;
  * Abstract base class for a directed multigraph node. Edge connections are managed
  * through separate input and output edge sets.
  */
-public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends Props
+public abstract class Node<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
 		implements Comparable<N> {
 
 	public static final String NODE_ID = "NodeId";
@@ -29,50 +30,64 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	static final Counter CTR = new Counter();
 
 	/** Set of inbound edges */
-	protected final IEdgeSet<N, E> in;
+	protected final IEdgeSet<I, N, E> in;
 	/** Set of outbound edges */
-	protected final IEdgeSet<N, E> out;
+	protected final IEdgeSet<I, N, E> out;
 
 	/** Unique numerical node identifier */
 	public final long _nid;
 
-	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out) {
-		Assert.notNull(in, out);
+	protected Node(I id, IEdgeSet<I, N, E> in, IEdgeSet<I, N, E> out) {
+		Assert.notNull(id, in, out);
 		this.in = in;
 		this.out = out;
 		_nid = CTR.getAndIncrement();
-		put(NODE_ID, String.valueOf(_nid)); // default id
+		setId(id);
 	}
 
-	protected Node(IEdgeSet<N, E> in, IEdgeSet<N, E> out, Map<Object, Object> props) {
-		this(in, out);
+	protected Node(I id, IEdgeSet<I, N, E> in, IEdgeSet<I, N, E> out, Map<Object, Object> props) {
+		this(id, in, out);
 		putAll(props);
 	}
 
 	/** Return the node instance identifying object. */
-	public Object nodeId() {
+	public I id() {
 		return get(NODE_ID);
 	}
 
 	/** Set the object used to provide the name of this node instance. */
-	public <V> V setNodeId(V id) {
+	public I setId(I id) {
 		Assert.notNull(id);
 		return put(NODE_ID, id);
 	}
 
-	/** Return a simple name for this node instance. */
+	/**
+	 * Return a simple name for this node instance. Excludes the namespace; potentially
+	 * not unique.
+	 *
+	 * @return simple node name
+	 */
 	public String name() {
-		Object id = nodeId();
-		if (id == null || id.toString().isBlank()) return String.valueOf(_nid);
-		return id.toString();
+		return id().name();
 	}
 
-	/** Return a unique display name for this node instance. */
-	public String displayName() {
-		String name = name();
-		String nid = String.valueOf(_nid);
-		if (name.equals(nid)) return nid;
-		return String.format("%s(%s)", name, nid);
+	/**
+	 * Return a unique name for this node instance. Includes the namespace and name.
+	 *
+	 * @return unique node name
+	 */
+	public String uname() {
+		return id().uname();
+	}
+
+	/**
+	 * Return a display appropriate label that uniquely identifies this node instance.
+	 * Nominally {@code #uname()}, or {@code #name()} if the namespace is {@code default}.
+	 *
+	 * @return unique display label
+	 */
+	public String label() {
+		return !id().isDefaultNamespace() ? uname() : name();
 	}
 
 	/**
@@ -416,9 +431,9 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public void clear() {
 		in.clear();
 		out.clear();
-		Object name = nodeId();
+		I name = id();
 		super.clear();
-		setNodeId(name);
+		setId(name);
 	}
 
 	@Override
@@ -437,12 +452,12 @@ public abstract class Node<N extends Node<N, E>, E extends Edge<N, E>> extends P
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (!(obj instanceof Node)) return false;
-		Node<?, ?> other = (Node<?, ?>) obj;
+		Node<?, ?, ?> other = (Node<?, ?, ?>) obj;
 		return _nid == other._nid;
 	}
 
 	@Override
 	public String toString() {
-		return displayName();
+		return uname();
 	}
 }

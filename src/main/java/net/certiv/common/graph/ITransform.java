@@ -8,11 +8,12 @@ import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
+import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 
-public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
+public interface ITransform<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	GraphException ERR_SENSE = GraphEx.of("Sense is null");
 	GraphException ERR_NO_PATH = GraphEx.of("GraphPath is null");
@@ -142,7 +143,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
-	Result<Boolean> remove(GraphPath<N, E> path, boolean clear);
+	Result<Boolean> remove(GraphPath<I, N, E> path, boolean clear);
 
 	/**
 	 * Removes all edges connecting the given subgraph to the graph and conditionally
@@ -154,7 +155,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@link Result#OK} on success, or {@link Result#err()} explaining the
 	 *         failure
 	 */
-	Result<Boolean> remove(SubGraph<N, E> sg, boolean clear);
+	Result<Boolean> remove(SubGraph<I, N, E> sg, boolean clear);
 
 	/**
 	 * Transfers the subgraph represented by the given edge to depend from the given node.
@@ -256,7 +257,7 @@ public interface ITransform<N extends Node<N, E>, E extends Edge<N, E>> {
 	 * @return {@link Result} containing the new edges, or {@link Result#err()} explaining
 	 *         the failure
 	 */
-	Result<LinkedList<E>> copy(SubGraph<N, E> sg, N dst, boolean remove);
+	Result<LinkedList<E>> copy(SubGraph<I, N, E> sg, N dst, boolean remove);
 
 	/**
 	 * Copies the given individual source node into the graph. The source node is

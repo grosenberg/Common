@@ -17,10 +17,18 @@ import net.certiv.common.util.Strings;
  * Extend and admend to provide any additional fields appropriate to establishing
  * uniqueness.
  * <p>
+ * Namespace must be non-null and should be non-blank; use {@code #DEFAULT} to represent
+ * the default namespace.
+ * <p>
  * Default implementation uses {@code '::'} as the namespace separator and {@code '.'} as
  * the name element separator.
  */
 public class Id implements Comparable<Id>, Iterable<String> {
+
+	public static final String ANON = IdFactory.ANON;
+	public static final String DEFAULT = IdFactory.DEFAULT;
+	public static final String NIL = IdFactory.NIL;
+	public static final String UNKNOWN = IdFactory.UNKNOWN;
 
 	public final String ns;
 	public final LinkedList<String> elems = new LinkedList<>();
@@ -31,12 +39,21 @@ public class Id implements Comparable<Id>, Iterable<String> {
 		this.elems.addAll(elems);
 	}
 
+	/**
+	 * Determines if the namespace is the {@code default} namespace.
+	 *
+	 * @return {@code true} if the namespace is the {@code default} namespace
+	 */
+	public boolean isDefaultNamespace() {
+		return IdFactory.DEFAULT.equals(ns);
+	}
+
 	/** The containing namespace. */
 	public String namespace() {
 		return ns;
 	}
 
-	/** Structured name - excludes the namespace; potentially not unique. */
+	/** Structured simple name - excludes the namespace; potentially not unique. */
 	public String name() {
 		return String.join(Strings.DOT, elements());
 	}
