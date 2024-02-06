@@ -187,18 +187,26 @@ public class IdFactory {
 	// --------------------------------
 
 	/**
-	 * Returns an identifier corresponding to the non-overlapping elements of this
-	 * identifier with the given elements appended. Creates a new identifier as needed.
+	 * Resolves a new name based on the name of the given id and added elements. Name
+	 * resolution accounts for any name element overlap.
+	 *
+	 * @param id       base name
+	 * @param elements name elements to add
+	 * @return resolved name
 	 */
-	public Id resolve(Id id, String... elements) {
-		return resolve(id, Arrays.asList(elements));
+	public List<String> resolveName(Id id, String... elements) {
+		return resolveName(id, Arrays.asList(elements));
 	}
 
 	/**
-	 * Returns an identifier corresponding to the non-overlapping elements of this
-	 * identifier with the given elements appended. Creates a new identifier as needed.
+	 * Resolves a new name based on the name of the given id and added elements. Name
+	 * resolution accounts for any name element overlap.
+	 *
+	 * @param id       base name
+	 * @param elements name elements to add
+	 * @return resolved name
 	 */
-	public Id resolve(Id id, List<String> elements) {
+	public List<String> resolveName(Id id, List<String> elements) {
 		Assert.notNull(id);
 		Assert.notEmpty(elements);
 
@@ -211,14 +219,38 @@ public class IdFactory {
 		}
 
 		parts.addAll(names);
-		return make(id.ns, parts);
+		return parts;
 	}
 
-	// find overlap beginning
-	private int begOverlap(List<String> parts, List<String> names) {
-		String n0 = names.get(0);
-		for (int idx = 0, plen = parts.size(); idx < plen; idx++) {
-			String px = parts.get(idx);
+	/**
+	 * Returns an identifier corresponding to the non-overlapping elements of this
+	 * identifier with the given elements appended. Creates a new identifier as needed.
+	 */
+	public Id resolve(Id id, String... elements) {
+		return resolve(id, Arrays.asList(elements));
+	}
+
+	/**
+	 * Returns an identifier corresponding to the non-overlapping elements of this
+	 * identifier with the given elements appended. Creates a new identifier as needed.
+	 */
+	public Id resolve(Id id, List<String> elements) {
+		List<String> resolved = resolveName(id, elements);
+		return make(id.ns, resolved);
+	}
+
+	/**
+	 * Find the beginning of any name element overlap between the given name lists. Does
+	 * not check for consecutive element matches. Override as needed.
+	 *
+	 * @param base  base name elements
+	 * @param added added name elements
+	 * @return overlap index, or {@code -1} if no overlap
+	 */
+	protected int begOverlap(List<String> base, List<String> added) {
+		String n0 = added.get(0);
+		for (int idx = 0, plen = base.size(); idx < plen; idx++) {
+			String px = base.get(idx);
 			if (px.equals(n0)) return idx;
 		}
 		return -1;

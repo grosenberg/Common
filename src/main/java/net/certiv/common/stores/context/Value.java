@@ -1,5 +1,6 @@
 package net.certiv.common.stores.context;
 
+import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -23,8 +24,7 @@ public class Value<V> {
 	protected final V beg;
 	protected final V end;
 	protected final String unit;
-
-	private final boolean range;
+	protected final boolean range;
 
 	public static <V> Value<V> of(V value) {
 		return new Value<>(value, null, null, false);
@@ -46,6 +46,7 @@ public class Value<V> {
 
 	// --------------------------------
 
+	@ConstructorProperties({ "beg", "end", "unit", "range" })
 	protected Value(V beg, V end, String unit, boolean range) {
 		this.beg = beg;
 		this.end = end;
@@ -121,8 +122,8 @@ public class Value<V> {
 		if (this == obj) return true;
 		if (!(obj instanceof Value)) return false;
 		Value<?> other = (Value<?>) obj;
-		return Objects.equals(beg, other.beg) //
-				&& Objects.equals(end, other.end) //
+		return Objects.deepEquals(beg, other.beg) //
+				&& Objects.deepEquals(end, other.end) //
 				&& range == other.range //
 				&& Objects.equals(unit, other.unit);
 	}

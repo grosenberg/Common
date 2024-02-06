@@ -93,6 +93,12 @@ public class Log {
 		log(Level.FATAL, message, e);
 	}
 
+	// --------------------------------
+
+	public static void printf(LogDesc desc) {
+		_printf(desc.level(), new StringFormattedMessage(desc.toString()));
+	}
+
 	public static void printf(Level level, String msg) {
 		_printf(level, new StringFormattedMessage(msg));
 	}
@@ -143,15 +149,16 @@ public class Log {
 	// ==========================================
 
 	/**
-	 * Returns a location descriptor for the caller on the given class. Defined as the
-	 * stack trace entry immediatly prior to the first entry containing the FQCN of the
-	 * given class.
+	 * Returns a {@link StackTraceElement} location descriptor for the caller on the given
+	 * object or class. Defined as the stack trace entry immediatly prior to the first
+	 * entry containing the fully qualified class name of the origin object.
 	 *
-	 * @param cls class that defines the relative caller
+	 * @param origin object or class that defines the relative caller
 	 * @return caller {@link StackTraceElement}, or {@code null} if not found
 	 */
-	public static StackTraceElement callerLocation(Class<?> cls) {
+	public static StackTraceElement callerLocation(Object origin) {
 		try {
+			Class<?> cls = origin instanceof Class ? (Class<?>) origin : origin.getClass();
 			return StackLocator.getInstance().calcLocation(cls.getName());
 		} catch (NoSuchElementException ex) {
 			return null;

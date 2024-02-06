@@ -7,6 +7,8 @@
  ******************************************************************************/
 package net.certiv.common.util;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,20 +23,24 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -42,24 +48,36 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import net.certiv.common.check.Assert;
+import net.certiv.common.ex.IOEx;
 import net.certiv.common.ex.IllegalArgsEx;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.Result;
 
 public final class FsUtil {
 
-	private static final String WIN_PREFIX = "/\\w+\\:.*";
-	private static final int DEFAULT_READING_SIZE = 8192;
+	private static final int BufSize = 8192;
 	private static final String TmpDir = System.getProperty("java.io.tmpdir");
 
+	private static final String WIN_PREFIX = "/\\w+\\:.*";
 	private static final Pattern FROM = Pattern.compile("(src/(main|test)/\\w+|target/(test-)?classes)");
 	private static final String TEST_RES = "src/test/resources";
+
 	private static final String ERR_LOC = "Error identifying location URI: %s";
+	private static final String ERR_LOC_CLASS = "Indeterminable location for Class '%s'.";
+	private static final String ERR_LOC_JAR = "Cannot determime jar-in-jar location for Class '%s'.";
+
 	private static final String ERR_NOT_WRITABLE = "File not writable: %s";
 	private static final String ERR_NO_FOLDER = "Folder does not exist: %s";
+
+	private static final String ERR_UNKNOWN_ARCHIVE = "Unknown archive type [%s]: %s";
+	private static final String ERR_DIR = "Unable to create directory '%s' from '%s'.";
 
 	private static File sysTmp;
 
@@ -113,34 +131,19 @@ public final class FsUtil {
 	 * Returns the container location for the given class, or {@code null} if the class
 	 * does not have a recognizable location.
 	 * <p>
-	 * For a class file located on the filesystem, returns the URI of the location
-	 * directory.
+	 * For a class file located on the filesystem, the URI is directory containing the
+	 * class file.
 	 * <p>
 	 * For a class file located within a jar, returns the the URI of the jar file
-	 * location.
+	 * containing the class file.
 	 *
 	 * @param cls the class to locate
 	 * @return {@code URI} identifying the class container
+	 * @see #location(Class)
 	 */
 	public static URI locate(Class<?> cls) {
-		if (cls != null) {
-			try {
-				URI uri = cls.getProtectionDomain().getCodeSource().getLocation().toURI();
-				if (uri != null) {
-					if (uri.getScheme().equalsIgnoreCase("file")) return uri;
-					if (uri.getScheme().equalsIgnoreCase("rsrc")) return null;
-				}
-
-				uri = cls.getResource(cls.getSimpleName() + ClassUtil.CLASS).toURI();
-				if (uri.getScheme().equalsIgnoreCase("jar")) {
-					return Paths.get(uri.getPath()).toUri();
-				}
-
-			} catch (Exception e) {
-				Log.error(ERR_LOC, cls.getName());
-			}
-		}
-		return null;
+		Result<URI> res = location(cls);
+		return res.get();
 	}
 
 	/**
@@ -169,6 +172,89 @@ public final class FsUtil {
 		path = String.join(Strings.SLASH, path, pkg);
 
 		return URI.create(path);
+	}
+
+	/**
+	 * Returns a {@code Result} containing the container location URI for the given class,
+	 * or an {@link IOException} if the class does not have a recognizable location.
+	 * <p>
+	 * For a class file located on the filesystem, the URI is directory containing the
+	 * class file.
+	 * <p>
+	 * For a class file located within a jar, returns the the URI of the jar file
+	 * containing the class file.
+	 *
+	 * @param cls the class to locate
+	 * @return {@code Result} containing a class location URI, or {@link IOException} if
+	 *         not determinable
+	 */
+	public static Result<URI> location(Class<?> cls) {
+		try {
+			URI uri = cls.getProtectionDomain().getCodeSource().getLocation().toURI();
+			return loc(uri);
+
+		} catch (Exception e) {
+			try {
+				URI uri = cls.getResource(cls.getSimpleName() + ClassUtil.CLASS).toURI();
+				return loc(uri);
+			} catch (Exception ex) {}
+			return Result.of(IOEx.of(ERR_LOC_CLASS, cls));
+		}
+	}
+
+	private static Result<URI> loc(URI uri) {
+		try {
+			switch (uri.getScheme().toLowerCase()) {
+				case "file":
+					return Result.of(sanitize(uri));
+
+				case "rsrc":
+					return Result.of(IOEx.of(ERR_LOC_JAR, uri));
+
+				case "jar":
+				default:
+					String part = uri.getSchemeSpecificPart();
+					int dot = part.lastIndexOf(ClassUtil.JAR_SEP);
+					if (dot > -1) {
+						part = part.substring(0, dot);
+					}
+					return Result.of(sanitize(URI.create(part)));
+
+			}
+		} catch (Exception ex) {}
+		return Result.of(IOEx.of(ERR_LOC_CLASS, uri));
+	}
+
+	/**
+	 * Sanitize a URL to ensure correct encoding of spaces and other special characters.
+	 * Standardizes on use of Unix-style file path separators.
+	 *
+	 * @param url source URL
+	 * @return santitized URL
+	 * @throws IllegalArgumentException     if this URL is not absolute
+	 * @throws MalformedURLException        if a URL protocol handler error occurred
+	 * @throws UnsupportedEncodingException if this URL is not UTF-8 or equivalent
+	 * @throws URISyntaxException           if this URL cannot be converted to a URI
+	 */
+	public static URL sanitize(URL url)
+			throws MalformedURLException, UnsupportedEncodingException, URISyntaxException {
+		return sanitize(url.toURI()).toURL();
+	}
+
+	/**
+	 * Sanitize a URI to ensure correct encoding of spaces and other special characters.
+	 * Standardizes on use of Unix-style file path separators.
+	 *
+	 * @param uri source URI
+	 * @return santitized URI
+	 * @throws IllegalArgumentException     if this URI is not absolute
+	 * @throws UnsupportedEncodingException if this URI is not UTF-8 or equivalent
+	 */
+	public static URI sanitize(URI uri) throws UnsupportedEncodingException {
+		String loc = Path.of(uri).toString();
+		loc = FilenameUtils.separatorsToUnix(loc);
+		Path path = Path.of(URLDecoder.decode(loc, Strings.UTF_8));
+		return path.toUri();
 	}
 
 	/**
@@ -389,7 +475,7 @@ public final class FsUtil {
 			int contentsLength = 0;
 			int amountRead = -1;
 			do {
-				int amountRequested = Math.max(stream.available(), DEFAULT_READING_SIZE);
+				int amountRequested = Math.max(stream.available(), BufSize);
 
 				// resize contents if needed
 				if (contentsLength + amountRequested > contents.length) {
@@ -612,18 +698,6 @@ public final class FsUtil {
 		return URI.create(basepath);
 	}
 
-	// /**
-	// * Returns the content of the given named resource as a {@code String}.
-	// *
-	// * @param cls a resource classloader relative class
-	// * @param name the resource name
-	// * @return the resource content as a {@code String}
-	// * @throws IOException on load IO exception
-	// */
-	// public static String loadResource(Class<?> cls, String name) throws IOException {
-	// return new String(_loadResource(cls, name));
-	// }
-
 	/**
 	 * Returns the content of the given named resource as a {@code byte[]}.
 	 *
@@ -636,14 +710,14 @@ public final class FsUtil {
 		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
 			return rs.readAllBytes();
 
-		} catch (NullPointerException | SecurityException e) {
+		} catch (Exception e) {
 			String pkg = slashify(cls.getPackageName());
 			String res = String.join(Strings.SLASH, pkg, name);
 			try (InputStream rs = cls.getClassLoader().getResourceAsStream(res)) {
 				return rs.readAllBytes();
 
-			} catch (NullPointerException | SecurityException ex) {
-				throw new IOException(ex);
+			} catch (Exception ex) {
+				throw IOEx.of(ex, ex.getMessage());
 			}
 		}
 	}
@@ -675,97 +749,186 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Copies the content from the given archive to the given destination directory. The
-	 * hierarchical structure of the content is maintained.
+	 * Copies a resource file at the given resource pathname to the given destination
+	 * pathname. If the given resource pathname is absolute, the resource is located
+	 * relative to the root of the bundle containing the reference class. Otherwise, the
+	 * resource is located relative to the given reference class.
 	 *
-	 * @param archive the zip archive on the filesystem
-	 * @param dst     filesystem destination directory
-	 * @return the root directory of the copied content
+	 * @param ref      object reference that identifies a bundle
+	 * @param resource pathname identifying the resource
+	 * @param dst      filesystem destination pathname
+	 * @return {@link Result} containing the destination {@link File}, or an
+	 *         {@link IOException} identifying the resource read or write failure
 	 */
-	public static Result<File> fromArchive(File archive, Path dst) {
-		try (ZipFile zip = new ZipFile(archive)) {
-			Path root = Files.createDirectories(dst);
-
-			// sort entries by name to always create folders first
-			List<? extends ZipEntry> entries = zip.stream().sorted(Comparator.comparing(ZipEntry::getName))
-					.collect(Collectors.toList());
-
-			// copy each entry in the dest path
-			for (ZipEntry entry : entries) {
-				Path dstPath = dst.resolve(entry.getName());
-				if (entry.isDirectory()) {
-					Files.createDirectory(dstPath);
-					continue;
-				}
-				Files.copy(zip.getInputStream(entry), dstPath, StandardCopyOption.REPLACE_EXISTING);
-			}
-
-			return Result.of(root.toFile());
+	public static Result<File> fromResource(Object ref, String resource, Path dst) {
+		Class<?> cls = ref instanceof Class ? (Class<?>) ref : ref.getClass();
+		try (InputStream is = cls.getResourceAsStream(resource)) {
+			File file = dst.toFile();
+			FileUtils.copyInputStreamToFile(is, file);
+			return Result.of(file);
 
 		} catch (Exception e) {
 			return Result.of(e);
 		}
 	}
 
-	// @Deprecated
-	// public static void copyToFile(InputStream inputStream, File file) throws
-	// IOException {
-	// try (OutputStream outputStream = new FileOutputStream(file)) {
-	// IOUtils.copy(inputStream, outputStream);
-	// }
-	// }
+	/**
+	 * Copies the content from the given archive to the given destination directory. The
+	 * hierarchical structure of the content is maintained.
+	 * <p>
+	 * Handles {@code '.gz'}, {@code '.tgz'}, {@code '.tar.gz'}, {@code '.jar'}, and
+	 * {@code '.zip'} archives.
+	 *
+	 * @param archive archive file on the filesystem
+	 * @param dir     filesystem destination directory
+	 * @return {@link Result} containing the filesystem destination file for single file
+	 *         archives ({@code '.gz'}), base extraction directory for collection archives
+	 *         ({@code '.tgz'}, {@code '.tar.gz'}, {@code '.jar'}, and {@code '.zip'}), or
+	 *         an {@link IOException} identifying whatever read/write failure occurred
+	 */
+	public static Result<File> extractArchive(File archive, File dir) {
+		try {
+			Objects.requireNonNull(archive);
+			Objects.requireNonNull(dir);
+
+			String name = archive.getName();
+			String ext = decodeExtension(name);
+			switch (ext) {
+				case "gz":
+					return extractGz(archive, dir);
+				case "tgz":
+					return extractTar(archive, dir, true);
+				case "tar":
+					return extractTar(archive, dir, false);
+				case "jar":
+					return extractZip(archive, dir, true);
+				case "zip":
+					return extractZip(archive, dir, false);
+				default:
+					throw IOEx.of(ERR_UNKNOWN_ARCHIVE, ext, name);
+			}
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	private static String decodeExtension(String name) {
+		String ext = FilenameUtils.getExtension(name);
+		if (ext.equals("gz") && name.endsWith(".tar.gz")) return "tgz";
+		return ext;
+	}
+
+	private static Result<File> extractGz(File archive, File dir) {
+		try {
+			Assert.notNull(archive, dir);
+			Assert.isTrue(archive.isFile());
+			if (!dir.exists()) dir.mkdirs();
+			Assert.isTrue(dir.isDirectory());
+
+			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(archive));
+					GzipCompressorInputStream is = new GzipCompressorInputStream(in)) {
+
+				String name = is.getMetaData().getFileName();
+				Path dst = dir.toPath().resolve(name);
+				Files.copy(is, dst, REPLACE_EXISTING);
+				return Result.of(dst.toFile());
+			}
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	private static Result<File> extractTar(File archive, File dir, boolean gzip) {
+		try {
+			Assert.notNull(archive, dir);
+			Assert.isTrue(archive.isFile());
+			if (!dir.exists()) dir.mkdirs();
+			Assert.isTrue(dir.isDirectory());
+
+			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(archive));
+					TarArchiveInputStream is = new TarArchiveInputStream(
+							gzip ? new GzipCompressorInputStream(in) : in)) {
+
+				ArchiveEntry entry;
+				while ((entry = is.getNextEntry()) != null) {
+					File dst = new File(dir, entry.getName());
+					if (entry.isDirectory()) {
+						dst.mkdirs();
+						if (!dst.isDirectory()) {
+							throw IOEx.of(ERR_DIR, dst.getCanonicalPath(), archive.getName());
+						}
+					} else {
+						Files.copy(is, dst.toPath(), REPLACE_EXISTING);
+					}
+				}
+				return Result.of(dir);
+			}
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
+
+	private static Result<File> extractZip(File archive, File dir, boolean jar) {
+		try {
+			Assert.notNull(archive, dir);
+			Assert.isTrue(archive.isFile());
+			if (!dir.exists()) dir.mkdirs();
+			Assert.isTrue(dir.isDirectory());
+
+			try (ZipFile zip = jar ? new JarFile(archive) : new ZipFile(archive)) {
+				// sort to create folders first (?)
+				List<? extends ZipEntry> entries = zip.stream() //
+						.sorted(Comparator.comparing(ZipEntry::getName)) //
+						.collect(Collectors.toList());
+
+				for (ZipEntry entry : entries) {
+					File dst = new File(dir, entry.getName());
+					if (entry.isDirectory()) {
+						dst.mkdirs();
+						if (!dst.isDirectory()) {
+							throw IOEx.of(ERR_DIR, dst.getCanonicalPath(), archive.getName());
+						}
+					} else {
+						try (InputStream is = zip.getInputStream(entry)) {
+							Files.copy(is, dst.toPath(), REPLACE_EXISTING);
+						}
+					}
+				}
+			}
+			return Result.of(dir);
+
+		} catch (Exception e) {
+			return Result.of(e);
+		}
+	}
 
 	/**
-	 * Returns the system temporary directory. On windows:
+	 * Returns the canonical system temporary directory. Symbolic links are resolved to
+	 * the real directory.
+	 * <p>
+	 * On Windows, {@code System.getProperty("java.io.tmpdir")} returns the real directory
 	 * {@code C:\Users\<user>\AppData\Local\Temp}
+	 * <p>
+	 * On {@code *nix} systems {@code System.getProperty("java.io.tmpdir")} returns a
+	 * directory {@code '/var/...} symlinked to the real temporary directory
+	 * {@code '/private/var/...}.
 	 *
-	 * @return the system temporary directory
+	 * @return canonical system temporary directory
+	 * @throws {@link RuntimeException} if filesystem access error occurs on resolving the
+	 *                canonical pathname
 	 */
 	public synchronized static File getSysTmp() {
 		if (sysTmp == null) {
-			if (!TmpDir.endsWith(File.separator)) {
-				sysTmp = new File(TmpDir + File.separator);
-			} else {
-				sysTmp = new File(TmpDir);
+			try {
+				sysTmp = new File(TmpDir).getCanonicalFile();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			if (!sysTmp.exists()) sysTmp.mkdirs();
 		}
 		return sysTmp;
-	}
-
-	/**
-	 * Deletes the given directory, recursively, on JVM runtime shutdown.
-	 *
-	 * @param dir a directory to delete
-	 */
-	public static void deleteTmpFolderOnExit(File dir) {
-		if (dir != null) {
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-
-				@Override
-				public void run() {
-					try {
-						if (dir.isDirectory()) Files.walk(dir.toPath()) //
-								.map(Path::toFile) //
-								.sorted(Comparator.reverseOrder()) //
-								.forEach(File::delete);
-					} catch (Exception e) {}
-				}
-			});
-		}
-	}
-
-	public static File createTmpFolder(String path) throws IOException {
-		return createTmpFolder(getSysTmp(), path);
-	}
-
-	public static File createTmpFolder(File root, String path) throws IOException {
-		Assert.notNull(root, path);
-		Assert.isTrue(root.isDirectory());
-
-		File dir = new File(root, path);
-		dir.mkdirs();
-		return dir;
 	}
 
 	/**
@@ -782,42 +945,113 @@ public final class FsUtil {
 	 *
 	 * @param prefix a filename prefix
 	 * @param suffix a filename suffix
-	 * @param dir    the directory that will contain the created file, or {@code null}
+	 * @param dir    the directory that will contain the created file, or {@code null} to
 	 *               select the default system temporary-file directory
 	 * @return the the newly-created file
 	 * @throws IOException if a file could not be created
 	 */
 	public static File createTmpFile(String prefix, String suffix, File dir) throws IOException {
-		dir = dir != null ? dir : new File(TmpDir);
-		if (!dir.isDirectory()) {
-			throw new IOException(String.format("Directory '%s' does not exist", dir));
-		}
-
 		prefix = prefix != null ? prefix : "Tmp";
 		suffix = suffix != null ? suffix : ".tmp";
+		dir = dir != null ? dir : getSysTmp();
+		if (!dir.isDirectory()) {
+			try {
+				dir.mkdirs();
+			} catch (Exception e) {
+				throw IOEx.of("Directory '%s' does not exist/cannot be created.", dir);
+			}
+		}
 
 		String name = String.format("%s-%08d%s", prefix, Maths.nextRandom(99999999), suffix);
 		return new File(dir, name);
 	}
 
-	public static void deleteFolder(File dir) throws IOException {
-		if (dir == null || !dir.exists()) return;
+	/**
+	 * Create a filesystem folder at the given path offset under the system temporary
+	 * directory.
+	 *
+	 * @param offset path offset; may be {@code null} or empty
+	 * @return constructed filesystem folder
+	 * @throws IOException if the folder cannot be created
+	 */
+	public static File createTmpFolder(String offset) throws IOException {
+		return createFolder(getSysTmp(), offset);
+	}
 
-		clearFolder(dir);
-		if (dir.list().length == 0) {
-			if (!dir.delete()) throw new IOException("Delete failed for " + dir);
+	/**
+	 * Create a filesystem folder at the given path offset under the given root directory.
+	 *
+	 * @param dir    base directory
+	 * @param offset path offset; may be {@code null} or empty
+	 * @return constructed filesystem folder
+	 * @throws IOException if the folder cannot be created
+	 */
+	public static File createFolder(File dir, String offset) throws IOException {
+		if (dir == null || !dir.isDirectory()) {
+			throw IOEx.of("Directory '%s' does not exist", dir);
+		}
+		if (offset == null) offset = Strings.EMPTY;
+
+		File tgt = new File(dir, offset);
+		tgt.mkdirs();
+		return tgt;
+	}
+
+	/**
+	 * Deletes the given directory, including all contained files and subdirectories.
+	 * Returns silently if the given directory is {@code null} or is not a directory.
+	 * <p>
+	 * Function differs from {@link FileUtils#deleteDirectory(dir)} in that this method
+	 * returns silently if the given directory is {@code null} or is not a directory.
+	 *
+	 * @param dir directory to delete
+	 * @throws IOException where deletion is unsuccessful
+	 */
+	public static void deleteFolder(File dir) throws IOException {
+		if (dir != null && dir.isDirectory()) {
+			try {
+				clearFolder(dir);
+				dir.delete();
+			} catch (IOException e) {
+				throw IOEx.of("Delete folder failed for '%s' [%s]", dir, e.getMessage());
+			}
 		}
 	}
 
-	public static void clearFolder(File folder) {
-		assert folder != null;
-		assert folder.exists();
-		assert folder.isDirectory();
+	/**
+	 * Deletes the given directory, including all contained files and subdirectories, on
+	 * JVM runtime shutdown.
+	 *
+	 * @param dir directory to delete
+	 */
+	public static void deleteFolderOnExit(File dir) {
+		if (dir != null && dir.isDirectory()) {
+			Runtime.getRuntime().addShutdownHook(new Thread() {
 
-		File[] files = folder.listFiles();
-		for (File file : files) {
-			if (file.isDirectory()) clearFolder(file);
-			file.delete();
+				@Override
+				public void run() {
+					try {
+						clearFolder(dir);
+						dir.delete();
+					} catch (Exception e) {}
+				}
+			});
+		}
+	}
+
+	/**
+	 * Clears the given directory by deleting all contained files and subdirectories.
+	 * Returns silently if the given directory is {@code null} or is not a directory.
+	 *
+	 * @param dir directory to clear
+	 * @throws IOException on failure to delete a contained file or subdirectory
+	 */
+	public static void clearFolder(File dir) throws IOException {
+		if (dir != null && dir.isDirectory()) {
+			Files.walk(dir.toPath()) //
+					.map(Path::toFile) //
+					.sorted(Comparator.reverseOrder()) //
+					.forEach(File::delete);
 		}
 	}
 }

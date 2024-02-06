@@ -216,8 +216,6 @@ class ContextTest {
 
 	@Test
 	void testPutIfAbsent() {
-		KS.a.put(KS.KeyA, "StrA");
-
 		KS.context = Context.of(2, false);
 		KS.context.mergeFirst(KS.a);
 
@@ -232,5 +230,10 @@ class ContextTest {
 		assertTrue(KS.context.contains(KS.KeyA));
 		assertNotEquals("StrB", KS.context.get(KS.KeyA));
 		assertEquals("StrA", KS.context.get(KS.KeyA));
+
+		KS.context.put(KS.KeyA, "StrB");
+		assertTrue(KS.context.contains(KS.KeyA));
+		assertNotEquals("StrA", KS.context.get(KS.KeyA));
+		assertEquals("StrB", KS.context.get(KS.KeyA));
 	}
 }

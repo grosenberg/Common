@@ -1,0 +1,21 @@
+[ "net.certiv.common.stores.LinkedHashList", {
+  "map" : [ "java.util.LinkedHashMap", {
+    "X" : [ "java.util.LinkedList", [ [ "net.certiv.common.util.JsonUtilTest$AClass", {
+      "mode" : "X0",
+      "enable" : false
+    } ], [ "net.certiv.common.util.JsonUtilTest$AClass", {
+      "mode" : "X1",
+      "enable" : false
+    } ], [ "net.certiv.common.util.JsonUtilTest$AClass", {
+      "mode" : "X2",
+      "enable" : false
+    } ], [ "net.certiv.common.util.JsonUtilTest$AClass", {
+      "mode" : "X3",
+      "enable" : false
+    } ], [ "net.certiv.common.util.JsonUtilTest$AClass", {
+      "mode" : "X4",
+      "enable" : false
+    } ] ] ]
+  } ],
+  "unique" : false
+} ]

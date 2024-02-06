@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 /** Collections related convenience methods. */
+@Deprecated
 public final class Make {
 
 	private Make() {}

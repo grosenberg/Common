@@ -1,0 +1,22 @@
+[ "java.util.LinkedHashMap", {
+  "X0" : [ "net.certiv.common.util.JsonUtilTest$AClass", {
+    "mode" : "X0",
+    "enable" : false
+  } ],
+  "X1" : [ "net.certiv.common.util.JsonUtilTest$AClass", {
+    "mode" : "X1",
+    "enable" : false
+  } ],
+  "X2" : [ "net.certiv.common.util.JsonUtilTest$AClass", {
+    "mode" : "X2",
+    "enable" : false
+  } ],
+  "X3" : [ "net.certiv.common.util.JsonUtilTest$AClass", {
+    "mode" : "X3",
+    "enable" : false
+  } ],
+  "X4" : [ "net.certiv.common.util.JsonUtilTest$AClass", {
+    "mode" : "X4",
+    "enable" : false
+  } ]
+} ]

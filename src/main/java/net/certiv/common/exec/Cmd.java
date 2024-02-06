@@ -13,44 +13,101 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.certiv.common.check.Assert;
 import net.certiv.common.log.Log;
+import net.certiv.common.stores.Result;
+import net.certiv.common.util.Chars;
+import net.certiv.common.util.ClassUtil;
+import net.certiv.common.util.FsUtil;
 import net.certiv.common.util.Strings;
 
 public class Cmd {
 
 	/**
+	 * Execute a Java application in a separate background process.
+	 *
+	 * @param cls     class, located within a jar, containing a main method
+	 * @param args    main method arguments; may be {@code null}
+	 * @param working working directory; may be {@code null}
+	 * @param data    program input data; may be {@code null}
+	 * @return program output data
+	 */
+	public static synchronized String javaw(Class<?> cls, List<String> args, File working, String data) {
+		Assert.notNull(cls);
+		Result<URI> res = FsUtil.location(cls);
+		Assert.isTrue(res.validNonNull(), String.format("Cannot locate jar containing '%s'", cls));
+
+		List<String> cmd = new ArrayList<>();
+		cmd.add("javaw");
+		cmd.add("-jar");
+		cmd.add(new File(res.get()).toString());
+		if (args != null) cmd.addAll(args);
+
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		if (working != null && working.isDirectory()) pb.directory(working);
+		return exec(pb, data);
+	}
+
+	/**
+	 * Execute a Java class in the context of the given classloader in a separate
+	 * background process.
+	 *
+	 * @param cls     class to execute
+	 * @param cl      class loader defining a class path environment
+	 * @param working working directory; may be {@code null}
+	 * @param data    program input data; may be {@code null}
+	 * @return program output data
+	 */
+	public static synchronized String javaw(Class<?> cls, URLClassLoader cl, File working, String data) {
+		Assert.notNull(cls, cl);
+		String program = cls.getCanonicalName();
+		String cp = ClassUtil.toClasspath(cl);
+		ProcessBuilder pb = new ProcessBuilder("javaw", "-cp", cp, program);
+		if (working != null && working.isDirectory()) pb.directory(working);
+		return exec(pb, data);
+	}
+
+	/**
 	 * Execute a command in a subprocess. Sanitizes the I/O to UTF-8.
 	 *
-	 * @param cmd  command line argument array defining the command and options. The
-	 *             command must execute as a standard filter: stdIn to stdOut.
-	 * @param base the base directory for the command or {@code null} if the command is
-	 *             absolute
-	 * @param data an input data string
+	 * @param cmd     command line argument array defining the command and options. The
+	 *                command must execute as a standard filter: stdIn to stdOut.
+	 * @param working base directory for the command or {@code null} if the command is
+	 *                absolute
+	 * @param data    input data string
 	 * @return output data
 	 */
-	public static synchronized String process(String[] cmd, String base, String data) {
-		final StringBuilder sb = new StringBuilder();
-		final ProcessBuilder pb = new ProcessBuilder(cmd);
+	public static synchronized String process(String[] cmd, String working, String data) {
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		if (working != null) pb.directory(new File(working));
+		return exec(pb, data);
+	}
+
+	private static String exec(ProcessBuilder pb, String data) {
 		try {
-			if (base != null) pb.directory(new File(base));
 			pb.redirectErrorStream(true);
-			Process process = pb.start();
+			Process p = pb.start();
 
 			// prep for output from the process
-			try (InputStreamReader in = new InputStreamReader(process.getInputStream(), Strings.UTF_8);
+			try (InputStreamReader in = new InputStreamReader(p.getInputStream(), Strings.UTF_8);
 					BufferedReader br = new BufferedReader(in)) {
 
-				// prep and feed input to the process
-				OutputStreamWriter out = new OutputStreamWriter(process.getOutputStream(), in.getEncoding());
-				BufferedWriter bw = new BufferedWriter(out);
+				if (data != null) {
+					// prep and feed input into the process
+					OutputStreamWriter out = new OutputStreamWriter(p.getOutputStream(), in.getEncoding());
+					BufferedWriter bw = new BufferedWriter(out);
 
-				bw.write(toUTF8(data));
-				bw.close();
+					bw.write(toUTF8(data));
+					bw.close();
+				}
 
 				// read output from the process
+				StringBuilder sb = new StringBuilder();
 				String line;
 				while ((line = br.readLine()) != null) {
 					sb.append(line + Strings.EOL);
@@ -59,7 +116,7 @@ public class Cmd {
 			}
 
 		} catch (IOException e) {
-			Log.error("Cmd execution error: %s", e.getMessage());
+			Log.error("Process error[%s] '%s' ", e.getMessage(), pb.command());
 			return Strings.EMPTY;
 		}
 	}
@@ -74,11 +131,11 @@ public class Cmd {
 		List<String> args = new ArrayList<>();
 		StringBuilder qStr = new StringBuilder();
 		boolean quoted = false;
-		char ac[] = command.toCharArray();
+		char[] ac = command.toCharArray();
 		for (char c : ac) {
 			if (quoted) {
 				qStr.append(c);
-				if (c == '"') {
+				if (c == Chars.QUOTE) {
 					quoted = false;
 				}
 			} else if (Character.isWhitespace(c)) {
@@ -88,7 +145,7 @@ public class Cmd {
 				}
 			} else {
 				qStr.append(c);
-				if (c == '"') {
+				if (c == Chars.QUOTE) {
 					quoted = true;
 				}
 			}

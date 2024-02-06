@@ -1,0 +1,50 @@
+[ "net.certiv.common.stores.context.KVStore", {
+  "className" : "net.certiv.common.stores.context.KVStore",
+  "scope" : [ "java.util.LinkedHashMap", {
+    "str" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : "one off",
+      "unit" : "",
+      "range" : false
+    } ],
+    "ary" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "[Ljava.lang.String;", [ "one", "two", "three" ] ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "class" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.lang.Class", "net.certiv.common.log.Log" ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.duration" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.time.Duration", 10.000000000 ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.instant" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.time.Instant", 10000.000000000 ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.level" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "net.certiv.common.log.Level", "INFO" ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.path" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.nio.file.Path", "test/path" ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.uri" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.net.URI", "file:///D:/DevFiles/Eclipse/Tools/Certiv/net.certiv.common/test/uri" ],
+      "unit" : "",
+      "range" : false
+    } ],
+    "key.url" : [ "net.certiv.common.stores.context.Value", {
+      "beg" : [ "java.net.URL", "file:/D:/DevFiles/Eclipse/Tools/Certiv/net.certiv.common/test/url" ],
+      "unit" : "",
+      "range" : false
+    } ]
+  } ]
+} ]

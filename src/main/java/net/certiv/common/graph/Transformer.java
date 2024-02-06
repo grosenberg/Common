@@ -23,7 +23,8 @@ import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
 /** In-place graph transformer. */
-public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> implements ITransform<I, N, E> {
+public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransform<I, N, E> {
 
 	public final Graph<I, N, E> graph;
 	private XfPolicy policy;
@@ -616,27 +617,27 @@ public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 	@Override
 	public Result<E> copy(E edge, N beg, N end) {
 		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, false);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	public Result<E> copy(XfPolicy policy, E edge, N beg, N end) {
 		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, false);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	@Override
 	public Result<E> copy(E edge, N beg, N end, boolean cyclic) {
 		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, cyclic);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	public Result<E> copy(XfPolicy policy, E edge, N beg, N end, boolean cyclic) {
 		Result<LinkedList<E>> res = copy(policy, List.of(edge), beg, end, cyclic);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	@Override
@@ -807,8 +808,8 @@ public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 		}
 	}
 
-	private final boolean insertPath(Explainer xpr, LinkedList<E> dups, E lead, N head, GraphPath<I, N, E> path,
-			UniqueList<E> tails) {
+	private final boolean insertPath(Explainer xpr, LinkedList<E> dups, E lead, N head,
+			GraphPath<I, N, E> path, UniqueList<E> tails) {
 		boolean ok = true;
 
 		// if tails is empty, path terminals size is N/C

@@ -1,6 +1,7 @@
 package net.certiv.common.util.test;
 
 import net.certiv.common.stores.Result;
+import net.certiv.common.util.ClassUtil;
 import net.certiv.common.util.FsUtil;
 
 public class CommonTestBase {
@@ -37,7 +38,7 @@ public class CommonTestBase {
 	public void writeResource(Class<?> cls, String name, String data, boolean force) {
 		if (this.force || force || !FsUtil.checkResource(cls, name)) {
 			Result<Boolean> res = FsUtil.writeResource(getClass(), name, data);
-			if (res.err()) throw new RuntimeException(res.err);
+			if (res.err()) throw new RuntimeException(res.getErr());
 		}
 	}
 
@@ -57,7 +58,22 @@ public class CommonTestBase {
 	 */
 	public static String loadResource(Class<?> cls, String name) {
 		Result<String> res = FsUtil.loadResource(cls, name);
-		if (res.err()) throw new RuntimeException(res.err);
-		return res.value;
+		if (res.err()) throw new RuntimeException(res.getErr());
+		return res.get();
+	}
+
+	/**
+	 * Loads the class with the given <a href="#binary-name">binary</a> classname from the
+	 * jar located at the absoluate path specified by the given jarname.
+	 *
+	 * @param jarname   absolute pathname of a jar
+	 * @param classname <a href="#binary-name">binary name</a> of the class
+	 * @return resulting {@code Class} object
+	 * @throws a runtime exception on a read failure
+	 */
+	public static Class<?> loadClass(String jarname, String classname) {
+		Result<Class<?>> res = ClassUtil.loadClass(jarname, classname);
+		if (res.err()) throw new RuntimeException(res.getErr());
+		return res.get();
 	}
 }

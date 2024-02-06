@@ -7,7 +7,7 @@
 
 	<groupId>net.certiv</groupId>
 	<artifactId>certiv-common</artifactId>
-	<version>0.9.5</version>
+	<version>0.9.6</version>
 
 	<name>net.certiv :: common</name>
 	<description>Common utilities</description>
@@ -22,16 +22,13 @@
 		<comm-io.ver>2.11.0</comm-io.ver>
 		<comm-lang3.ver>3.12.0</comm-lang3.ver>
 		<comm-text.ver>1.10.0</comm-text.ver>
-		<eclipse-coll.ver>11.1.0</eclipse-coll.ver>
-
+		<comm-compress.ver>1.25.0</comm-compress.ver>
+		
 		<diff.ver>4.12</diff.ver>
+		<jackson.ver>2.16.1</jackson.ver>
 		<log4j.ver>2.20.0</log4j.ver>
-
-		<gson.ver>2.10.1</gson.ver>
-		<jackson.ver>2.14.2</jackson.ver>
-		<microstream.ver>08.01.00-MS-GA</microstream.ver>
-
 		<junit.ver>5.9.2</junit.ver>
+
 	</properties>
 
 	<dependencies>
@@ -50,36 +47,33 @@
 			<artifactId>commons-text</artifactId>
 			<version>${comm-text.ver}</version>
 		</dependency>
-
-
-		<!-- 
-
 		<dependency>
-			<groupId>org.eclipse.collections</groupId>
-			<artifactId>eclipse-collections-api</artifactId>
-			<version>${eclipse-coll.ver}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.collections</groupId>
-			<artifactId>eclipse-collections</artifactId>
-			<version>${eclipse-coll.ver}</version>
-		</dependency>
-		
--->
-
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>${gson.ver}</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${comm-compress.ver}</version>
 		</dependency>
 
-<!--
 		<dependency>
-			<groupId>one.microstream</groupId>
-			<artifactId>microstream-storage-embedded</artifactId>
-			<version>${microstream.ver}</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.ver}</version>
 		</dependency>
--->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>${jackson.ver}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.ver}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-parameter-names</artifactId>
+			<version>${jackson.ver}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>io.github.java-diff-utils</groupId>
 			<artifactId>java-diff-utils</artifactId>
@@ -111,6 +105,9 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>logs/*.*</exclude>
+				</excludes>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
@@ -136,7 +133,12 @@
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.12.1</version>
+				<configuration>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -189,7 +191,7 @@
 						<id>attach-sources</id>
 						<phase>verify</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>jar-no-fork</goal>
 						</goals>
 					</execution>
 				</executions>

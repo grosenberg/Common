@@ -7,8 +7,6 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import net.certiv.common.util.GsonUtil.Convertable;
-
 /**
  * Interface definition for a key-value store having a single scope, {@code KVScope}, or
  * multiple scopes, {@code Context}.
@@ -16,7 +14,7 @@ import net.certiv.common.util.GsonUtil.Convertable;
  * Keys are value typed: {@code Key<V>}. Values are held in typed value holders:
  * {@code Value<V>}.
  */
-public interface IKVScope extends Convertable {
+public interface IKVScope {
 
 	String ErrNotDef = "Key [%s] not defined.";
 	RuntimeException ErrMark = new UnsupportedOperationException("MARK is inviolable.");

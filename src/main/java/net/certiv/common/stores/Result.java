@@ -4,18 +4,20 @@ import java.util.Objects;
 
 /**
  * A container object for potentially null objects. Includes a {@code Throwable} error
- * field. If a value is present ({@code non-null}) without an error being present,
- * {@code valid()} returns {@code true}.
+ * field. If a contained value is present ({@code non-null}) without an error being
+ * present, {@code valid()} returns {@code true}.
  * <p>
- * API:
+ * Primary API:
  * <ul>
- * <li>{@code value}: the returned value; nominally {@code null} when reporting an error
- * <li>{@code valid}: identifies whether the value is valid (error free), even if
- * {@code null}
- * <li>{@code err}: the returned error; otherwise {@code null}
+ * <li>{@link #valid()}: identifies whether the contained value is valid (error free),
+ * even if {@code null}
+ * <li>{@link #err()}: identifies whether an error is being reported
+ * <li>{@link #get()}: the returned value; may be {@code null} if {@link #valid()}; always
+ * {@code null} when reporting an error
+ * <li>{@link #getErr()}: the returned error; otherwise {@code null}
  * </ul>
  *
- * @param <T> the type of value
+ * @param <T> the type of contained value
  */
 public class Result<T> {
 
@@ -24,12 +26,12 @@ public class Result<T> {
 	/** Valid {@code false} result. */
 	public static final Result<Boolean> FAIL = new Result<>(false, true, null);
 
-	/** The result value. */
-	public final T value;
+	/** The result contained value. */
+	private final T value;
 	/** The result validity. */
-	public final boolean valid;
+	private final boolean valid;
 	/** The result error. */
-	public final Throwable err;
+	private final Throwable err;
 
 	/**
 	 * Typed, valid {@code null}-valued constructed result.
@@ -43,7 +45,7 @@ public class Result<T> {
 
 	/**
 	 * Construct a result containing the given result value. The result is valid if the
-	 * value is {@code non-null}.
+	 * contained value is {@code non-null}.
 	 *
 	 * @param <T>   the result type
 	 * @param value the result value
@@ -85,36 +87,52 @@ public class Result<T> {
 	}
 
 	/**
-	 * Returns {@code true} if the value represents a valid value.
+	 * Returns {@code true} if the contained value represents a valid, potentially
+	 * {@code null}, value.
 	 */
 	public boolean valid() {
 		return valid;
 	}
 
 	/**
-	 * Returns {@code true} if the value represents a valid, {@code non-null} value.
+	 * Returns {@code true} if the contained value represents a {@code non-null} value.
 	 */
-	public boolean present() {
+	public boolean validNonNull() {
 		return valid && value != null;
 	}
 
 	/**
-	 * Returns {@code true} if the value represents a valid, {@code null} value.
+	 * Returns {@code true} if the contained value represents a valid, {@code null} value.
 	 */
-	public boolean isEmpty() {
+	public boolean validNull() {
 		return valid && value == null;
 	}
 
 	/**
-	 * Returns {@code true} if the error is {@code non-null} or the value is not valid.
+	 * Returns {@code true} if the error is {@code non-null} or the contained value is not
+	 * valid.
 	 */
 	public boolean err() {
 		return err != null || !valid;
 	}
 
+	/** Returns the contained value. */
+	public T get() {
+		return value;
+	}
+
+	public Throwable getErr() {
+		return err;
+	}
+
 	/** Returns the error message, if any. */
-	public String errMessage() {
+	public String getErrMsg() {
 		return err != null ? err.getMessage() : "<No error>";
+	}
+
+	/** Throws the contained {@link Throwable}. */
+	public void rethrow() throws Throwable {
+		if (err()) throw err;
 	}
 
 	@Override
@@ -132,7 +150,8 @@ public class Result<T> {
 
 	@Override
 	public String toString() {
-		if (err == null) return String.format("%s [%s]", value, valid);
-		return String.format("%s [%s] %s", value, valid, err.getMessage());
+		if (err()) return err.getMessage();
+		if (validNull()) return "<null>";
+		return value.toString();
 	}
 }

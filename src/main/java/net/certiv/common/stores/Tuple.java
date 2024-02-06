@@ -9,11 +9,13 @@ public class Tuple<V> {
 
 	protected final List<V> data;
 
-	public static <V> Tuple<V> of(@SuppressWarnings("unchecked") V... data) {
+	@SuppressWarnings("unchecked")
+	public static <V> Tuple<V> of(V... data) {
 		return new Tuple<>(data);
 	}
 
-	protected Tuple(@SuppressWarnings("unchecked") V... data) {
+	@SuppressWarnings("unchecked")
+	protected Tuple(V... data) {
 		this.data = Arrays.asList(data);
 	}
 

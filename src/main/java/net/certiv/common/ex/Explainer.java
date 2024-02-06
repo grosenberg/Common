@@ -47,7 +47,7 @@ public class Explainer extends RuntimeException {
 	}
 
 	public Explainer add(Result<Boolean> res) {
-		if (res.err()) add(res.err);
+		if (res.err()) add(res.getErr());
 		return this;
 	}
 
@@ -68,7 +68,7 @@ public class Explainer extends RuntimeException {
 	}
 
 	public Explainer addFirst(Result<Boolean> res) {
-		if (res.err()) addFirst(res.err);
+		if (res.err()) addFirst(res.getErr());
 		return this;
 	}
 

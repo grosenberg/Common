@@ -26,14 +26,4 @@ class LogTest {
 		Log.setName("Printf");
 		Log.printf(Level.WARN, "Print %s", "now.");
 	}
-
-	@Test
-	void testLog() {}
-
-	@Test
-	void testDefLevelLevel() {}
-
-	@Test
-	void testSetLevelLevel() {}
-
 }

@@ -3,11 +3,11 @@ package net.certiv.common.graph;
 import java.util.Set;
 
 import net.certiv.common.event.IEvtType;
-import net.certiv.common.event.LogDesc;
 import net.certiv.common.event.TypedActionEvent.IEvtCmd;
 import net.certiv.common.event.TypedEvent;
 import net.certiv.common.graph.id.Id;
 import net.certiv.common.log.Level;
+import net.certiv.common.log.LogDesc;
 
 /**
  * Graph events encompass both action and change events.

@@ -14,6 +14,7 @@ import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IdFactory;
 import net.certiv.common.graph.ops.ITransformOp;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraphFinder;
@@ -46,13 +47,22 @@ public abstract class Graph<I extends Id, N extends Node<I, N, E>, E extends Edg
 	private final ReentrantLock lock = new ReentrantLock();
 
 	/**
+	 * Construct a graph with a default graph identifier. Use {@link #setId(Id)} to
+	 * customize.
+	 */
+	public Graph() {
+		super();
+		_gid = CTR.getAndIncrement();
+		setId(IdFactory.anon());
+	}
+
+	/**
 	 * Construct a graph with the given graph identifier.
 	 *
 	 * @param id a graph identifier.
 	 */
 	public Graph(Id id) {
-		super();
-		_gid = CTR.getAndIncrement();
+		this();
 		setId(id);
 	}
 

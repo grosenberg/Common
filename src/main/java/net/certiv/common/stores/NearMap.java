@@ -30,16 +30,16 @@ public class NearMap<V> {
 	}
 
 	/**
-	 * Returns the value associated with the greatest key less than or equal to the given key,
-	 * or {@code null} if there is no such key.
+	 * Returns the value associated with the greatest key less than or equal to the given
+	 * key, or {@code null} if there is no such key.
 	 *
 	 * @param key the key
-	 * @return the value associated with the greatest key less than or equal to {@code key},
-	 *             or {@code null} if there is no such key
-	 * @throws ClassCastException if the specified key cannot be compared with the keys
-	 *             currently in the map
-	 * @throws NullPointerException if the specified key is null and this map does not permit
-	 *             null keys
+	 * @return the value associated with the greatest key less than or equal to
+	 *         {@code key}, or {@code null} if there is no such key
+	 * @throws ClassCastException   if the specified key cannot be compared with the keys
+	 *                              currently in the map
+	 * @throws NullPointerException if the specified key is null and this map does not
+	 *                              permit null keys
 	 */
 	public V getFloor(int key) {
 		Entry<Integer, V> entry = map.floorEntry(key);
@@ -56,11 +56,12 @@ public class NearMap<V> {
 	}
 
 	/**
-	 * Returns the key value pair for the first of the given terminal values found where the
-	 * key is the greatest key strictly less than the given key, or null if there is no such
-	 * pair exists.
+	 * Returns the key value pair for the first of the given terminal values found where
+	 * the key is the greatest key strictly less than the given key, or null if there is
+	 * no such pair exists.
 	 */
-	public Pair<Integer, V> before(int key, @SuppressWarnings("unchecked") V... terminals) {
+	@SuppressWarnings("unchecked")
+	public Pair<Integer, V> before(int key, V... terminals) {
 		Set<V> tvalues = new HashSet<>(Arrays.asList(terminals));
 		int idx = key;
 		Entry<Integer, V> entry = map.lowerEntry(idx);
@@ -72,11 +73,12 @@ public class NearMap<V> {
 	}
 
 	/**
-	 * Returns the key value pair for the first of the given terminal values found where the
-	 * key is the lowest key strictly greater than the given key, or null if there is no such
-	 * pair exists.
+	 * Returns the key value pair for the first of the given terminal values found where
+	 * the key is the lowest key strictly greater than the given key, or null if there is
+	 * no such pair exists.
 	 */
-	public Pair<Integer, V> after(int key, @SuppressWarnings("unchecked") V... terminals) {
+	@SuppressWarnings("unchecked")
+	public Pair<Integer, V> after(int key, V... terminals) {
 		Set<V> tvalues = new HashSet<>(Arrays.asList(terminals));
 		int idx = key;
 		Entry<Integer, V> entry = map.higherEntry(idx);

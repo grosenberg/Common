@@ -38,7 +38,8 @@ import net.certiv.common.stores.UniqueList;
  * xf.apply();
  * }</pre>
  */
-public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> implements ITransform<I, N, E> {
+public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+		implements ITransform<I, N, E> {
 
 	private static final XfPolicy CHECK = XfPolicy.of(XfPolicy.TEST, Flg.Repair);
 
@@ -503,8 +504,8 @@ public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 	@Override
 	public Result<E> copy(E edge, N beg, N end) {
 		Result<LinkedList<E>> res = copy(List.of(edge), beg, end, false);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	/**
@@ -521,8 +522,8 @@ public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 	@Override
 	public Result<E> copy(E edge, N beg, N end, boolean cyclic) {
 		Result<LinkedList<E>> res = copy(List.of(edge), beg, end, cyclic);
-		if (res.err()) return Result.of(res.err);
-		return Result.of(res.value.get(0));
+		if (res.err()) return Result.of(res.getErr());
+		return Result.of(res.get().get(0));
 	}
 
 	/**
@@ -864,7 +865,7 @@ public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 	}
 
 	private <T> Result<T> report(Result<T> res) {
-		if (res.err()) Log.debug(res.err.getMessage());
+		if (res.err()) Log.debug(res.getErrMsg());
 		return res;
 	}
 

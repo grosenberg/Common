@@ -62,6 +62,15 @@ public abstract class Node<I extends Id, N extends Node<I, N, E>, E extends Edge
 	}
 
 	/**
+	 * Returns the containing namespace.
+	 *
+	 * @return namespace
+	 */
+	public String namespace() {
+		return id().namespace();
+	}
+
+	/**
 	 * Return a simple name for this node instance. Excludes the namespace; potentially
 	 * not unique.
 	 *

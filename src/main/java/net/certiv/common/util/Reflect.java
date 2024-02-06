@@ -23,7 +23,7 @@ public class Reflect {
 	@SuppressWarnings("unchecked")
 	public static <T> Result<T> get(Object target, String fieldName) {
 		try {
-			Field f = target.getClass().getDeclaredField(fieldName);
+			Field f = classOf(target).getDeclaredField(fieldName);
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
@@ -36,7 +36,7 @@ public class Reflect {
 	@SuppressWarnings("unchecked")
 	public static <T> Result<T> getSuper(Object target, String fieldName) {
 		try {
-			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
+			Field f = classOf(target).getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
@@ -49,7 +49,7 @@ public class Reflect {
 	@SuppressWarnings("unchecked")
 	public static <T> Result<T> getSuper2(Object target, String fieldName) {
 		try {
-			Field f = target.getClass().getSuperclass().getSuperclass().getDeclaredField(fieldName);
+			Field f = classOf(target).getSuperclass().getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			T value = (T) f.get(target);
 			return Result.of(value);
@@ -61,7 +61,7 @@ public class Reflect {
 
 	public static Result<Boolean> set(Object target, String fieldName, Object value) {
 		try {
-			Field f = target.getClass().getDeclaredField(fieldName);
+			Field f = classOf(target).getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
 			return Result.OK;
@@ -73,7 +73,7 @@ public class Reflect {
 
 	public static Result<Boolean> setSuper(Object target, String fieldName, Object value) {
 		try {
-			Field f = target.getClass().getSuperclass().getDeclaredField(fieldName);
+			Field f = classOf(target).getSuperclass().getDeclaredField(fieldName);
 			f.setAccessible(true);
 			f.set(target, value);
 			return Result.OK;
@@ -83,14 +83,47 @@ public class Reflect {
 		}
 	}
 
+	/**
+	 * Invokes the underlying no-argument method identified by the given method name.
+	 *
+	 * @param <T>        method return type
+	 * @param target     class object or class containing the method
+	 * @param methodName method to invoke
+	 * @return {@link Result} containing the method return or invocation exception
+	 */
 	public static <T> Result<T> invoke(Object target, String methodName) {
 		return invoke(target, methodName, NoParams, NoArgs);
 	}
 
+	/**
+	 * Invokes the underlying method identified by the given method name with the given
+	 * parameter arguments. Parameter types are auto-detected.
+	 *
+	 * @param <T>        method return type
+	 * @param target     class object or class containing the method
+	 * @param methodName method to invoke
+	 * @param args       method arguments
+	 * @return {@link Result} containing the method return or invocation exception
+	 */
+	public static <T> Result<T> invoke(Object target, String methodName, Object... args) {
+		return invoke(target, methodName, params(args), args);
+	}
+
+	/**
+	 * Invokes the underlying method identified by the given method name with the given
+	 * parameter type and parameter arguments.
+	 *
+	 * @param <T>        method return type
+	 * @param target     class object or class containing the method
+	 * @param methodName method to invoke
+	 * @param params     method parameter types
+	 * @param args       method arguments
+	 * @return {@link Result} containing the method return or invocation exception
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Result<T> invoke(Object target, String methodName, Class<?>[] params, Object[] args) {
 		try {
-			Method m = target.getClass().getMethod(methodName, params);
+			Method m = classOf(target).getDeclaredMethod(methodName, params);
 			m.setAccessible(true);
 			T value = (T) m.invoke(target, args);
 			return Result.of(value);
@@ -104,7 +137,7 @@ public class Reflect {
 	public static <T> Result<T> invokeSuperDeclared(Object target, String methodName, Class<?>[] params,
 			Object[] args) {
 		try {
-			Method m = target.getClass().getSuperclass().getDeclaredMethod(methodName, params);
+			Method m = classOf(target).getSuperclass().getDeclaredMethod(methodName, params);
 			m.setAccessible(true);
 			T value = (T) m.invoke(target, args);
 			return Result.of(value);
@@ -116,7 +149,7 @@ public class Reflect {
 
 	public static Result<Boolean> hasField(Object target, String name) {
 		try {
-			target.getClass().getDeclaredField(name);
+			classOf(target).getDeclaredField(name);
 			return Result.OK;
 
 		} catch (Exception | Error e) {
@@ -125,7 +158,7 @@ public class Reflect {
 	}
 
 	public static Result<Field> findField(Object target, String name) {
-		Class<?> parent = target.getClass();
+		Class<?> parent = classOf(target);
 		while (parent != Object.class) {
 			try {
 				return Result.of(parent.getDeclaredField(name));
@@ -149,11 +182,11 @@ public class Reflect {
 	 *         failure to find, or {@code Throwable} on failure to set
 	 */
 	public static Result<Boolean> setField(Object target, String name, Object value) {
-		Result<Field> field = findField(target, name);
-		if (!field.present()) return Result.FAIL;
+		Result<Field> res = findField(target, name);
+		if (!res.validNonNull()) return Result.FAIL;
 		try {
-			field.value.setAccessible(true);
-			field.value.set(target, value);
+			res.get().setAccessible(true);
+			res.get().set(target, value);
 			return Result.OK;
 
 		} catch (Exception | Error e) {
@@ -161,14 +194,23 @@ public class Reflect {
 		}
 	}
 
-	public static Result<Boolean> hasMethod(Object target, String methodName, Class<?>[] params) {
+	/**
+	 * Returns {@code true} if the given target, or subclass thereof, has a public method
+	 * of the given name and parameter types.
+	 *
+	 * @param target     object to search
+	 * @param methodName method name
+	 * @param params     parameter types
+	 * @return {@code true} if the given target has the requested method
+	 */
+	public static boolean hasMethod(Object target, String methodName, Class<?>[] params) {
 		if (params == null) params = NoParams;
 		try {
-			target.getClass().getMethod(methodName, params);
-			return Result.OK;
+			classOf(target).getMethod(methodName, params);
+			return true;
 
 		} catch (Exception | Error e) {
-			return Result.of(e);
+			return false;
 		}
 	}
 
@@ -193,7 +235,7 @@ public class Reflect {
 	 */
 	public static <C> Result<Class<C>> typeOf(Object target, String fieldname, int idx) {
 		try {
-			Field decl = target.getClass().getDeclaredField(fieldname);
+			Field decl = classOf(target).getDeclaredField(fieldname);
 			Type[] types = ((ParameterizedType) decl.getGenericType()).getActualTypeArguments();
 			if (idx < 0 || idx >= types.length) return Result.of(new IndexOutOfBoundsException(idx));
 			return Result.of(cast((Class<?>) types[idx]));
@@ -261,7 +303,7 @@ public class Reflect {
 	 * <p>
 	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
-	 * @param <C>       the intended class type
+	 * @param <C>       intended class type
 	 * @param classname fully-qualified class name
 	 * @param params    constuctor parameter types required for instantiation
 	 * @param args      constuctor parameter arguments required for instantiation
@@ -285,8 +327,8 @@ public class Reflect {
 	 * <p>
 	 * Fails if the instantiated class cannot be cast to the intended class type.
 	 *
-	 * @param <C>       the intended class type
-	 * @param cl        the class loader to use
+	 * @param <C>       intended class type
+	 * @param cl        class loader to use
 	 * @param classname fully-qualified class name
 	 * @param args      constuctor parameter arguments required for instantiation
 	 * @return {@code Result} containing the instantiated class or instantiation error
@@ -302,30 +344,11 @@ public class Reflect {
 	}
 
 	/**
-	 * Returns an instantiated instance of the given {@code Class} object using the given
-	 * constuctor parameter arguments.
-	 *
-	 * @param <C>  the intended class type
-	 * @param cls  the class to instantiate
-	 * @param args constuctor parameter arguments required for instantiation
-	 * @return {@code Result} containing the instantiated class or instantiation error
-	 */
-	public static <C> Result<C> make(Class<C> cls, Object... args) {
-		try {
-			Class<?>[] params = Stream.of(args).map(Object::getClass).toArray(Class<?>[]::new);
-			return make(cls, params, args);
-
-		} catch (Exception | Error e) {
-			return Result.of(e);
-		}
-	}
-
-	/**
 	 * Returns an instantiated instance of the given {@code Class} object using the
 	 * no-argument constuctor.
 	 *
-	 * @param <C> the intended class type
-	 * @param cls the class to instantiate
+	 * @param <C> intended class type
+	 * @param cls class to instantiate
 	 * @return {@code Result} containing the instantiated class or instantiation error
 	 */
 	public static <C> Result<C> make(Class<C> cls) {
@@ -345,9 +368,31 @@ public class Reflect {
 	/**
 	 * Returns an instantiated instance of the given {@code Class} object using the given
 	 * constuctor parameter arguments.
+	 * <p>
+	 * Note: primitive arguments will be boxed.
 	 *
-	 * @param <C>    the intended class type
-	 * @param cls    the class to instantiate
+	 * @param <C>  intended class type
+	 * @param cls  class to instantiate
+	 * @param args constuctor parameter arguments required for instantiation
+	 * @return {@code Result} containing the instantiated class or instantiation error
+	 */
+	public static <C> Result<C> make(Class<C> cls, Object... args) {
+		try {
+			return make(cls, params(args), args);
+
+		} catch (Exception | Error e) {
+			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Returns an instantiated instance of the given {@code Class} object using the given
+	 * constuctor parameter arguments.
+	 * <p>
+	 * Identify primitive types by, e.g., {@code int.class} or {@code Integer.TYPE}
+	 *
+	 * @param <C>    intended class type
+	 * @param cls    class to instantiate
 	 * @param params constuctor parameter types required for instantiation
 	 * @param args   constuctor parameter arguments required for instantiation
 	 * @return {@code Result} containing the instantiated class or instantiation error
@@ -365,6 +410,42 @@ public class Reflect {
 		} catch (Exception | Error e) {
 			return Result.of(e);
 		}
+	}
+
+	/**
+	 * Return a class array representing the types of the given arguments. Nominally used
+	 * to auto-detect the type parameters for use in invoking an object constructor or
+	 * method.
+	 * <p>
+	 * Note: primitive values will be boxed.
+	 *
+	 * @param args arguments
+	 * @return class array
+	 */
+	public static Class<?>[] params(Object... args) {
+		return Stream.of(args).map(a -> classOf(a)).toArray(Class<?>[]::new);
+	}
+
+	/**
+	 * Return a formal Object array for the given arguments.
+	 * <p>
+	 * Note: primitive values will be boxed.
+	 *
+	 * @param args arguments
+	 * @return object array
+	 */
+	public static Object[] args(Object... args) {
+		return args;
+	}
+
+	/**
+	 * Returns the class of the given object.
+	 *
+	 * @param obj class or value object
+	 * @return class
+	 */
+	public static Class<?> classOf(Object obj) {
+		return obj instanceof Class ? (Class<?>) obj : obj.getClass();
 	}
 
 	private static void chkArgs(Class<?>[] params, Object[] args) {

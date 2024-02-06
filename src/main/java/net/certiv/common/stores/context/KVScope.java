@@ -45,7 +45,7 @@ public class KVScope implements IKVScope, ITypedEventDispatcher {
 
 	/**
 	 * Makes a random scope UUID marker. By definition, will not be equal to the
-	 * {@link IKVScopeMin#EOS} marker internally used as an end-of-scopes delineation.
+	 * {@link IKVScope#EOS} marker internally used as an end-of-scopes delineation.
 	 *
 	 * @return a unique scope UUID
 	 */
@@ -330,7 +330,8 @@ public class KVScope implements IKVScope, ITypedEventDispatcher {
 		if (this == obj) return true;
 		if (!(obj instanceof KVScope)) return false;
 		KVScope other = (KVScope) obj;
-		return Objects.equals(scope, other.scope);
+		return Objects.equals(keys(), other.keys()) //
+				&& keys().stream().allMatch(k -> getValue(k).equals(other.getValue(k)));
 	}
 
 	@Override
