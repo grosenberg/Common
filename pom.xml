@@ -23,7 +23,7 @@
 		<comm-io.ver>2.11.0</comm-io.ver>
 		<comm-lang3.ver>3.12.0</comm-lang3.ver>
 		<comm-text.ver>1.10.0</comm-text.ver>
-		<comm-compress.ver>1.25.0</comm-compress.ver>
+		<comm-compress.ver>1.26.0</comm-compress.ver>
 
 		<diff.ver>4.12</diff.ver>
 		<jackson.ver>2.16.1</jackson.ver>
