@@ -14,6 +14,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.certiv.common.stores.sparse.SparseStore;
+
+/**
+ * @param <V>
+ * @deprecated use {@link SparseStore}
+ */
+@Deprecated
 public class NearMap<V> {
 
 	private final TreeMap<Integer, V> map = new TreeMap<>();

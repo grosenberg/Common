@@ -8,12 +8,12 @@ import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
 
-public interface ITransform<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public interface ITransform<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	GraphException ERR_SENSE = GraphEx.of("Sense is null");
 	GraphException ERR_NO_PATH = GraphEx.of("GraphPath is null");

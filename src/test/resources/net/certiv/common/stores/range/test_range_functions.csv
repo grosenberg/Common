@@ -1,0 +1,10 @@
+idx, before, after,  intersects, intersection, overlapsMin, overlapsMax, contains,  within,  min,  max,  oMin,  oMax
+1,   true,   false,  false,      ,             false,       false,       false,     false,   10,   20,   30,    40
+2,	 false,  false,  true,       "20",         true,        false,       false,     false,   10,   20,   20,    30
+3,	 false,  false,  true,       "18:20",      true,        false,       false,     false,   10,   20,   18,    25
+4,	 false,  false,  true,       "12:16",      false,       false,       true,      false,   10,   20,   12,    16
+5,	 false,  false,  true,       "10:20",      false,       false,       true,      false,   10,   20,   10,    20
+6,	 false,  false,  true,       "10:20",      false,       false,       false,     true,    10,   20,   8,     22
+7,	 false,  false,  true,       "10:12",      false,       true,        false,     false,   10,   20,   5,     12
+8,	 false,  false,  true,       "10",         false,       true,        false,     false,   10,   20,   5,     10
+9,	 false,  true,   false,      ,             false,       false,       false,     false,   10,   20,   5,     8

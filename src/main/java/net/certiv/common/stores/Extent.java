@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @deprecated
+ */
+@Deprecated
 public class Extent<V extends Number> implements IExtent<V> {
 
 	public static final String TYPE = "type";

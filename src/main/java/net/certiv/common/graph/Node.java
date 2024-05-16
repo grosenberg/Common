@@ -11,7 +11,7 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
@@ -21,7 +21,7 @@ import net.certiv.common.stores.props.Props;
  * Abstract base class for a directed multigraph node. Edge connections are managed
  * through separate input and output edge sets.
  */
-public abstract class Node<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
+public abstract class Node<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
 		implements Comparable<N> {
 
 	public static final String NODE_ID = "NodeId";

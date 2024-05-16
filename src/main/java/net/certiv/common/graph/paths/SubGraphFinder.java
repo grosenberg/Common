@@ -9,11 +9,11 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.ITransform;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 
-public class SubGraphFinder<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public class SubGraphFinder<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	private final Predicate<N> TRUE = n -> true;
 	private final Predicate<N> FALSE = n -> false;
@@ -37,7 +37,7 @@ public class SubGraphFinder<I extends Id, N extends Node<I, N, E>, E extends Edg
 	 *
 	 * @param graph the search target
 	 */
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
 			Graph<I, N, E> graph) {
 		return new SubGraphFinder<>(graph, GraphPath.makeDKey(999, 4));
 	}
@@ -49,7 +49,7 @@ public class SubGraphFinder<I extends Id, N extends Node<I, N, E>, E extends Edg
 	 * @param key   weighted distance property key
 	 * @see GraphPath#makeDKey(int, int)
 	 */
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> SubGraphFinder<I, N, E> in(
 			Graph<I, N, E> graph, String key) {
 		return new SubGraphFinder<>(graph, key);
 	}

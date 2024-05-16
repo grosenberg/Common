@@ -2,11 +2,11 @@ package net.certiv.common.graph;
 
 import java.util.function.Predicate;
 
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.UniqueList;
 
 /** Interface for a node edge set. */
-public interface IEdgeSet<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public interface IEdgeSet<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	N owner();
 

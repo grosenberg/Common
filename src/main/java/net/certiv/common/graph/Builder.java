@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
@@ -27,7 +27,7 @@ import net.certiv.common.util.Strings;
  * @param <N> node type
  * @param <E> edge type
  */
-public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, E>, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public abstract class Builder<T extends IUId, I extends IUId, G extends Graph<I, N, E>, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements IBuild<I, N, E> {
 
 	public static final String ERR_NODE_LOOKUP = "Node lookup-by-name requires unique node names: %s %s";
@@ -46,6 +46,7 @@ public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, 
 	protected final G graph;
 
 	public Builder(G graph) {
+		Assert.notNull(graph);
 		this.graph = graph;
 	}
 
@@ -75,6 +76,64 @@ public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, 
 	protected abstract String nameOf(I id);
 
 	/**
+	 * Returns the node, existing in the graph or built by this builder and either not yet
+	 * added to the graph, having the given unique id.
+	 *
+	 * @param id    unique node id
+	 * @param built {@code true} to include any known node
+	 * @return node having the given id, or {@code null}
+	 * @throws UnsupportedOperationException if the given id is not unique
+	 */
+	public N getNode(I id, boolean built) {
+		N node = null;
+		if (built) {
+			LinkedList<N> nodes = this.built.stream() //
+					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
+					.collect(Collectors.toCollection(LinkedList::new));
+			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, id, nodes), nodes.size() <= 1);
+			node = nodes.peek();
+		}
+
+		if (node == null) {
+			LinkedList<N> nodes = graph.getNodes().stream() //
+					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
+					.collect(Collectors.toCollection(LinkedList::new));
+			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, id, nodes), nodes.size() <= 1);
+			node = nodes.peek();
+		}
+
+		return node;
+	}
+
+	/**
+	 * Finds the single identified terminal node in the graph or, if not pre-existing,
+	 * creates a new node with the given id.
+	 *
+	 * @param id node id
+	 * @return named node
+	 */
+	public N findOrCreateNode(I id) {
+		N node = getNode(id, true);
+		if (node != null) return node;
+
+		node = createNode(id);
+		built.add(node);
+		return node;
+	}
+
+	/**
+	 * @param beg
+	 * @param end
+	 * @return
+	 * @see Graph#addEdge(Node, Node)
+	 */
+	public E createAndAddEdge(N beg, N end) {
+		return graph.addEdge(beg, end);
+	}
+
+	// --------------------------------
+
+	/**
 	 * Returns the node existing in the graph having the given name. Requires given name
 	 * be unique.
 	 *
@@ -100,24 +159,7 @@ public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, 
 	public N getNode(String name, boolean built) {
 		Assert.isTrue(NAME.matcher(name).matches());
 		I id = makeId(name);
-		N node = null;
-		if (built) {
-			LinkedList<N> nodes = this.built.stream() //
-					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
-					.collect(Collectors.toCollection(LinkedList::new));
-			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
-			node = nodes.peek();
-		}
-
-		if (node == null) {
-			LinkedList<N> nodes = graph.getNodes().stream() //
-					.filter(n -> n.get(Node.NODE_ID).equals(id)) //
-					.collect(Collectors.toCollection(LinkedList::new));
-			Assert.isTrue(GraphEx.of(ERR_NODE_LOOKUP, name, nodes), nodes.size() <= 1);
-			node = nodes.peek();
-		}
-
-		return node;
+		return getNode(id, built);
 	}
 
 	/**
@@ -206,16 +248,6 @@ public abstract class Builder<T extends Id, I extends Id, G extends Graph<I, N, 
 	}
 
 	// TODO: consider adding
-	// /**
-	// * @param beg
-	// * @param end
-	// * @return
-	// * @see Graph#createAndAddEdge(Node, Node)
-	// */
-	// public E createAndAddEdge(N beg, N end) {
-	// return graph.createAndAddEdge(beg, end);
-	// }
-	//
 	// /**
 	// * @param node
 	// * @return

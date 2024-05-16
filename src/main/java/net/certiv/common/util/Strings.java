@@ -86,6 +86,7 @@ public class Strings {
 	public static final String TAB_MARK = "\u2409";			// horizontal tabulation ␉
 	public static final String LF_MARK = "\u240A";			// line feed ␊
 	public static final String CR_MARK = "\u240D";			// carriage return ␍
+	public static final String ESC_MARK = "\u241B";			// escape symbol ␛
 	public static final String RETURN_MARK = "\u23CE";		// return symbol ⏎
 	public static final String SPACE_MARK = "\u2423";		// space symbol ␣
 	public static final String MIDDLE_DOT = "\u00B7";		// middle dot ·
@@ -153,7 +154,15 @@ public class Strings {
 					sb.append(LF_MARK);
 					break;
 				default:
-					sb.append(c);
+					if (c >= 0x20) {
+						sb.append(c);
+					} else if (c >= 0x10) {
+						sb.append("\\u00").append(Integer.toHexString(c)); //$NON-NLS-1$
+					} else if (c >= 0) {
+						sb.append("\\u000").append(Integer.toHexString(c)); //$NON-NLS-1$
+					} else {
+						sb.append(c);
+					}
 			}
 		}
 		return sb.toString();
@@ -328,6 +337,7 @@ public class Strings {
 	}
 
 	/** Returns value of !null and !isEmpty test. */
+	@Deprecated
 	public static boolean notEmpty(String arg) {
 		return arg != null && !arg.isEmpty();
 	}
@@ -337,6 +347,7 @@ public class Strings {
 		return arg == null || arg.isEmpty();
 	}
 
+	@Deprecated
 	public static boolean empty(String[] args) {
 		return args == null || args.length == 0;
 	}
@@ -998,6 +1009,7 @@ public class Strings {
 		return -1;
 	}
 
+	@Deprecated
 	public static boolean equals(String s, char[] c) {
 		if (s.length() != c.length) return false;
 

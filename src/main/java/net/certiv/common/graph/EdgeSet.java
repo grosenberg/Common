@@ -1,33 +1,53 @@
 package net.certiv.common.graph;
 
+import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.TreeMapSet;
 import net.certiv.common.stores.UniqueList;
 
 /**
  * Default EdgeSet.
- * <p>
- * Relies on the native comparable ordering of nodes and edges.
  */
-public class EdgeSet<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class EdgeSet<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements IEdgeSet<I, N, E> {
 
 	/** 1:1 map: key=edge; value=distal node */
-	private final TreeMap<E, N> forward = new TreeMap<>();
+	private final TreeMap<E, N> forward;
 	/** 1:n map: key=distal node; value=edge */
-	private final TreeMapSet<N, E> reverse = new TreeMapSet<>();
+	private final TreeMapSet<N, E> reverse;
 
 	private final Sense dir;
 	private N node;
 
+	/**
+	 * Construct a default edge set. Relies on the natural comparable ordering of nodes
+	 * and edges.
+	 *
+	 * @param dir edge set direction
+	 */
 	public EdgeSet(Sense dir) {
+		this(dir, null, null);
+	}
+
+	/**
+	 * Construct a default edge set. Ordering of nodes and edges is dependent on the given
+	 * comparators. A {@code null} comparator is equivalent to a natural ordering
+	 * comparator.
+	 *
+	 * @param dir   edge set direction
+	 * @param edges edge comparator
+	 * @param nodes node comparator
+	 */
+	public EdgeSet(Sense dir, Comparator<? super E> edges, Comparator<? super N> nodes) {
 		this.dir = dir;
+		forward = new TreeMap<>(edges);
+		reverse = new TreeMapSet<>(nodes, edges);
 	}
 
 	public Sense sense() {

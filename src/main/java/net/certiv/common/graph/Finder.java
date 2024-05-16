@@ -4,12 +4,12 @@ import java.util.function.Predicate;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Holder;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 
-public class Finder<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public class Finder<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	private final Predicate<N> TRUE = n -> true;
 	private final Predicate<N> FALSE = n -> false;
@@ -21,35 +21,73 @@ public class Finder<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, 
 	private Predicate<? super N> whilst = TRUE;
 	private boolean debug = false;
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> Finder<I, N, E> in(
+	/**
+	 * Instantiate a new finder on the given graph.
+	 *
+	 * @param graph search target
+	 * @return new finder instance
+	 */
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> Finder<I, N, E> in(
 			Graph<I, N, E> graph) {
 		return new Finder<>(graph);
 	}
 
+	/**
+	 * Private constructor
+	 *
+	 * @param graph search target
+	 */
 	private Finder(Graph<I, N, E> graph) {
 		this.graph = graph;
 	}
 
+	/**
+	 * Node search {@code include} {@code TRUE} criteria.
+	 *
+	 * @return this finder instance
+	 */
 	public Finder<I, N, E> include() {
 		this.include = TRUE;
 		return this;
 	}
 
+	/**
+	 * Node search using the given {@code include} criteria.
+	 *
+	 * @param include node inclusion criteria
+	 * @return this finder instance
+	 */
 	public Finder<I, N, E> include(Predicate<? super N> include) {
 		this.include = include != null ? include : TRUE;
 		return this;
 	}
 
+	/**
+	 * Node search {@code exclude} {@code FALSE} criteria.
+	 *
+	 * @return this finder instance
+	 */
 	public Finder<I, N, E> exclude() {
 		this.exclude = FALSE;
 		return this;
 	}
 
+	/**
+	 * Node search using the given {@code exclude} criteria.
+	 *
+	 * @param exclude node exclusion criteria
+	 * @return this finder instance
+	 */
 	public Finder<I, N, E> exclude(Predicate<? super N> exclude) {
 		this.exclude = exclude != null ? exclude : FALSE;
 		return this;
 	}
 
+	/**
+	 * Node search {@code continue while} {@code TRUE} criteria.
+	 *
+	 * @return this finder instance
+	 */
 	public Finder<I, N, E> whilst() {
 		this.whilst = TRUE;
 		return this;

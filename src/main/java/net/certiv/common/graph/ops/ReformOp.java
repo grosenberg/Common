@@ -10,29 +10,29 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Result;
 import net.certiv.common.util.Strings;
 
-public class ReformOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class ReformOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransformOp<I, N, E> {
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
 			E edge, N beg) {
 		return new ReformOp<>(XfPermits.TRANSFER, List.of(edge), beg, false);
 	}
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> transfer(
 			Collection<? extends E> edges, N beg) {
 		return new ReformOp<>(XfPermits.TRANSFER, edges, beg, false);
 	}
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
 			E edge, N end, boolean cyclic) {
 		return new ReformOp<>(XfPermits.RETERMINATE, List.of(edge), end, cyclic);
 	}
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReformOp<I, N, E> reterminate(
 			Collection<? extends E> edges, N end, boolean cyclic) {
 		return new ReformOp<>(XfPermits.RETERMINATE, edges, end, cyclic);
 	}

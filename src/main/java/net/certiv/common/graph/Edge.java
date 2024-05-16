@@ -5,7 +5,7 @@ import java.util.Map;
 import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.props.Props;
 
@@ -16,7 +16,7 @@ import net.certiv.common.stores.props.Props;
  * <p>
  * An edge can only exist between two existing nodes: no dangling edges permitted.
  */
-public abstract class Edge<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
+public abstract class Edge<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
 		implements Comparable<E> {
 
 	private static final String ERR_INVALID = "Invalid edge %s";

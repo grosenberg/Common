@@ -50,13 +50,35 @@ public class Differ {
 	/** diff display results */
 	private String result;
 
-	public static Differ diff(String name, String src, String ref) {
-		return new Differ(name, src, ref, true);
+	/**
+	 * Create a Differ instance representing the difference between the original and
+	 * revised texts. Differences are highlighted using using ANSI coloring.
+	 *
+	 * @param name     display title
+	 * @param original original text
+	 * @param revised  revised text
+	 * @return {@link Differ} instance containing the difference
+	 */
+	public static Differ diff(String name, String original, String revised) {
+		return new Differ(name, original, revised, true);
 	}
 
-	public static Differ diff(String name, String src, String ref, int width, boolean ansi) {
-		return new Differ(name, src, ref, ansi);
+	/**
+	 * Create a Differ instance representing the difference between the original and
+	 * revised texts. Differences are highlighted using using either ANSI-coded coloring
+	 * or legacy-style character marks.
+	 *
+	 * @param name     display title
+	 * @param original original text
+	 * @param revised  revised text
+	 * @param ansi     {@code true} to use ANSI difference coloring
+	 * @return {@link Differ} instance containing the difference
+	 */
+	public static Differ diff(String name, String original, String revised, boolean ansi) {
+		return new Differ(name, original, revised, ansi);
 	}
+
+	// --------------------------------
 
 	private Differ(String name, String src, String ref, boolean ansi) {
 		this.name = name;
@@ -119,7 +141,7 @@ public class Differ {
 		return result;
 	}
 
-	private List<DiffRow> generate(String src, String ref, boolean ansi) {
+	private List<DiffRow> generate(String original, String revised, boolean ansi) {
 		Builder builder = DiffRowGenerator //
 				.create() //
 				.ignoreWhiteSpaces(true) //
@@ -134,7 +156,7 @@ public class Differ {
 		}
 
 		DiffRowGenerator gen = builder.build();
-		return gen.generateDiffRows(split(src), split(ref));
+		return gen.generateDiffRows(split(original), split(revised));
 	}
 
 	private List<String> split(String content) {

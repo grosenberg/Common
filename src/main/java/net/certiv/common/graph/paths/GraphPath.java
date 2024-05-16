@@ -16,7 +16,7 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Maths;
@@ -33,7 +33,7 @@ import net.certiv.common.util.Strings;
  *          I--J--K
  * </pre>
  */
-public class GraphPath<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public class GraphPath<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	public static final String DKEY_PREFIX = "DKEY-";
 	public static final GraphException ERR_DKEY = GraphEx.of("No weighted distance key/value for edge: %s");

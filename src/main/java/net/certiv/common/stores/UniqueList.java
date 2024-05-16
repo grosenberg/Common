@@ -20,9 +20,15 @@ public class UniqueList<E> extends LinkedList<E> {
 
 	private boolean nomod;
 
+	/** Returns an unmodifiable empty list instance. */
 	@SuppressWarnings("unchecked")
 	public static final <E> UniqueList<E> empty() {
 		return (UniqueList<E>) EMPTY;
+	}
+
+	/** Returns a new modifiable empty list instance. */
+	public static final <E> UniqueList<E> of() {
+		return new UniqueList<>();
 	}
 
 	public UniqueList() {

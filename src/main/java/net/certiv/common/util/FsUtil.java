@@ -7,8 +7,6 @@
  ******************************************************************************/
 package net.certiv.common.util;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,20 +37,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.ex.IOEx;
@@ -75,9 +67,6 @@ public final class FsUtil {
 
 	private static final String ERR_NOT_WRITABLE = "File not writable: %s";
 	private static final String ERR_NO_FOLDER = "Folder does not exist: %s";
-
-	private static final String ERR_UNKNOWN_ARCHIVE = "Unknown archive type [%s]: %s";
-	private static final String ERR_DIR = "Unable to create directory '%s' from '%s'.";
 
 	private static File sysTmp;
 
@@ -332,10 +321,8 @@ public final class FsUtil {
 	}
 
 	public static BufferedReader getReader(InputStream in, String encoding) {
-		InputStreamReader reader;
 		try {
-			reader = new InputStreamReader(in, encoding);
-			return new BufferedReader(reader);
+			return new BufferedReader(new InputStreamReader(in, encoding));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -599,27 +586,6 @@ public final class FsUtil {
 	}
 
 	/**
-	 * Reads, to a {@code String}, the contents of the resource file having the given name
-	 * in the package folder, defined by the package of the given class, under the project
-	 * {@code <resource>} directory.
-	 * <p>
-	 * For a {@code <resource>} directory of {@code <project>/src/test/resources},
-	 * reference class of {@code a.b.c.D.class}, and name {@code y/Z.txt}, data will be
-	 * read from {@code <project>/src/test/resources/a/b/c/y/Z.txt}.
-	 *
-	 * @param cls  a resource classloader relative class
-	 * @param name the resource filename
-	 * @return a {@link Result} containing a read data {@code String} or failure exception
-	 */
-	public static Result<String> loadResource(Class<?> cls, String name) {
-		try {
-			return Result.of(new String(loadByteResource(cls, name)));
-		} catch (IOException e) {
-			return Result.of(e);
-		}
-	}
-
-	/**
 	 * Writes, or overwrites, the given data to a resource file of the given name in the
 	 * package folder, defined by the package of the given class, under the project
 	 * {@code test/resources} directory.
@@ -665,6 +631,35 @@ public final class FsUtil {
 
 		} catch (Exception e) {
 			return Result.of(e);
+		}
+	}
+
+	/**
+	 * Reads the contents of the resource file having the given name to a UTF-8 encoded
+	 * String. The resource file is located in the package folder, as defined by the
+	 * package of the given class, under the project {@code <resource>} directory.
+	 * <p>
+	 * For a {@code <resource>} directory of {@code <project>/src/test/resources},
+	 * reference class of {@code a.b.c.D.class}, and name {@code y/Z.txt}, data will be
+	 * read from {@code <project>/src/test/resources/a/b/c/y/Z.txt}.
+	 *
+	 * @param cls  class defining the resource classloader
+	 * @param name resource filename
+	 * @return {@link Result} containing the resource content, or a failure exception
+	 */
+	public static Result<String> loadResource(Class<?> cls, String name) {
+		try (InputStream rs = cls.getClassLoader().getResourceAsStream(name)) {
+			return Result.of(IOUtils.toString(rs, Strings.UTF_8));
+
+		} catch (Exception e) {
+			String pkg = slashify(cls.getPackageName());
+			String res = String.join(Strings.SLASH, pkg, name);
+			try (InputStream rs = cls.getClassLoader().getResourceAsStream(res)) {
+				return Result.of(IOUtils.toString(rs, Strings.UTF_8));
+
+			} catch (Exception ex) {
+				return Result.of(IOEx.of(ex, ex.getMessage()));
+			}
 		}
 	}
 
@@ -772,138 +767,29 @@ public final class FsUtil {
 		}
 	}
 
-	/**
-	 * Copies the content from the given archive to the given destination directory. The
-	 * hierarchical structure of the content is maintained.
-	 * <p>
-	 * Handles {@code '.gz'}, {@code '.tgz'}, {@code '.tar.gz'}, {@code '.jar'}, and
-	 * {@code '.zip'} archives.
-	 *
-	 * @param archive archive file on the filesystem
-	 * @param dir     filesystem destination directory
-	 * @return {@link Result} containing the filesystem destination file for single file
-	 *         archives ({@code '.gz'}), base extraction directory for collection archives
-	 *         ({@code '.tgz'}, {@code '.tar.gz'}, {@code '.jar'}, and {@code '.zip'}), or
-	 *         an {@link IOException} identifying whatever read/write failure occurred
-	 */
-	public static Result<File> extractArchive(File archive, File dir) {
-		try {
-			Objects.requireNonNull(archive);
-			Objects.requireNonNull(dir);
+	// ---- Filesystem ----------------
 
-			String name = archive.getName();
-			String ext = decodeExtension(name);
-			switch (ext) {
-				case "gz":
-					return extractGz(archive, dir);
-				case "tgz":
-					return extractTar(archive, dir, true);
-				case "tar":
-					return extractTar(archive, dir, false);
-				case "jar":
-					return extractZip(archive, dir, true);
-				case "zip":
-					return extractZip(archive, dir, false);
-				default:
-					throw IOEx.of(ERR_UNKNOWN_ARCHIVE, ext, name);
-			}
-
-		} catch (Exception e) {
-			return Result.of(e);
-		}
+	public static List<String> getContainedFilenames(Path dir, String ext) throws IOException {
+		return getContainedPathnames(dir, ext) //
+				.stream() //
+				.map(Path::toString) //
+				.collect(Collectors.toList());
 	}
 
-	private static String decodeExtension(String name) {
-		String ext = FilenameUtils.getExtension(name);
-		if (ext.equals("gz") && name.endsWith(".tar.gz")) return "tgz";
-		return ext;
+	public static List<Path> getContainedPathnames(Path dir, String ext) throws IOException {
+		return getContainedPathnames(dir, Integer.MAX_VALUE, Strings.EMPTY, ext);
 	}
 
-	private static Result<File> extractGz(File archive, File dir) {
-		try {
-			Assert.notNull(archive, dir);
-			Assert.isTrue(archive.isFile());
-			if (!dir.exists()) dir.mkdirs();
-			Assert.isTrue(dir.isDirectory());
-
-			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(archive));
-					GzipCompressorInputStream is = new GzipCompressorInputStream(in)) {
-
-				String name = is.getMetaData().getFileName();
-				Path dst = dir.toPath().resolve(name);
-				Files.copy(is, dst, REPLACE_EXISTING);
-				return Result.of(dst.toFile());
-			}
-
-		} catch (Exception e) {
-			return Result.of(e);
-		}
+	public static List<Path> getContainedPathnames(Path dir, int depth, String prefix, String ext)
+			throws IOException {
+		return Files.walk(dir, depth) //
+				.filter(Files::isRegularFile) //
+				.filter(p -> p.getFileName().toString().startsWith(prefix)) //
+				.filter(p -> p.getFileName().toString().endsWith(Strings.DOT + ext)) //
+				.collect(Collectors.toList());
 	}
 
-	private static Result<File> extractTar(File archive, File dir, boolean gzip) {
-		try {
-			Assert.notNull(archive, dir);
-			Assert.isTrue(archive.isFile());
-			if (!dir.exists()) dir.mkdirs();
-			Assert.isTrue(dir.isDirectory());
-
-			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(archive));
-					TarArchiveInputStream is = new TarArchiveInputStream(
-							gzip ? new GzipCompressorInputStream(in) : in)) {
-
-				ArchiveEntry entry;
-				while ((entry = is.getNextEntry()) != null) {
-					File dst = new File(dir, entry.getName());
-					if (entry.isDirectory()) {
-						dst.mkdirs();
-						if (!dst.isDirectory()) {
-							throw IOEx.of(ERR_DIR, dst.getCanonicalPath(), archive.getName());
-						}
-					} else {
-						Files.copy(is, dst.toPath(), REPLACE_EXISTING);
-					}
-				}
-				return Result.of(dir);
-			}
-
-		} catch (Exception e) {
-			return Result.of(e);
-		}
-	}
-
-	private static Result<File> extractZip(File archive, File dir, boolean jar) {
-		try {
-			Assert.notNull(archive, dir);
-			Assert.isTrue(archive.isFile());
-			if (!dir.exists()) dir.mkdirs();
-			Assert.isTrue(dir.isDirectory());
-
-			try (ZipFile zip = jar ? new JarFile(archive) : new ZipFile(archive)) {
-				// sort to create folders first (?)
-				List<? extends ZipEntry> entries = zip.stream() //
-						.sorted(Comparator.comparing(ZipEntry::getName)) //
-						.collect(Collectors.toList());
-
-				for (ZipEntry entry : entries) {
-					File dst = new File(dir, entry.getName());
-					if (entry.isDirectory()) {
-						dst.mkdirs();
-						if (!dst.isDirectory()) {
-							throw IOEx.of(ERR_DIR, dst.getCanonicalPath(), archive.getName());
-						}
-					} else {
-						try (InputStream is = zip.getInputStream(entry)) {
-							Files.copy(is, dst.toPath(), REPLACE_EXISTING);
-						}
-					}
-				}
-			}
-			return Result.of(dir);
-
-		} catch (Exception e) {
-			return Result.of(e);
-		}
-	}
+	// --------------------------------
 
 	/**
 	 * Returns the canonical system temporary directory. Symbolic links are resolved to

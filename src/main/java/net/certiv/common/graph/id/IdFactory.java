@@ -3,31 +3,33 @@ package net.certiv.common.graph.id;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import net.certiv.common.check.Assert;
 
-public class IdFactory {
-
-	public static final String ANON = "anon";
-	public static final String DEFAULT = "default";
-	public static final String NIL = "nil";
-	public static final String UNKNOWN = "unknown";
-
-	/** Cache: value=id */
-	protected final Set<Id> Cache = new HashSet<>();
-
-	/** The namespace specific to this factory instance. */
-	public final String ns;
+public class IdFactory extends UIdFactory<Id, StrSeq> {
 
 	private static Id ANON_ID;
 	private static Id UNKNOWN_ID;
+
+	public static Id anon() {
+		if (ANON_ID == null) {
+			ANON_ID = new Id(DEFAULT, List.of(ANON));
+		}
+		return ANON_ID;
+	}
+
+	public static Id unknown() {
+		if (UNKNOWN_ID == null) {
+			UNKNOWN_ID = new Id(DEFAULT, List.of(UNKNOWN));
+		}
+		return UNKNOWN_ID;
+	}
+
+	// ---- Public API ----
 
 	/**
 	 * Creates the factory with the given default namespace; {@code ANON} if {@code null}.
@@ -35,45 +37,7 @@ public class IdFactory {
 	 * @param ns the namespace for factored idents
 	 */
 	public IdFactory(String ns) {
-		this.ns = ns != null ? ns : DEFAULT;
-	}
-
-	// ---- Public API ----
-
-	/**
-	 * Returns the current id set for the default namespace.
-	 *
-	 * @return default namespace id set
-	 */
-	public Set<Id> defined() {
-		return defined(ns);
-	}
-
-	/**
-	 * Returns the id defined in the given namespace.
-	 *
-	 * @param ns namespace
-	 * @return namespace ids
-	 */
-	public Set<Id> defined(String ns) {
-		return Cache.stream() //
-				.filter(k -> k.ns.equals(ns)) //
-				.collect(Collectors.toUnmodifiableSet());
-	}
-
-	/**
-	 * Return an existing id corresponding to the given naming elements in the given
-	 * namespace.
-	 *
-	 * @param ns   namespace
-	 * @param name id name
-	 * @return existing id or {@code null}
-	 */
-	public Id find(String ns, String name) {
-		return Cache.stream() //
-				.filter(t -> t.ns.equals(ns) && t.name().equals(name)) //
-				.findFirst() //
-				.orElse(null);
+		super(ns);
 	}
 
 	/**
@@ -97,7 +61,8 @@ public class IdFactory {
 	 */
 	public Id find(String ns, List<String> elems) {
 		return Cache.stream() //
-				.filter(t -> t.ns.equals(ns) && t.elems.equals(elems)) //
+				.map(t -> (Id) t) //
+				.filter(t -> t.ns.equals(ns) && t.get().elems.equals(elems)) //
 				.findFirst() //
 				.orElse(null);
 	}
@@ -109,7 +74,7 @@ public class IdFactory {
 	 * @return existing or new ident
 	 */
 	public Id make(String name) {
-		return make(ns, List.of(name));
+		return make(ns, name);
 	}
 
 	/**
@@ -166,22 +131,17 @@ public class IdFactory {
 	 * @return existing or new ident
 	 */
 	public Id make(String ns, List<String> elems) {
-		List<String> elements = parse(elems);
-		Id id = find(ns, elements);
+		List<String> names = parse(elems);
+		Id id = find(ns, names);
 		if (id != null) return id;
-		return _make(new Id(ns, elements));
+		return (Id) super.make(ns, new StrSeq(names));
 	}
 
-	// --------------------------------
+	// ---- Internal API --------------
 
-	public static Id anon() {
-		if (ANON_ID == null) ANON_ID = new Id(DEFAULT, List.of(ANON));
-		return ANON_ID;
-	}
-
-	public static Id unknown() {
-		if (UNKNOWN_ID == null) UNKNOWN_ID = new Id(DEFAULT, List.of(UNKNOWN));
-		return UNKNOWN_ID;
+	@Override
+	protected Id __make(String ns, StrSeq seq) {
+		return new Id(ns, seq);
 	}
 
 	// --------------------------------
@@ -272,7 +232,7 @@ public class IdFactory {
 	 */
 	public Id findParent(Id id, int limit) {
 		Assert.notNull(id);
-		Assert.isTrue(id.elems.size() > 0);
+		Assert.isTrue(id.size() > 0);
 
 		LinkedList<String> elems = id.elements();
 		elems.removeLast();
@@ -292,15 +252,6 @@ public class IdFactory {
 			elems.removeLast();
 		}
 		return null;
-	}
-
-	// ---- Internal API --------------
-
-	/** Record a newly made id in the cache. */
-	@SuppressWarnings("unchecked")
-	protected <T extends Id> T _make(Id id) {
-		Cache.add(id);
-		return (T) id;
 	}
 
 	// ---- Utilities -----------------

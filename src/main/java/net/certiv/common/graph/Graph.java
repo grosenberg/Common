@@ -13,6 +13,7 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotAttr;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.id.IdFactory;
 import net.certiv.common.graph.ops.ITransformOp;
@@ -30,7 +31,7 @@ import net.certiv.common.stores.props.Props;
  * @param <N> node type
  * @param <E> edge type
  */
-public abstract class Graph<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
+public abstract class Graph<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends Props
 		implements IBuild<I, N, E> {
 
 	private static final String GRAPH_ID = "GraphId";
@@ -61,7 +62,7 @@ public abstract class Graph<I extends Id, N extends Node<I, N, E>, E extends Edg
 	 *
 	 * @param id a graph identifier.
 	 */
-	public Graph(Id id) {
+	public Graph(IUId id) {
 		this();
 		setId(id);
 	}
@@ -77,14 +78,16 @@ public abstract class Graph<I extends Id, N extends Node<I, N, E>, E extends Edg
 	}
 
 	/** Return the graph instance identifier used to provide the graph name. */
-	public Id id() {
-		return (Id) get(GRAPH_ID);
+	@SuppressWarnings("unchecked")
+	public I id() {
+		return (I) get(GRAPH_ID);
 	}
 
 	/** Set the graph instance identifier. */
-	public Id setId(Id id) {
+	@SuppressWarnings("unchecked")
+	public I setId(IUId id) {
 		Assert.notNull(id);
-		return (Id) put(GRAPH_ID, id);
+		return (I) put(GRAPH_ID, id);
 	}
 
 	/** Return the graph instance name. */

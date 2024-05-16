@@ -3,17 +3,12 @@ package net.certiv.common.stores;
 import java.util.Objects;
 
 /**
- * A container object for potentially null objects. Includes a {@code Throwable} error
- * field. If a contained value is present ({@code non-null}) without an error being
- * present, {@code valid()} returns {@code true}.
- * <p>
- * Primary API:
+ * A container having a return value field and a {@code Throwable} error field.
  * <ul>
- * <li>{@link #valid()}: identifies whether the contained value is valid (error free),
- * even if {@code null}
+ * <li>{@link #valid()}: identifies whether the contained value is real, even if
+ * {@code null}
  * <li>{@link #err()}: identifies whether an error is being reported
- * <li>{@link #get()}: the returned value; may be {@code null} if {@link #valid()}; always
- * {@code null} when reporting an error
+ * <li>{@link #get()}: the returned value; may be {@code null} if {@link #valid()}
  * <li>{@link #getErr()}: the returned error; otherwise {@code null}
  * </ul>
  *
@@ -34,45 +29,69 @@ public class Result<T> {
 	private final Throwable err;
 
 	/**
-	 * Typed, valid {@code null}-valued constructed result.
+	 * Typed {@code null}-valued result. The result is always {@code valid}.
 	 *
-	 * @param <T> the result type
-	 * @return the constructed result
+	 * @param <T> result type
+	 * @return constructed result
 	 */
 	public static <T> Result<T> nil() {
 		return new Result<>((T) null, true, null);
 	}
 
 	/**
-	 * Construct a result containing the given result value. The result is valid if the
-	 * contained value is {@code non-null}.
+	 * Typed {@code null}-valued, invalid result.
 	 *
-	 * @param <T>   the result type
-	 * @param value the result value
-	 * @return the constructed result
+	 * @param <T> result type
+	 * @return constructed result
+	 */
+	public static <T> Result<T> nack() {
+		return new Result<>((T) null, false, null);
+	}
+
+	/**
+	 * Typed result containing the given value that is {@code valid} if the value is
+	 * {@code non-null}.
+	 *
+	 * @param <T>   result type
+	 * @param value result value
+	 * @return constructed result
 	 */
 	public static <T> Result<T> of(T value) {
 		return new Result<>(value, value != null, null);
 	}
 
 	/**
-	 * Construct a result containing the given result value having the given validity.
+	 * Typed result containing the given value that is {@code valid} dependent on the
+	 * given {@code validity}.
 	 *
-	 * @param <T>   the result type
-	 * @param value the result value
-	 * @param valid the result validity
-	 * @return the constructed result
+	 * @param <T>      result type
+	 * @param value    result value
+	 * @param validity value validity
+	 * @return constructed result
 	 */
-	public static <T> Result<T> of(T value, boolean valid) {
-		return new Result<>(value, valid, null);
+	public static <T> Result<T> of(T value, boolean validity) {
+		return new Result<>(value, validity, null);
 	}
 
 	/**
-	 * Typed, valid {@code null}-valued constructed result containing the given error.
+	 * Typed result containing the given value and error. The result is {@code valid} if
+	 * the value is {@code non-null}.
 	 *
-	 * @param <T> the result type
-	 * @param err a Throwable error
-	 * @return the constructed result
+	 * @param <T>   result type
+	 * @param value result value
+	 * @param err   captured throwable; may be {@code null}
+	 * @return constructed result
+	 */
+	public static <T> Result<T> of(T value, Throwable err) {
+		return new Result<>(value, value != null, err);
+	}
+
+	/**
+	 * Typed result containing the given error. The result is always {@code not-valid}.
+	 *
+	 * @param <T> result type
+	 * @param err captured throwable
+	 * @return constructed result
 	 */
 	public static <T> Result<T> of(Throwable err) {
 		return new Result<>(null, false, err);
@@ -86,6 +105,10 @@ public class Result<T> {
 		this.err = err;
 	}
 
+	public boolean ok() {
+		return valid && err == null && value.equals(Boolean.TRUE);
+	}
+
 	/**
 	 * Returns {@code true} if the contained value represents a valid, potentially
 	 * {@code null}, value.
@@ -95,14 +118,16 @@ public class Result<T> {
 	}
 
 	/**
-	 * Returns {@code true} if the contained value represents a {@code non-null} value.
+	 * Returns {@code true} if the contained value represents a {@code valid},
+	 * {@code non-null} value.
 	 */
 	public boolean validNonNull() {
 		return valid && value != null;
 	}
 
 	/**
-	 * Returns {@code true} if the contained value represents a valid, {@code null} value.
+	 * Returns {@code true} if the contained value represents a {@code valid} {@code null}
+	 * value.
 	 */
 	public boolean validNull() {
 		return valid && value == null;

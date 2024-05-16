@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.stores.Result;
@@ -23,7 +23,7 @@ import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
 /** In-place graph transformer. */
-public class Transformer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class Transformer<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransform<I, N, E> {
 
 	public final Graph<I, N, E> graph;

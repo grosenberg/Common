@@ -9,13 +9,13 @@ import java.util.stream.Stream;
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.UniqueList;
 
 /**
  * Sub-graph of a graph represented by a set of graph paths.
  */
-public class SubGraph<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class SubGraph<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements Iterable<GraphPath<I, N, E>> {
 
 	/** {@code key=head node; value=graph path} */

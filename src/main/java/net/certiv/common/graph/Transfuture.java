@@ -10,7 +10,7 @@ import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.XfPolicy.Flg;
 import net.certiv.common.graph.ex.GraphEx;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.graph.ops.ConsolidateOp;
 import net.certiv.common.graph.ops.CopyOp;
 import net.certiv.common.graph.ops.ITransformOp;
@@ -38,7 +38,7 @@ import net.certiv.common.stores.UniqueList;
  * xf.apply();
  * }</pre>
  */
-public class Transfuture<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class Transfuture<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransform<I, N, E> {
 
 	private static final XfPolicy CHECK = XfPolicy.of(XfPolicy.TEST, Flg.Repair);

@@ -6,6 +6,7 @@
  *******************************************************************************/
 package net.certiv.common.stores;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -90,12 +91,12 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 	}
 
 	/**
-	 * Appends the value at the given row/column in the table.
+	 * Appends the given value at the given row/column in this table.
 	 *
-	 * @param row   the table row
-	 * @param col   the table column
-	 * @param value the value to append
-	 * @return @true if the value was added
+	 * @param row   table row
+	 * @param col   table column
+	 * @param value value to append
+	 * @return @true if this collection changed as a result of the call
 	 */
 	public boolean put(R row, C col, V value) {
 		LinkedHashMap<C, LinkedList<V>> cols = get(row);
@@ -132,6 +133,28 @@ public class TableList<R, C, V> implements Iterable<TableRow<R, C, LinkedList<V>
 			colList.put(col, list);
 		}
 		return !list.contains(value) ? list.add(value) : false;
+	}
+
+	/**
+	 * Appends the given values at the given row/column in this table.
+	 *
+	 * @param row    table row
+	 * @param col    table column
+	 * @param values collection of values to append
+	 * @return {@code true} if this collection changed as a result of the call
+	 */
+	public boolean putAll(R row, C col, Collection<V> values) {
+		LinkedHashMap<C, LinkedList<V>> cols = get(row);
+		if (cols == null) {
+			cols = new LinkedHashMap<>();
+			table.put(row, cols);
+		}
+		LinkedList<V> values_ = cols.get(col);
+		if (values_ == null) {
+			values_ = new LinkedList<>();
+			cols.put(col, values_);
+		}
+		return values_.addAll(values);
 	}
 
 	/**

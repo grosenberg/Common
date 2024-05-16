@@ -81,5 +81,4 @@ class IdFactoryTest {
 		Id id = factory.resolve(id2, NAME3);
 		assertEquals(NAME3, id.name());
 	}
-
 }

@@ -18,6 +18,7 @@ public final class Chars {
 	public static final char HASH = '#';
 	public static final char LOWDASH = '_';
 	public static final char MARK = '\'';
+	public static final char PIPE = '|';
 	public static final char PLUS = '+';
 	public static final char QMARK = '?';
 	public static final char QUOTE = '"';

@@ -61,7 +61,7 @@ public class IllegalArgsEx extends IllegalArgumentException {
 		super(msg, t);
 	}
 
-	public IllegalArgsEx on(Object... args) {
+	public IllegalArgsEx formatted(Object... args) {
 		if (args != null && args.length > 0) {
 			String fmt = super.getMessage();
 			msg = String.format(fmt, args);

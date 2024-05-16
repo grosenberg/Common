@@ -3,107 +3,71 @@ package net.certiv.common.graph.id;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.function.Consumer;
 
-import net.certiv.common.check.Assert;
 import net.certiv.common.util.CompareUtil;
 import net.certiv.common.util.Maths;
 import net.certiv.common.util.Maths.RangeStyle;
-import net.certiv.common.util.Strings;
 
 /**
- * Provides a defining class for a unique, structured {@code namespace::name} identifier.
- * Extend and admend to provide any additional fields appropriate to establishing
- * uniqueness.
- * <p>
- * Namespace must be non-null and should be non-blank; use {@code #DEFAULT} to represent
- * the default namespace.
- * <p>
- * Default implementation uses {@code '::'} as the namespace separator and {@code '.'} as
- * the name element separator.
+ * Provides a defining class for a unique, structured {@code namespace::naming_object}
+ * identifier, where the {@code naming_object} is implemented by a hierarchical sequence
+ * of strings.
  */
-public class Id implements Comparable<Id>, Iterable<String> {
+public class Id extends UId<StrSeq> implements Iterable<String> {
 
-	public static final String ANON = IdFactory.ANON;
-	public static final String DEFAULT = IdFactory.DEFAULT;
-	public static final String NIL = IdFactory.NIL;
-	public static final String UNKNOWN = IdFactory.UNKNOWN;
-
-	public final String ns;
-	public final LinkedList<String> elems = new LinkedList<>();
+	public Id(String ns, String elem) {
+		super(ns, new StrSeq(elem));
+	}
 
 	public Id(String ns, Collection<String> elems) {
-		Assert.notNull(ns, elems);
-		this.ns = ns;
-		this.elems.addAll(elems);
+		super(ns, new StrSeq(elems));
 	}
 
-	/**
-	 * Determines if the namespace is the {@code default} namespace.
-	 *
-	 * @return {@code true} if the namespace is the {@code default} namespace
-	 */
-	public boolean isDefaultNamespace() {
-		return IdFactory.DEFAULT.equals(ns);
-	}
-
-	/** The containing namespace. */
-	public String namespace() {
-		return ns;
-	}
-
-	/** Structured simple name - excludes the namespace; potentially not unique. */
-	public String name() {
-		return String.join(Strings.DOT, elements());
-	}
-
-	/** Structured unique name; includes the namespace and name. */
-	public String uname() {
-		return String.format("%s::%s", ns, name());
+	public Id(String ns, StrSeq path) {
+		super(ns, path);
 	}
 
 	/** Structured package name - elements except last. */
 	public String packageName() {
-		int end = Math.max(0, elems.size() - 1);
-		return String.join(Strings.DOT, elems.subList(0, end));
+		return get().baseName();
 	}
 
 	/** Structured last name element. */
 	public String lastName() {
-		return elems.peekLast();
+		return get().lastName();
 	}
 
 	/** Deconstructed name. */
 	public LinkedList<String> elements() {
-		return new LinkedList<>(elems);
+		return new LinkedList<>(get().elems);
 	}
 
 	/** Return indexed element of the ident name. */
 	public String element(int index) {
-		return elems.get(index);
+		return get().get(index);
 	}
 
 	/** Return the first index of the given element from the ident name. */
 	public int indexOf(String element) {
-		return elems.indexOf(element);
+		return get().indexOf(element);
 	}
 
 	/** Return the last index of the given element from the ident name. */
 	public int lastIndexOf(String element) {
-		return elems.lastIndexOf(element);
+		return get().lastIndexOf(element);
 	}
 
 	public boolean contains(String element) {
-		return elems.contains(element);
+		return get().contains(element);
 	}
 
 	public boolean containsAll(Collection<String> names) {
-		return elems.containsAll(names);
+		return get().containsAll(names);
 	}
 
 	public int size() {
-		return elems.size();
+		return get().size();
 	}
 
 	public boolean sameNamespace(Id id) {
@@ -168,44 +132,25 @@ public class Id implements Comparable<Id>, Iterable<String> {
 	public int order(Id other) {
 		int dot = ns.compareTo(other.ns);
 		if (dot != 0) return dot * 3;
-		return CompareUtil.within(elems, other.elems);
+		return CompareUtil.within(no.elems, other.no.elems);
 	}
 
 	@Override
-	public int compareTo(Id id) {
+	public int compareTo(UId<StrSeq> id) {
 		if (this == id) return 0;
 		if (id == null) return -1;
 		int v = ns.compareTo(id.ns);
 		if (v != 0) return v;
-		return CompareUtil.compare(elems, id.elems);
+		return no.compareTo(id.no);
 	}
 
 	@Override
 	public Iterator<String> iterator() {
-		return elems.iterator();
+		return no.iterator();
 	}
 
 	@Override
 	public void forEach(Consumer<? super String> action) {
-		elems.forEach(action);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(ns, elems);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		Id id = (Id) obj;
-		return Objects.equals(ns, id.ns) && Objects.equals(elems, id.elems);
-	}
-
-	@Override
-	public String toString() {
-		return uname();
+		no.forEach(action);
 	}
 }

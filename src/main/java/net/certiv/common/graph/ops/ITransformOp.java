@@ -7,14 +7,14 @@ import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Result;
 
 /**
  * TransformOps describe elementary, deferrable graph manipulation operations. Each op is
  * executed by application to a {@code Graph}.
  */
-public interface ITransformOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public interface ITransformOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	GraphException ERR_APPLY = GraphEx.of("Error applying graph transform op: %s.");
 

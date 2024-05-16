@@ -63,7 +63,7 @@ public class IOEx extends IOException {
 		super(msg, t);
 	}
 
-	public IOEx on(Object... args) {
+	public IOEx formatted(Object... args) {
 		if (args != null && args.length > 0) {
 			String fmt = super.getMessage();
 			msg = String.format(fmt, args);

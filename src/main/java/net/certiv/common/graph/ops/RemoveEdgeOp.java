@@ -9,18 +9,18 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Result;
 
-public class RemoveEdgeOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class RemoveEdgeOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransformOp<I, N, E> {
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
 			E edge, boolean clear) {
 		return new RemoveEdgeOp<>(List.of(edge), clear);
 	}
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> RemoveEdgeOp<I, N, E> of(
 			Collection<? extends E> edges, boolean clear) {
 		return new RemoveEdgeOp<>(edges, clear);
 	}

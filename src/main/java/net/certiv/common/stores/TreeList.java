@@ -1,8 +1,10 @@
 package net.certiv.common.stores;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
@@ -12,8 +14,8 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 /**
- * Sorted multimap implemented as a TreeMap with LinkedList implemented instance values.
- * Keys are implicitly unique.
+ * Sorted multimap implemented as a {@link TreeMap} with {@link LinkedList} implemented
+ * instance values. Keys are implicitly unique.
  *
  * @param <K> the key type
  * @param <V> the list value type
@@ -140,9 +142,11 @@ public class TreeList<K, V> {
 	 * Puts the given values at the beginning of the value list identified by the given
 	 * key. The order of the individual added values is preserved.
 	 */
-	public void putAll(K key, LinkedList<? extends V> values) {
-		values.descendingIterator().forEachRemaining(v -> put(key, v));
+	public void putAll(K key, Collection<? extends V> values) {
+		values.forEach(v -> put(key, v));
 	}
+
+	public void putAll(Map<? extends K, List<? extends V>> map) {}
 
 	/**
 	 * Copies all of the mappings from the specified map to this map. These mappings
@@ -216,7 +220,7 @@ public class TreeList<K, V> {
 		return map.navigableKeySet();
 	}
 
-	/** Returns a consolidated list of values. */
+	/** Returns a consolidated list of all values. */
 	public List<V> values() {
 		List<V> results = new LinkedList<>();
 		for (List<V> values : map.values()) {

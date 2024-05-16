@@ -5,13 +5,13 @@ import java.util.function.Consumer;
 
 import net.certiv.common.event.TypedEvent;
 import net.certiv.common.event.TypedEventListener;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 
 /**
  * Base class for graph listeners. Extend and implement constructors:
  *
  * <pre>{@code
- * public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
+ * public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
  * 		GraphEvtType... types) {
  * 	GraphListener<I, N, E> listener = new GraphListener<>();
  * 	listener.register(types);
@@ -20,7 +20,7 @@ import net.certiv.common.graph.id.Id;
  * }</pre>
  *
  * <pre>{@code
- * public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
+ * public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> GraphListener<I, N, E> of(
  * 		EnumSet<GraphEvtType> types) {
  * 	GraphListener<I, N, E> listener = new GraphListener<>();
  * 	listener.register(types);
@@ -31,7 +31,7 @@ import net.certiv.common.graph.id.Id;
  * @param <N> node type
  * @param <E> edge type
  */
-public abstract class GraphListener<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public abstract class GraphListener<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		extends TypedEventListener {
 
 	private final LinkedHashSet<Consumer<? super GraphEvent<I, N, E>>> actions = new LinkedHashSet<>();

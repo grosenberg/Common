@@ -122,7 +122,7 @@ public class LogDesc {
 	private static StackTraceElement elem(Object loc) {
 		if (loc == null) return null;
 		if (loc instanceof StackTraceElement) return (StackTraceElement) loc;
-		return Log.callerLocation(loc);
+		return Log.location(loc);
 	}
 
 	// --------------------------------

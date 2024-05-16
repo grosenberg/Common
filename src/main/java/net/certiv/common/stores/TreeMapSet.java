@@ -8,8 +8,11 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * Composite data structure implemented using a {@link TreeMap} with {@link TreeSet}
- * values.
+ * Sorted multimap implemented as a {@link TreeMap} with {@link TreeSet} implemented
+ * instance values. Keys and values are implicitly unique.
+ *
+ * @param <K> the key type
+ * @param <V> the list value type
  */
 public class TreeMapSet<K, V> {
 

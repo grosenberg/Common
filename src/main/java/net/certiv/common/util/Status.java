@@ -58,8 +58,27 @@ public class Status {
 	/** Wrapped exception, or {@code null} if none. */
 	private Throwable exception = null;
 
+	/**
+	 * Simplified constructor of a new status object; assumes that code is {@code OK}. The
+	 * created status has no children.
+	 *
+	 * @param severity the severity; one of {@code OK}, {@code ERROR}, {@code INFO},
+	 *                 {@code WARNING}, or {@code CANCEL}
+	 */
 	public Status(Severity severity) {
 		this(severity, Strings.EMPTY, 0, severity.toString(), null);
+	}
+
+	/**
+	 * Simplified constructor of a new status object; assumes that code is {@code OK}. The
+	 * created status has no children.
+	 *
+	 * @param severity the severity; one of {@code OK}, {@code ERROR}, {@code INFO},
+	 *                 {@code WARNING}, or {@code CANCEL}
+	 * @param message  a human-readable message, localized to the current locale
+	 */
+	public Status(Severity severity, String message) {
+		this(severity, Strings.EMPTY, 0, message, null);
 	}
 
 	/**
@@ -85,7 +104,6 @@ public class Status {
 	 * @param source    the unique identifier of the relevant plug-in
 	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or {@code null} if not applicable
-	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(Severity severity, Object source, String message, Throwable exception) {
 		this(severity, source, 0, message, exception);

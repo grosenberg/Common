@@ -171,12 +171,35 @@ public class Log {
 		return frame != null ? frame.getDeclaringClass() : Log.class;
 	}
 
-	// find the stack frame for the class that called Log
+	// find the stack frame for the class that called Log: first from not from Log
 	private static StackFrame caller(Stream<StackFrame> frames) {
 		return frames //
 				.filter(f -> !f.getClassName().equals(FQCN)) //
 				.findFirst() //
 				.orElse(null);
+	}
+
+	/**
+	 * Returns a {@link StackTraceElement} location descriptor for the given object or
+	 * class. Defined as the first stack trace entry immediatly that contains the fully
+	 * qualified class name of the origin object.
+	 *
+	 * @param origin object or class that defines the desired location
+	 * @return location {@link StackTraceElement}, or {@code null} if not found
+	 */
+	public static StackTraceElement location(Object origin) {
+		if (origin == null) return null;
+		Class<?> cls = origin instanceof Class ? (Class<?>) origin : origin.getClass();
+		String fqcn = cls.getName();
+
+		try {
+			StackTraceElement[] trace = new Throwable().getStackTrace();
+			for (int idx = 0; idx < trace.length; idx++) {
+				String tcn = trace[idx].getClassName();
+				if (fqcn.equals(tcn)) return trace[idx];
+			}
+		} catch (NoSuchElementException ex) {}
+		return null;
 	}
 
 	// /////////////////////////////////////////////////////////////////////////

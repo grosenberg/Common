@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.cfg.ConstructorDetector;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 import net.certiv.common.ex.JsonException;
 import net.certiv.common.util.json.ClassDeserializer;
@@ -43,6 +45,20 @@ public class JsonUtil {
 	 */
 	public static final <T> T dup(T value) {
 		return Inst.serdes(value);
+	}
+
+	/**
+	 * Serialize the given value. If {@code prettify}, pretty-print the Json output. Does
+	 * not embed field classes.
+	 *
+	 * @param <T>      value type
+	 * @param value    source value
+	 * @param prettify {@code true} to pretty-print the Json output
+	 * @return a Json string
+	 * @throws {@link JsonException} on any serialization processing failure
+	 */
+	public static final <T> String toJson(T value, boolean prettify) {
+		return Inst.serialize(value, false, prettify);
 	}
 
 	/**
@@ -79,6 +95,19 @@ public class JsonUtil {
 	/**
 	 * Deserialize the given Json string to an instance of the given class.
 	 *
+	 * @param <T>  value type
+	 * @param json Json string
+	 * @param cls  target class
+	 * @return target class instance
+	 * @throws {@link JsonException} on any deserialization processing failure
+	 */
+	public static final <T> T fromJson(String json, Class<T> cls) {
+		return Inst.deserialize(json, false, cls);
+	}
+
+	/**
+	 * Deserialize the given Json string to an instance of the given class.
+	 *
 	 * @param <T>   value type
 	 * @param json  Json string
 	 * @param typed {@code true} if json includes field typing information
@@ -93,6 +122,19 @@ public class JsonUtil {
 	/**
 	 * Deserialize the given Json string to a class instance of the given Java type.
 	 *
+	 * @param <T>  value type
+	 * @param json Json string
+	 * @param type Java type of target class
+	 * @return target class instance
+	 * @throws {@link JsonException} on any deserialization processing failure
+	 */
+	public static <T> T fromJson(String json, JavaType type) {
+		return Inst.deserialize(json, false, type);
+	}
+
+	/**
+	 * Deserialize the given Json string to a class instance of the given Java type.
+	 *
 	 * @param <T>   value type
 	 * @param json  Json string
 	 * @param typed {@code true} if json includes field typing information
@@ -102,6 +144,19 @@ public class JsonUtil {
 	 */
 	public static <T> T fromJson(String json, boolean typed, JavaType type) {
 		return Inst.deserialize(json, typed, type);
+	}
+
+	/**
+	 * Deserialize the given Json string to a class instance of the given reference type.
+	 *
+	 * @param <T>  value type
+	 * @param json Json string
+	 * @param ref  target class type referrence
+	 * @return target class instance
+	 * @throws {@link JsonException} on any deserialization processing failure
+	 */
+	public static final <T> T fromJson(String json, TypeReference<T> ref) {
+		return Inst.deserialize(json, false, ref);
 	}
 
 	/**
@@ -305,6 +360,10 @@ public class JsonUtil {
 
 		// serialize only non-null values
 		mapper.setSerializationInclusion(Include.NON_NULL);
+
+		// match constructor parameter names with field names
+		// obviates using @JsonProperties
+		mapper.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 
 		// serialize all non-transient fields without relying on getters/setters
 		mapper.setVisibility( //

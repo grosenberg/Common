@@ -9,12 +9,12 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Result;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 
-public class ReplicateOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class ReplicateOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransformOp<I, N, E> {
 
 	/**
@@ -22,7 +22,7 @@ public class ReplicateOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I
 	 * @param targets the target nodes
 	 * @param remove  {@code true} to remove the source node
 	 */
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReplicateOp<I, N, E> of(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReplicateOp<I, N, E> of(
 			N src, Collection<? extends N> targets, boolean remove) {
 		return new ReplicateOp<>(src, targets, remove);
 	}

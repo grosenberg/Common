@@ -1,7 +1,7 @@
 package net.certiv.common.graph;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 
@@ -16,7 +16,7 @@ import net.certiv.common.stores.LinkedHashList;
  * <p>
  * Reseting the walker clears the record or internal visited path intervals.
  */
-public class Walker<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public class Walker<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	private static class StopEx extends RuntimeException {}
 

@@ -15,7 +15,7 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.Pair;
 import net.certiv.common.stores.UniqueList;
@@ -25,7 +25,7 @@ import net.certiv.common.util.Strings;
  * Graph pretty-printer. Supports both fully stylized Dot-syntax rendering and simple
  * text-tree dump.
  */
-public class Printer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
+public class Printer<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {
 
 	// simple DOT name
 	private static final Pattern SIMPLE = Pattern.compile("\\w+");
@@ -237,7 +237,7 @@ public class Printer<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N,
 		return sb;
 	}
 
-	public static class DotVisitor<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends NodeVisitor<N> {
+	public static class DotVisitor<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> extends NodeVisitor<N> {
 
 		private TreeSet<N> nodes = new TreeSet<>();
 		private TreeSet<E> edges = new TreeSet<>();

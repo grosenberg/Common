@@ -7,18 +7,18 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.graph.id.IUId;
 import net.certiv.common.stores.Result;
 
-public class ReduceOp<I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>>
+public class ReduceOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
 		implements ITransformOp<I, N, E> {
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReduceOp<I, N, E> of(
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReduceOp<I, N, E> of(
 			N node) {
 		return new ReduceOp<>(node);
 	}
 
-	public static <I extends Id, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReduceOp<I, N, E> of(E src,
+	public static <I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> ReduceOp<I, N, E> of(E src,
 			E dst) {
 		return new ReduceOp<>(src, dst);
 	}
