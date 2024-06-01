@@ -14,7 +14,6 @@ import net.certiv.common.CommonSupport;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.UniqueList;

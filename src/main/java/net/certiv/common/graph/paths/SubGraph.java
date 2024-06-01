@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import net.certiv.common.graph.Edge;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.UniqueList;
 
 /**

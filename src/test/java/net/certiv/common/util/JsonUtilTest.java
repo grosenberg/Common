@@ -23,6 +23,10 @@ import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.context.KVStore;
 import net.certiv.common.stores.context.Key;
+import net.certiv.common.util.json.ClassDeserializer;
+import net.certiv.common.util.json.ClassSerializer;
+import net.certiv.common.util.json.PathDeserializer;
+import net.certiv.common.util.json.PathSerializer;
 import net.certiv.common.util.test.CommonTestBase;
 
 class JsonUtilTest extends CommonTestBase {
@@ -58,11 +62,17 @@ class JsonUtilTest extends CommonTestBase {
 		}
 	}
 
+	private JsonUtil jsu;
 	private KVStore store;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		// Log.setTestMode(true);
+		jsu = JsonUtil.mapper() //
+				.includeTypes(true) //
+				.addSerDes(Path.class, new PathSerializer(), new PathDeserializer()) //
+				.addSerDes(Class.class, new ClassSerializer(), new ClassDeserializer()) //
+				.prettify(true) //
+		;
 
 		store = new KVStore();
 		store.put(KStr, VStr);
@@ -84,59 +94,61 @@ class JsonUtilTest extends CommonTestBase {
 
 	@Test
 	void testString() {
-		String typed = JsonUtil.toJson(VStr, true, true);
+		String typed = jsu.toJson(VStr);
 		writeResource(getClass(), "StringTyped.json", typed, FORCE);
 
-		String basic = JsonUtil.toJson(VStr, false, true);
+		jsu.includeTypes(false);
+
+		String basic = jsu.toJson(VStr);
 		writeResource(getClass(), "StringBasic.json", basic, FORCE);
 
-		String array = JsonUtil.toJson(VAry, false, true);
+		String array = jsu.toJson(VAry);
 		writeResource(getClass(), "StringArray.json", array, FORCE);
 
 		String exp = loadResource(getClass(), "StringBasic.json");
 		Differ.diff("StringBasic", exp, basic).sdiff(true, 120).out();
 		assertEquals(exp, basic);
 
-		String str = JsonUtil.fromJson(basic, false, String.class);
+		String str = jsu.fromJson(basic, String.class);
 		assertEquals(VStr, str);
 	}
 
 	@Test
 	void testPath() {
-		String json = JsonUtil.toJson(VPath, true, true);
+		String json = jsu.toJson(VPath);
 		writeResource(getClass(), "Path.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "Path.json");
 		Differ.diff("Path", exp, json).sdiff(true, 120).out();
 		assertEquals(exp, json);
 
-		Path path = JsonUtil.fromJson(json, true, Path.class);
+		Path path = jsu.fromJson(json, Path.class);
 		assertEquals(VPath, path);
 	}
 
 	@Test
 	void testPathBasic() {
-		String json = JsonUtil.toJson(VPath, false, true);
+		String json = jsu.includeTypes(false).toJson(VPath);
 		writeResource(getClass(), "PathBasic.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "PathBasic.json");
 		Differ.diff("PathBasic", exp, json).sdiff(true, 120).out();
 		assertEquals(exp, json);
 
-		Path path = JsonUtil.fromJson(json, false, Path.class);
+		Path path = jsu.fromJson(json, Path.class);
 		assertEquals(VPath, path);
 	}
 
 	@Test
 	void testClassType() {
-		String json = JsonUtil.toJson(VCls, true, true);
+		String json = jsu.toJson(VCls);
 		writeResource(getClass(), "ClassType.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "ClassType.json");
 		Differ.diff("Class", exp, json).sdiff(true, 120).out();
 		assertEquals(exp, json);
 
-		Class<?> cls = JsonUtil.fromJson(json, true, Class.class);
+		Class<?> cls = jsu.fromJson(json, Class.class);
 		assertEquals(VCls, cls);
 	}
 
@@ -144,14 +156,14 @@ class JsonUtilTest extends CommonTestBase {
 	void testClassInst() {
 		AClass ac = new AClass(VStr, false);
 
-		String json = JsonUtil.toJson(ac, false, true);
+		String json = jsu.includeTypes(false).toJson(ac);
 		writeResource(getClass(), "ClassInst.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "ClassInst.json");
 		Differ.diff("Class", exp, json).sdiff(true, 120).out();
 		assertEquals(exp, json);
 
-		AClass cls = JsonUtil.fromJson(json, false, AClass.class);
+		AClass cls = jsu.fromJson(json, AClass.class);
 		assertEquals(ac, cls);
 	}
 
@@ -162,15 +174,15 @@ class JsonUtilTest extends CommonTestBase {
 			list.put("X", new AClass("X" + idx, false));
 		}
 
-		String json = JsonUtil.toJson(list, true, true);
+		String json = jsu.toJson(list);
 		writeResource(getClass(), "JavaTypedCollection.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "JavaTypedCollection.json");
 		Differ.diff("JavaTypedCollection", exp, json).sdiff(true, 200).out();
 		assertEquals(exp, json);
 
-		JavaType type = JsonUtil.typeOf(LinkedHashList.class, String.class, AClass.class);
-		LinkedHashList<String, AClass> restored = JsonUtil.fromJson(json, true, type);
+		JavaType type = jsu.typeOf(LinkedHashList.class, String.class, AClass.class);
+		LinkedHashList<String, AClass> restored = jsu.fromJson(json, type);
 		assertEquals(list, restored);
 	}
 
@@ -182,7 +194,7 @@ class JsonUtilTest extends CommonTestBase {
 			map.put(key, new AClass(key, false));
 		}
 
-		String json = JsonUtil.toJson(map, true, true);
+		String json = jsu.toJson(map);
 		writeResource(getClass(), "RefTypedCollection.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "RefTypedCollection.json");
@@ -190,13 +202,13 @@ class JsonUtilTest extends CommonTestBase {
 		assertEquals(exp, json);
 
 		TypeReference<LinkedHashMap<String, AClass>> ref = JsonUtil.ref();
-		LinkedHashMap<String, AClass> restored = JsonUtil.fromJson(json, true, ref);
+		LinkedHashMap<String, AClass> restored = jsu.fromJson(json, ref);
 		assertEquals(map, restored);
 	}
 
 	@Test
 	void testKVStore() {
-		String json = JsonUtil.toJson(store, true, true);
+		String json = jsu.toJson(store);
 		writeResource(getClass(), "KVStore.json", json, FORCE);
 
 		String exp = loadResource(getClass(), "KVStore.json");
@@ -206,7 +218,7 @@ class JsonUtilTest extends CommonTestBase {
 
 	@Test
 	void testKVStoreDup() {
-		KVStore dup = JsonUtil.dup(store);
+		KVStore dup = jsu.dup(store);
 		assertEquals(store, dup);
 	}
 

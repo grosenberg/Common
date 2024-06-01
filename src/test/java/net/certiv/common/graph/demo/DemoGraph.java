@@ -5,7 +5,7 @@ import net.certiv.common.graph.EdgeSet;
 import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Printer;
 import net.certiv.common.graph.Walker;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.id.Id;
 
 public class DemoGraph extends Graph<Id, DemoNode, DemoEdge> {
 

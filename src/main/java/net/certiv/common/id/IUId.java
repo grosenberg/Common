@@ -1,4 +1,4 @@
-package net.certiv.common.graph.id;
+package net.certiv.common.id;
 
 public interface IUId /* <U extends Comparable<? super U>> */ {
 

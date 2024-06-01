@@ -1,7 +1,7 @@
 package net.certiv.common.graph.demo;
 
 import net.certiv.common.graph.GraphEvent;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.id.Id;
 import net.certiv.common.log.Level;
 
 public class DemoEvent extends GraphEvent<Id, DemoNode, DemoEdge> {

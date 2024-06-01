@@ -8,9 +8,9 @@ import net.certiv.common.ex.Explainer;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.IUId;
 import net.certiv.common.graph.paths.GraphPath;
 import net.certiv.common.graph.paths.SubGraph;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Result;
 
 public interface ITransform<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {

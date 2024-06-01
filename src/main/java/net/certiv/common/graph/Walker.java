@@ -1,7 +1,7 @@
 package net.certiv.common.graph;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 

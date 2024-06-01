@@ -2,7 +2,7 @@ package net.certiv.common.graph;
 
 import java.util.function.Predicate;
 
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.UniqueList;
 
 /** Interface for a node edge set. */

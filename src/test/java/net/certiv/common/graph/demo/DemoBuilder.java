@@ -2,8 +2,8 @@ package net.certiv.common.graph.demo;
 
 import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Builder;
-import net.certiv.common.graph.id.Id;
-import net.certiv.common.graph.id.IdFactory;
+import net.certiv.common.id.Id;
+import net.certiv.common.id.IdFactory;
 
 public class DemoBuilder extends Builder<Id, Id, DemoGraph, DemoNode, DemoEdge> {
 
@@ -21,7 +21,7 @@ public class DemoBuilder extends Builder<Id, Id, DemoGraph, DemoNode, DemoEdge> 
 	@Override
 	protected Id makeId(Object nameObj) {
 		Assert.isTrue(nameObj instanceof String);
-		return factory.make((String) nameObj);
+		return (Id) factory.make((String) nameObj);
 	}
 
 	@Override

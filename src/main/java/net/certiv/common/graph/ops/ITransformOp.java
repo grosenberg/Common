@@ -7,7 +7,7 @@ import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Result;
 
 /**

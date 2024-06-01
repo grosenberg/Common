@@ -3,7 +3,7 @@ package net.certiv.common.graph;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.UniqueList;
 
 public interface IBuild<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>> {

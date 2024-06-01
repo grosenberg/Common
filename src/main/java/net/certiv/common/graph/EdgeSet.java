@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.certiv.common.graph.Edge.Sense;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.TreeMapSet;
 import net.certiv.common.stores.UniqueList;
 

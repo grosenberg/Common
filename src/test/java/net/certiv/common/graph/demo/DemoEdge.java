@@ -1,7 +1,7 @@
 package net.certiv.common.graph.demo;
 
 import net.certiv.common.graph.Edge;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.id.Id;
 
 public class DemoEdge extends Edge<Id, DemoNode, DemoEdge> {
 

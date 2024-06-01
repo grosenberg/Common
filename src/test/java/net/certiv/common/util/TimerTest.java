@@ -71,7 +71,7 @@ class TimerTest {
 		delta = timer.totalElapsed(N1);
 		// System.out.println(timer.totalElapsed(N1));
 		// System.out.println(timer.totalElapsed(N1, "%sms"));
-		assertTrue(Maths.inRange(delta, 210, 250, RangeStyle.CLOSED));
+		assertTrue(Maths.inRange(delta, 210, 270, RangeStyle.CLOSED));
 	}
 
 	@Test

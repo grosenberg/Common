@@ -16,7 +16,7 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.ex.GraphEx;
 import net.certiv.common.graph.ex.GraphException;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Maths;

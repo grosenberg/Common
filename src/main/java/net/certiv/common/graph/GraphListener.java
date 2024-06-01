@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import net.certiv.common.event.TypedEvent;
 import net.certiv.common.event.TypedEventListener;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 
 /**
  * Base class for graph listeners. Extend and implement constructors:

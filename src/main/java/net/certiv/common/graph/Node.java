@@ -11,7 +11,7 @@ import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;

@@ -16,7 +16,6 @@ import net.certiv.common.diff.Differ;
 import net.certiv.common.dot.DotStyle;
 import net.certiv.common.graph.demo.DemoEdge;
 import net.certiv.common.graph.demo.DemoNode;
-import net.certiv.common.graph.id.Id;
 import net.certiv.common.graph.paths.SubGraph;
 import net.certiv.common.graph.paths.SubGraphFinder;
 import net.certiv.common.stores.Result;

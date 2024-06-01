@@ -6,7 +6,7 @@ import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.EdgeSet;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.Id;
+import net.certiv.common.id.Id;
 import net.certiv.common.stores.LinkedHashList;
 
 public class DemoNode extends Node<Id, DemoNode, DemoEdge> {

@@ -4,7 +4,7 @@ import java.util.function.Predicate;
 
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Holder;
 import net.certiv.common.stores.LinkedHashList;
 import net.certiv.common.stores.UniqueList;

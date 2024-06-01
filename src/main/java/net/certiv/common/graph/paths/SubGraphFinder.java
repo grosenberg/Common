@@ -9,7 +9,7 @@ import net.certiv.common.graph.Graph;
 import net.certiv.common.graph.ITransform;
 import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Walker.NodeVisitor;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.log.Log;
 import net.certiv.common.stores.LinkedHashList;
 

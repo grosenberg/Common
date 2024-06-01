@@ -99,6 +99,8 @@ public class CompareUtil {
 		return 0;
 	}
 
+	// --------------------------------
+
 	/**
 	 * Compare two potentially dotted strings for rooted, relative order.
 	 * <p>
@@ -232,6 +234,29 @@ public class CompareUtil {
 
 		return a == b || a != null && a.equals(b);
 	}
+
+	/**
+	 * Find the beginning of any name element overlap between the given name lists. Does
+	 * not check for consecutive element matches.
+	 *
+	 * @param base base name elements
+	 * @param ext  added name elements
+	 * @return overlap index, or {@code -1} if no overlap
+	 */
+	public static <E extends Comparable<E>> int begOverlap(Collection<E> base, Collection<E> ext) {
+		if (base == null || base.isEmpty()) return -1;
+		if (ext == null || ext.isEmpty()) return -1;
+
+		E beg = List.copyOf(ext).get(0);
+		List<E> b = List.copyOf(base);
+		for (int idx = 0, plen = base.size(); idx < plen; idx++) {
+			E elem = b.get(idx);
+			if (elem.equals(beg)) return idx;
+		}
+		return -1;
+	}
+
+	// --------------------------------
 
 	/**
 	 * Parse the given element into a list of name elements using a single DOT regex

@@ -5,7 +5,7 @@ import java.util.Map;
 import net.certiv.common.check.Assert;
 import net.certiv.common.dot.Dictionary.ON;
 import net.certiv.common.dot.DotStyle;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Counter;
 import net.certiv.common.stores.props.Props;
 

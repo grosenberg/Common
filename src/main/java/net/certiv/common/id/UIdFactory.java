@@ -1,10 +1,10 @@
-package net.certiv.common.graph.id;
+package net.certiv.common.id;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class UIdFactory<T extends UId<U>, U extends Comparable<? super U>> {
+public abstract class UIdFactory<T extends UId<U>, U extends UIdName> {
 
 	public static final String ANON = "anon";
 	public static final String DEFAULT = "default";
@@ -12,7 +12,7 @@ public abstract class UIdFactory<T extends UId<U>, U extends Comparable<? super 
 	public static final String UNKNOWN = "unknown";
 
 	/** Cache: value=id */
-	protected final Set<T> Cache = new LinkedHashSet<>();
+	protected final Set<T> cache = new LinkedHashSet<>();
 
 	/** The namespace specific to this factory instance. */
 	public final String ns;
@@ -44,7 +44,7 @@ public abstract class UIdFactory<T extends UId<U>, U extends Comparable<? super 
 	 * @return namespace ids
 	 */
 	public Set<T> defined(String ns) {
-		return Cache.stream() //
+		return cache.stream() //
 				.filter(k -> k.ns.equals(ns)) //
 				.collect(Collectors.toUnmodifiableSet());
 	}
@@ -58,8 +58,8 @@ public abstract class UIdFactory<T extends UId<U>, U extends Comparable<? super 
 	 * @return existing ident or {@code null}
 	 */
 	public T find(String ns, U elem) {
-		return Cache.stream() //
-				.filter(t -> t.ns.equals(ns) && t.no.equals(elem)) //
+		return cache.stream() //
+				.filter(t -> t.ns.equals(ns) && t.nu.equals(elem)) //
 				.findFirst() //
 				.orElse(null);
 	}
@@ -86,7 +86,7 @@ public abstract class UIdFactory<T extends UId<U>, U extends Comparable<? super 
 		if (id != null) return (T) id;
 
 		id = __make(ns, elem);
-		Cache.add(id);
+		cache.add(id);
 		return (T) id;
 	}
 

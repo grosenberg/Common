@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import net.certiv.common.check.Assert;
 import net.certiv.common.graph.Edge.Sense;
 import net.certiv.common.graph.ex.GraphEx;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.UniqueList;
 import net.certiv.common.util.Strings;
 

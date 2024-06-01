@@ -10,7 +10,7 @@ import net.certiv.common.graph.Node;
 import net.certiv.common.graph.Transformer;
 import net.certiv.common.graph.XfPermits;
 import net.certiv.common.graph.XfPolicy;
-import net.certiv.common.graph.id.IUId;
+import net.certiv.common.id.IUId;
 import net.certiv.common.stores.Result;
 
 public class RemoveEdgesIfOp<I extends IUId, N extends Node<I, N, E>, E extends Edge<I, N, E>>
